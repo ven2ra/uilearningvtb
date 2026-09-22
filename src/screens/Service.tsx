@@ -9,7 +9,7 @@ import { Badge, Button, ListRow, Page, Segmented, TopBar, cx } from "../ui/kit";
 export function MoveMoney({ kind }: { kind: "topup" | "withdraw" }) {
   const app = useApp();
   const training = app.mode === "training";
-  const [amount, setAmount] = useState(kind === "topup" ? "50000" : "");
+  const [amount, setAmount] = useState(kind === "topup" ? (training ? "50000" : "5000") : "");
   const [error, setError] = useState<string | null>(null);
   const [done, setDone] = useState<number | null>(null);
   const value = parseInt(amount.replace(/\D/g, "") || "0", 10);
@@ -17,6 +17,7 @@ export function MoveMoney({ kind }: { kind: "topup" | "withdraw" }) {
   const t = topup ? "topup" : "withdraw";
 
   if (done !== null) {
+    const nextBuy = topup && !training && !app.buyQuest.done;
     return (
       <>
         <TopBar title={topup ? "Пополнение" : "Вывод"} />
@@ -27,15 +28,41 @@ export function MoveMoney({ kind }: { kind: "topup" | "withdraw" }) {
           <h2 className="mt-4 text-[24px] font-bold">{topup ? "Счёт пополнен" : "Деньги выведены"}</h2>
           <p className="num mt-1 text-[17px] font-semibold">{fmtMoney(done, { sign: false })}</p>
           <div className="mt-3">
-            <Badge tone="training">Виртуальная операция</Badge>
+            {training ? <Badge tone="training">Виртуальная операция</Badge> : <Badge tone="accent">Карта ВТБ ··1234 → брокерский счёт</Badge>}
           </div>
-          <div className="mt-8 flex w-full flex-col gap-2">
-            <Button full onClick={() => app.tab("home")}>
-              На главную
-            </Button>
-            <Button full variant="tertiary" onClick={() => app.tab("history")}>
-              История операций
-            </Button>
+          {!training && <p className="mt-2 text-[12px] text-ink-3">В прототипе операция имитируется</p>}
+
+          {nextBuy && (
+            <div className="mt-6 w-full rounded-l border border-line-subtle bg-surface p-4 text-left anim-rise" style={{ animationDelay: "200ms" }}>
+              <div className="text-[12px] font-semibold uppercase tracking-wide text-brand">Следующий шаг</div>
+              <div className="mt-0.5 text-[17px] font-semibold leading-6">Первая покупка на бирже</div>
+              <p className="mt-1 text-[13px] leading-5 text-ink-2">Начать можно с минимума — пай фонда ликвидности стоит около 2 ₽. Или выберите любую акцию.</p>
+              <div className="mt-2 flex items-center gap-1.5 text-[12px] font-medium text-[#B45309]">
+                <Icon name="trophy" size={14} /> За первую покупку — достижение
+              </div>
+            </div>
+          )}
+
+          <div className="mt-6 flex w-full flex-col gap-2">
+            {nextBuy ? (
+              <>
+                <Button full data-tour="go-market" onClick={() => app.tab("market")}>
+                  Перейти на биржу
+                </Button>
+                <Button full variant="tertiary" onClick={() => app.tab("home")}>
+                  Позже
+                </Button>
+              </>
+            ) : (
+              <>
+                <Button full onClick={() => app.tab("home")}>
+                  На главную
+                </Button>
+                <Button full variant="tertiary" onClick={() => app.tab("history")}>
+                  История операций
+                </Button>
+              </>
+            )}
           </div>
         </Page>
       </>
@@ -43,10 +70,6 @@ export function MoveMoney({ kind }: { kind: "topup" | "withdraw" }) {
   }
 
   const submit = () => {
-    if (!training) {
-      app.setDealInfoOpen(true);
-      return;
-    }
     const err = app.moveMoney(kind, value);
     setError(err);
     if (!err) setDone(value);
@@ -82,7 +105,7 @@ export function MoveMoney({ kind }: { kind: "topup" | "withdraw" }) {
             <span className="text-[24px] font-bold text-ink-3">₽</span>
           </div>
           <div className="mt-3 flex flex-wrap gap-2">
-            {(topup ? [10000, 50000, 100000] : [5000, 25000]).map((n) => (
+            {(topup ? (training ? [10000, 50000, 100000] : [1000, 5000, 10000]) : [5000, 25000]).map((n) => (
               <button
                 key={n}
                 type="button"
@@ -121,7 +144,11 @@ export function MoveMoney({ kind }: { kind: "topup" | "withdraw" }) {
         <Button full className="mt-5" data-tour={`${t}-submit`} onClick={submit} disabled={!value}>
           {topup ? "Пополнить" : "Вывести"} {value ? fmtMoney(value, { whole: true }) : ""}
         </Button>
-        {training && <p className="mt-2 text-center text-[12px] text-tr-text">Операция виртуальная — реальные деньги не списываются</p>}
+        {training ? (
+          <p className="mt-2 text-center text-[12px] text-tr-text">Операция виртуальная — реальные деньги не списываются</p>
+        ) : (
+          <p className="mt-2 text-center text-[12px] text-ink-3">В прототипе операция имитируется</p>
+        )}
       </Page>
     </>
   );

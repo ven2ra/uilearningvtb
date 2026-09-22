@@ -112,7 +112,7 @@ export function SectionTitle({ children, action }: { children: ReactNode; action
 }
 
 // ---------- Сегменты ----------
-export function Segmented<T extends string>({ options, value, onChange, tour }: { options: readonly T[]; value: T; onChange: (v: T) => void; tour?: string }) {
+export function Segmented<T extends string>({ options, value, onChange, tour, itemTour }: { options: readonly T[]; value: T; onChange: (v: T) => void; tour?: string; itemTour?: (o: T) => string }) {
   return (
     <div data-tour={tour} className="flex rounded-m bg-muted p-0.5" role="tablist">
       {options.map((o) => (
@@ -120,10 +120,11 @@ export function Segmented<T extends string>({ options, value, onChange, tour }: 
           key={o}
           type="button"
           role="tab"
+          data-tour={itemTour?.(o)}
           aria-selected={o === value}
           onClick={() => onChange(o)}
           className={cx(
-            "h-8 flex-1 rounded-[6px] px-3 text-[13px] font-semibold transition-colors cursor-pointer",
+            "h-8 flex-1 rounded-[6px] px-2 text-[13px] font-semibold transition-colors cursor-pointer",
             o === value ? "bg-surface text-ink shadow-e1" : "text-ink-2",
           )}
         >

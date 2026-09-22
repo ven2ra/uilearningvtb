@@ -1,11 +1,11 @@
 import { useApp } from "../state/AppState";
-import { ACHIEVEMENTS, STAGES, TASKS, statusFor, tasksUntilNextAchievement } from "../lib/training";
+import { STAGES, TASKS, statusFor, tasksUntilNextAchievement } from "../lib/training";
+import { ACHIEVEMENTS, ACH_GROUPS } from "../lib/achievements";
+import { AchBadge } from "../ui/chrome";
 import { fmtMoney, fmtTime, plural } from "../lib/format";
 import { VIRTUAL_START_CASH } from "../lib/data";
 import Icon, { type IconName } from "../ui/Icons";
-import { Button, HelpButton, ProgressRing, TopBar, cx } from "../ui/kit";
-
-const ACH_ICON: Record<string, IconName> = { flag: "flag", compass: "compass", cart: "cart", briefcase: "briefcase", medal: "medal" };
+import { Button, HelpButton, ProgressBar, ProgressRing, TopBar, cx } from "../ui/kit";
 
 // ================= Вход в тренировку =================
 export function TrainingIntro() {
@@ -147,17 +147,20 @@ export function Hub() {
           })}
         </ol>
 
-        <h2 className="mb-2 mt-6 px-1 text-[18px] font-semibold">Достижения</h2>
+        <div className="mb-2 mt-6 flex items-center justify-between px-1">
+          <h2 className="text-[18px] font-semibold">Достижения тренировки</h2>
+          <button type="button" onClick={() => app.go("achievements")} className="text-[13px] font-semibold text-accent-text cursor-pointer">
+            Все
+          </button>
+        </div>
         <div data-tour="hub-achievements" className="grid grid-cols-2 gap-2">
-          {ACHIEVEMENTS.map((a) => {
-            const got = t.achievements.find((x) => x.id === a.id);
+          {ACHIEVEMENTS.filter((a) => a.group === "Фейковые торги").map((a) => {
+            const got = app.has(a.id);
             return (
               <div key={a.id} className={cx("flex flex-col items-center rounded-l border p-4 text-center", got ? "border-tr-border bg-tr-surface" : "border-line-subtle bg-surface")}>
-                <span className={cx("flex h-14 w-14 items-center justify-center rounded-l", got ? "bg-surface text-tr border border-tr-border" : "bg-muted text-ink-4")}>
-                  <Icon name={got ? ACH_ICON[a.icon] : "lock"} size={got ? 28 : 22} />
-                </span>
+                <AchBadge def={a} locked={!got} />
                 <div className={cx("mt-2 text-[14px] font-semibold leading-5", !got && "text-ink-2")}>{a.title}</div>
-                <div className="mt-0.5 text-[12px] leading-4 text-ink-2">{got ? a.desc : `Этап ${String(a.stage).padStart(2, "0")}: ${STAGES[a.stage - 1].short.toLowerCase()}`}</div>
+                <div className="mt-0.5 text-[12px] leading-4 text-ink-2">{a.desc}</div>
               </div>
             );
           })}
@@ -208,7 +211,7 @@ export function TrainingFinish() {
         {[
           ["7/7", "этапов"],
           [String(TASKS.length), "заданий"],
-          [String(ACHIEVEMENTS.length), "достижений"],
+          [String(app.achievements.length), "достижений"],
         ].map(([v, l]) => (
           <div key={l} className="rounded-l border border-tr-border bg-surface p-3">
             <div className="num text-[20px] font-bold">{v}</div>
@@ -260,6 +263,7 @@ export function More() {
         </div>
 
         <div className="mt-3 overflow-hidden rounded-l border border-line-subtle bg-surface">
+          <MoreRow icon="trophy" title="Мои достижения" sub={`Открыто ${app.achievements.length} из ${ACHIEVEMENTS.length}`} onClick={() => app.go("achievements")} />
           <MoreRow icon="user" title="Профиль" sub="Данные и документы" />
           <MoreRow icon="shield" title="Безопасность" sub="Код входа, биометрия" />
           <MoreRow icon="settings" title="Настройки" sub="Уведомления, внешний вид" />
@@ -300,6 +304,7 @@ export function DemoButtons({ compact }: { compact?: boolean }) {
   const items: [Parameters<typeof app.demo>[0], string][] = [
     ["first-run", "Первый запуск"],
     ["onboarding-done", "Онбординг пройден"],
+    ["topped-up", "Счёт пополнен → биржа"],
     ["training-progress", "Обучение: 4 из 7"],
     ["training-done", "Обучение завершено"],
   ];
@@ -311,5 +316,64 @@ export function DemoButtons({ compact }: { compact?: boolean }) {
         </button>
       ))}
     </div>
+  );
+}
+
+// ================= Мои достижения =================
+export function Achievements() {
+  const app = useApp();
+  const got = app.achievements.length;
+  return (
+    <>
+      <TopBar back={app.stack.length > 1} title="Мои достижения" />
+      <div className="px-4 pb-8">
+        <section data-tour="ach-summary" className="mt-4 rounded-l border border-tr-border bg-tr-surface p-4">
+          <div className="flex items-center gap-3">
+            <span className="flex h-12 w-12 items-center justify-center rounded-l bg-warning text-white">
+              <Icon name="trophy" size={26} />
+            </span>
+            <div className="flex-1">
+              <div className="num text-[24px] font-bold leading-8">
+                {got} <span className="text-[15px] font-medium text-ink-2">из {ACHIEVEMENTS.length}</span>
+              </div>
+              <div className="text-[13px] text-ink-2">Почти за каждое первое действие — достижение</div>
+            </div>
+          </div>
+          <ProgressBar value={got} max={ACHIEVEMENTS.length} tone="training" className="mt-3" />
+        </section>
+
+        <div data-tour="ach-grid">
+          {ACH_GROUPS.map((g) => {
+            const list = ACHIEVEMENTS.filter((a) => a.group === g);
+            const n = list.filter((a) => app.has(a.id)).length;
+            return (
+              <section key={g}>
+                <div className="mb-2 mt-6 flex items-center justify-between px-1">
+                  <h2 className="text-[18px] font-semibold">{g}</h2>
+                  <span className="num text-[13px] font-semibold text-ink-2">
+                    {n}/{list.length}
+                  </span>
+                </div>
+                <div className="grid grid-cols-2 gap-2">
+                  {list.map((a) => {
+                    const rec = app.achievements.find((x) => x.id === a.id);
+                    return (
+                      <div key={a.id} className={cx("flex flex-col items-center rounded-l border p-3 text-center", rec ? "border-tr-border bg-tr-surface" : "border-line-subtle bg-surface")}>
+                        <AchBadge def={a} locked={!rec} size={52} />
+                        <div className={cx("mt-2 text-[14px] font-semibold leading-5", !rec && "text-ink-2")}>{a.title}</div>
+                        <div className="mt-0.5 text-[12px] leading-4 text-ink-2">{a.desc}</div>
+                        <div className={cx("mt-1.5 text-[11px] font-semibold", rec ? "text-tr-text" : "text-ink-3")}>
+                          {rec ? `Получено ${fmtTime(rec.ts)}` : a.mode === "training" ? "На фейковых торгах" : a.mode === "real" ? "В приложении" : "В любом режиме"}
+                        </div>
+                      </div>
+                    );
+                  })}
+                </div>
+              </section>
+            );
+          })}
+        </div>
+      </div>
+    </>
   );
 }

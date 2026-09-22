@@ -1,6 +1,6 @@
 // Тестовые данные прототипа. Не являются рыночными котировками и не являются рекомендацией.
 
-export type InstrumentType = "Акции" | "Облигации" | "Фонды";
+export type InstrumentType = "Акции" | "Облигации" | "Фонды" | "Фьючерсы";
 
 export interface Instrument {
   id: string;
@@ -11,6 +11,8 @@ export interface Instrument {
   color: string; // цвет «монограммы» вместо логотипа эмитента
   sector: string;
   about: string;
+  /** Для реальной торговли нужно тестирование неквалифицированного инвестора */
+  needsTest?: boolean;
 }
 
 export const INSTRUMENTS: Instrument[] = [
@@ -23,6 +25,8 @@ export const INSTRUMENTS: Instrument[] = [
   { id: "OFZ26238", ticker: "SU26238", name: "ОФЗ 26238", type: "Облигации", open: 61.42, color: "#475569", sector: "Госдолг", about: "Облигация федерального займа. Цена указана в % от номинала × 10 для наглядности." },
   { id: "RU000A", ticker: "RU000A10", name: "Облигация ВДО-1", type: "Облигации", open: 998.5, color: "#7C3AED", sector: "Корпоративные", about: "Корпоративная облигация с фиксированным купоном." },
   { id: "LQDT", ticker: "LQDT", name: "Фонд денежного рынка", type: "Фонды", open: 1.782, color: "#0EA5E9", sector: "Денежный рынок", about: "Биржевой фонд, вкладывающий в инструменты денежного рынка." },
+  { id: "SiZ6", ticker: "Si-12.26", name: "Доллар — рубль, фьючерс", type: "Фьючерсы", open: 9412, color: "#0F766E", sector: "Срочный рынок", about: "Фьючерс на курс доллара. Цена — за один контракт, торговля с плечом.", needsTest: true },
+  { id: "BRZ6", ticker: "BR-12.26", name: "Нефть Brent, фьючерс", type: "Фьючерсы", open: 6284, color: "#1E293B", sector: "Срочный рынок", about: "Фьючерс на нефть марки Brent. Высокая волатильность, торговля с плечом.", needsTest: true },
   { id: "EQMX", ticker: "EQMX", name: "Фонд на индекс Мосбиржи", type: "Фонды", open: 132.6, color: "#6366F1", sector: "Индекс", about: "Биржевой фонд, повторяющий индекс Мосбиржи." },
 ];
 
@@ -39,6 +43,8 @@ export const INITIAL_PRICES: Record<string, number> = {
   RU000A: 999.1,
   LQDT: 1.7834,
   EQMX: 133.9,
+  SiZ6: 9458,
+  BRZ6: 6241,
 };
 
 export interface Position {
@@ -67,28 +73,13 @@ export interface Doc {
 const DAY = 86400000;
 const now = Date.now();
 
-// Реальный (демонстрационный) брокерский счёт
+// Реальный брокерский счёт нового клиента: пустой — сначала пополнение, потом первая покупка
 export const REAL_ACCOUNT = {
   number: "···4821",
-  cash: 48320.5,
-  positions: [
-    { id: "SBER", qty: 120, avg: 268.4 },
-    { id: "LQDT", qty: 40000, avg: 1.71 },
-    { id: "OFZ26238", qty: 300, avg: 63.1 },
-    { id: "YDEX", qty: 8, avg: 3890 },
-  ] as Position[],
-  history: [
-    { id: "r1", ts: now - 2 * 3600000, kind: "buy", title: "Покупка SBER", amount: -3124.5, detail: "10 шт. по 312,45 ₽" },
-    { id: "r2", ts: now - DAY, kind: "topup", title: "Пополнение с карты", amount: 25000, detail: "Карта ВТБ ··1234" },
-    { id: "r3", ts: now - 3 * DAY, kind: "coupon", title: "Купон ОФЗ 26238", amount: 1063.5 },
-    { id: "r4", ts: now - 6 * DAY, kind: "sell", title: "Продажа GAZP", amount: 12890, detail: "100 шт. по 128,90 ₽" },
-    { id: "r5", ts: now - 9 * DAY, kind: "withdraw", title: "Вывод на карту", amount: -10000, detail: "Карта ВТБ ··1234" },
-  ] as Operation[],
-  docs: [
-    { id: "d1", title: "Брокерский отчёт", period: "Август 2026", status: "ready", ts: now - 20 * DAY },
-    { id: "d2", title: "Справка о доходах (2-НДФЛ)", period: "2025 год", status: "ready", ts: now - 120 * DAY },
-    { id: "d3", title: "Выписка по счёту", period: "II квартал 2026", status: "ready", ts: now - 60 * DAY },
-  ] as Doc[],
+  cash: 0,
+  positions: [] as Position[],
+  history: [] as Operation[],
+  docs: [{ id: "d0", title: "Уведомление об открытии счёта", period: "Сентябрь 2026", status: "ready", ts: now - 2 * DAY }] as Doc[],
 };
 
 export const DOC_TYPES = [

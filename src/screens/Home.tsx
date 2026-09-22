@@ -1,6 +1,8 @@
+import { useEffect, useRef, useState } from "react";
 import { useApp } from "../state/AppState";
 import { INSTRUMENTS, INSTRUMENT_BY_ID } from "../lib/data";
 import { STAGES, TASKS, statusFor, tasksUntilNextAchievement } from "../lib/training";
+import { ACHIEVEMENTS } from "../lib/achievements";
 import { fmtMoney, plural } from "../lib/format";
 import { series } from "../lib/chart";
 import Icon, { type IconName } from "../ui/Icons";
@@ -20,9 +22,7 @@ export default function Home() {
           <div className="text-[12px] text-ink-2">{training ? "Учебный счёт" : "ВТБ Мои Инвестиции"}</div>
           <div className="text-[16px] font-semibold">Анна К.</div>
         </div>
-        <button type="button" className="flex h-9 w-9 items-center justify-center rounded-m text-ink-2 cursor-pointer" aria-label="Уведомления" onClick={() => app.toast({ kind: "info", title: "Новых уведомлений нет" })}>
-          <Icon name="bell" size={22} />
-        </button>
+        <AchChip />
         <HelpButton />
       </header>
 
@@ -51,6 +51,7 @@ export default function Home() {
         </div>
 
         {/* Обучение */}
+        {!training && <FirstSteps />}
         {training ? <TrainingProgressCard /> : <LearningCard />}
 
         {/* Активы */}
@@ -117,6 +118,86 @@ export default function Home() {
         <p className="mt-4 px-1 text-[11px] leading-4 text-ink-3">Котировки — тестовые данные прототипа и не являются инвестиционной рекомендацией.</p>
       </div>
     </div>
+  );
+}
+
+/** Счётчик достижений в шапке — напоминает, что награды есть почти за всё */
+export function AchChip() {
+  const app = useApp();
+  const count = app.achievements.length;
+  const prev = useRef(count);
+  const [pulse, setPulse] = useState(false);
+  useEffect(() => {
+    if (count > prev.current) {
+      setPulse(true);
+      const t = window.setTimeout(() => setPulse(false), 2400);
+      prev.current = count;
+      return () => window.clearTimeout(t);
+    }
+    prev.current = count;
+  }, [count]);
+  return (
+    <button
+      type="button"
+      data-tour="ach-chip"
+      onClick={() => app.go("achievements")}
+      className={cx("flex h-9 items-center gap-1 rounded-m bg-warning-surface px-2 text-[13px] font-semibold text-[#B45309] cursor-pointer", pulse && "anim-pulse")}
+      aria-label={`Достижения: ${app.achievements.length} из ${ACHIEVEMENTS.length}`}
+    >
+      <Icon name="trophy" size={18} />
+      <span className="num">{app.achievements.length}</span>
+    </button>
+  );
+}
+
+/** «Первые шаги» в реальном приложении: знакомство → пополнение → первая покупка */
+function FirstSteps() {
+  const app = useApp();
+  const steps = [
+    { title: "Познакомиться с приложением", done: app.onboarding === "done" || app.has("welcome"), reward: "Добро пожаловать" },
+    { title: "Пополнить счёт", done: app.has("first-topup"), reward: "Первое пополнение" },
+    { title: "Первая покупка — от 2 ₽", done: app.has("first-buy"), reward: "Первая покупка" },
+  ];
+  const doneCount = steps.filter((s) => s.done).length;
+  if (doneCount === steps.length) return null;
+  const nextIdx = steps.findIndex((s) => !s.done);
+  const cta =
+    nextIdx === 0
+      ? { label: "Показать подсказки", fn: () => app.setOnboarding("running") }
+      : nextIdx === 1
+        ? { label: "Пополнить счёт", fn: () => app.go("topup") }
+        : { label: "Перейти на биржу", fn: () => app.tab("market") };
+  return (
+    <section data-tour="first-steps" className="mt-3 rounded-l border border-line-subtle bg-surface p-4">
+      <div className="flex items-center justify-between">
+        <span className="text-[18px] font-semibold leading-6">Первые шаги</span>
+        <span className="num text-[13px] font-semibold text-ink-2">
+          {doneCount}/{steps.length}
+        </span>
+      </div>
+      <ProgressBar value={doneCount} max={steps.length} className="mt-2" />
+      <ol className="mt-3 space-y-2">
+        {steps.map((s, i) => (
+          <li key={s.title} className="flex items-center gap-2.5">
+            <span
+              className={cx(
+                "flex h-6 w-6 shrink-0 items-center justify-center rounded-full text-[12px] font-bold",
+                s.done ? "bg-success-surface text-success" : i === nextIdx ? "bg-brand text-white" : "bg-muted text-ink-3",
+              )}
+            >
+              {s.done ? <Icon name="check" size={14} /> : i + 1}
+            </span>
+            <span className={cx("flex-1 text-[14px]", s.done ? "text-ink-3 line-through" : i === nextIdx ? "font-semibold" : "text-ink-2")}>{s.title}</span>
+            <span className={cx("flex items-center gap-1 text-[11px] font-semibold", s.done ? "text-ink-3" : "text-[#B45309]")} title={`Достижение «${s.reward}»`}>
+              <Icon name="trophy" size={14} />
+            </span>
+          </li>
+        ))}
+      </ol>
+      <Button full size="m" className="mt-3" onClick={cta.fn}>
+        {cta.label}
+      </Button>
+    </section>
   );
 }
 

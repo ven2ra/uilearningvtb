@@ -14,14 +14,20 @@ export interface TourStep {
   /** Событие, по которому шаг click считается выполненным */
   advanceOn?: string;
   button?: string;
+  /** Вторая кнопка тултипа (например, «Выберу сам») — завершает тур */
+  secondary?: string;
 }
 
 export interface Tour {
   id: string;
-  kind: "onboarding" | "help" | "hint";
+  /** hint и quest — «путь»: тур сам перескакивает к самому дальнему шагу, цель которого уже на экране */
+  kind: "onboarding" | "help" | "hint" | "quest";
   steps: TourStep[];
   onDone?: () => void;
   onClose?: () => void;
+  onSecondary?: () => void;
+  /** Событие, завершающее тур (например, do:buy) */
+  endOn?: string;
 }
 
 interface Rect {
@@ -35,6 +41,7 @@ interface TourApi {
   start: (t: Tour | string) => void;
   startHelp: () => void;
   startHint: () => void;
+  startQuest: () => void;
   active: Tour | null;
 }
 
@@ -105,11 +112,13 @@ function onboardingTours(app: AppApi, start: (id: string) => void): Record<strin
       onClose: skip,
       onDone: () => {
         app.setOnboarding("done");
-        app.toast({ kind: "success", title: "Основное вы уже знаете", text: "Попробуйте тренировку на виртуальных деньгах" });
+        app.emit("onb:done");
       },
       steps: [
-        { target: "training-card", title: "Попробуйте без риска", text: "Тренировка на виртуальных деньгах — в том же интерфейсе" },
-        { target: "help-btn", title: "Помощь", text: "Подсказки к любому экрану — всегда здесь", button: "Завершить" },
+        { target: "first-steps", title: "Первые шаги", text: "Пополните счёт и совершите первую покупку — подскажем на каждом шаге" },
+        { target: "training-card", title: "Попробуйте без риска", text: "Фейковые торги: тот же интерфейс, виртуальные деньги" },
+        { target: "ach-chip", title: "Достижения", text: "Почти за каждое действие в приложении — достижение" },
+        { target: "help-btn", title: "Помощь", text: "Подсказки, фейковые торги и обучение — здесь. Закрыть и вернуться можно в любой момент", button: "Завершить" },
       ],
     },
   };
@@ -135,7 +144,7 @@ const HELP: Partial<Record<ScreenName | "actions", TourStep[]>> = {
   ],
   market: [
     { target: "market-search", title: "Поиск", text: "Найдите бумагу по названию или тикеру" },
-    { target: "market-segments", title: "Категории", text: "Акции, облигации и фонды" },
+    { target: "market-segments", title: "Категории", text: "Акции, облигации, фонды и фьючерсы" },
     { target: "market-first", title: "Инструмент", text: "Нажмите, чтобы открыть карточку" },
   ],
   history: [{ target: "history-list", title: "История", text: "Все сделки, пополнения и выводы по датам" }],
@@ -167,6 +176,10 @@ const HELP: Partial<Record<ScreenName | "actions", TourStep[]>> = {
     { target: "doc-submit", title: "Заказать", text: "Документ подготовится за пару минут" },
   ],
   "doc-ready": [{ target: "docs-list", title: "Готовые документы", text: "Нажмите на документ, чтобы скачать" }],
+  achievements: [
+    { target: "ach-summary", title: "Ваши достижения", text: "Почти за каждое первое действие — новое достижение" },
+    { target: "ach-grid", title: "Как открыть", text: "У закрытых достижений написано, что нужно сделать" },
+  ],
   more: [
     { target: "more-learning", title: "Обучение", text: "Тренировка и подсказки по приложению" },
     { target: "more-demo", title: "Состояния прототипа", text: "Быстрый переход к нужному сценарию для показа" },
@@ -206,6 +219,7 @@ export function TourProvider({ children }: { children: ReactNode }) {
 
   const startHelp = useCallback(() => {
     const a = appRef.current;
+    a.setHelpOpen(false);
     const key = a.actionsOpen ? "actions" : a.current.name;
     let steps = HELP[key] ?? [];
     if (a.mode === "training" && key === "home") steps = [...TRAINING_PREFIX, ...steps];
@@ -223,6 +237,42 @@ export function TourProvider({ children }: { children: ReactNode }) {
     start({ id: `hint-${task.id}`, kind: "hint", steps: task.hint.map((h) => ({ ...h, mode: "click" as const })) });
   }, [start]);
 
+  const startQuest = useCallback(() => {
+    const a = appRef.current;
+    const training = a.mode === "training";
+    start({
+      id: "quest-buy",
+      kind: "quest",
+      endOn: "do:buy",
+      onSecondary: () =>
+        appRef.current.toast({ kind: "info", title: "Выбирайте любой актив", text: "Откройте карточку и нажмите «Купить». За первую покупку — достижение" }),
+      steps: [
+        { target: "nav-market", title: "Биржа", text: "Все инструменты — в разделе «Рынок»", mode: "click" },
+        {
+          target: "seg-Фонды",
+          title: "Начните с минимума",
+          text: "Пай фонда ликвидности стоит около 2 ₽. А можно выбрать и любую акцию — решать вам",
+          mode: "click",
+          secondary: "Выберу сам",
+        },
+        {
+          target: "instr-LQDT",
+          title: "Фонд ликвидности",
+          text: "Деньги работают каждый день, продать можно в любой момент",
+          mode: "click",
+          secondary: "Выберу сам",
+        },
+        { target: "btn-buy", title: "Купить", text: "Нажмите «Купить»", mode: "click" },
+        {
+          target: "trade-submit",
+          title: "Подтверждение",
+          text: training ? "Сделка виртуальная — подтверждайте смело" : "Проверьте сумму. Покупка произойдёт только после нажатия",
+          mode: "click",
+        },
+      ],
+    });
+  }, [start]);
+
   useEffect(() => {
     app.hintRef.current = startHint;
   }, [app.hintRef, startHint]);
@@ -230,11 +280,11 @@ export function TourProvider({ children }: { children: ReactNode }) {
   // Кнопка «Помощь» на любом экране
   useEffect(() => {
     const onClick = (e: MouseEvent) => {
-      if ((e.target as HTMLElement).closest?.("[data-help-trigger]")) startHelp();
+      if ((e.target as HTMLElement).closest?.("[data-help-trigger]")) appRef.current.openHelp();
     };
     document.addEventListener("click", onClick);
     return () => document.removeEventListener("click", onClick);
-  }, [startHelp]);
+  }, []);
 
   // Первый запуск: онбординг стартует после приветствия
   useEffect(() => {
@@ -249,13 +299,13 @@ export function TourProvider({ children }: { children: ReactNode }) {
     setTour((t) => (t?.kind === "hint" ? null : t));
   }, [app.training.done]);
 
-  // Смена режима прерывает активный тур
+  // Смена режима прерывает тур — кроме квеста, который как раз и переключает режим
   useEffect(() => {
-    setTour(null);
+    setTour((t) => (t?.kind === "quest" ? t : null));
   }, [app.mode]);
 
   return (
-    <TourCtx.Provider value={{ start, startHelp, startHint, active: tour }}>
+    <TourCtx.Provider value={{ start, startHelp, startHint, startQuest, active: tour }}>
       {children}
       {tour && app.frameRef.current && createPortal(<TourLayer key={tour.id} tour={tour} idx={idx} setIdx={setIdx} end={endTour} />, app.frameRef.current)}
     </TourCtx.Provider>
@@ -295,10 +345,14 @@ function TourLayer({ tour, idx, setIdx, end }: { tour: Tour; idx: number; setIdx
   useEffect(
     () =>
       app.subscribe((ev) => {
+        if (tour.endOn === ev) {
+          end();
+          return;
+        }
         const s = tour.steps[idxRef.current];
         if (s?.advanceOn && s.advanceOn === ev) next();
       }),
-    [app, next, tour.steps],
+    [app, next, end, tour.endOn, tour.steps],
   );
 
   // Отслеживание цели каждый кадр: цель может анимироваться, прокручиваться или появиться позже
@@ -309,14 +363,14 @@ function TourLayer({ tour, idx, setIdx, end }: { tour: Tour; idx: number; setIdx
     let missingSince = performance.now();
     let scrolled = false;
     const find = (target: string) => {
-      const el = frame.querySelector<HTMLElement>(`[data-tour="${target}"]`);
+      const el = frame.querySelector<HTMLElement>(`[data-tour~="${target}"]`);
       if (!el) return null;
       const r = el.getBoundingClientRect();
       return r.width > 0 && r.height > 0 ? el : null;
     };
     const loop = () => {
       // Подсказка к заданию: перескакиваем на самый дальний шаг, цель которого уже на экране
-      if (tour.kind === "hint") {
+      if (tour.kind === "hint" || tour.kind === "quest") {
         for (let j = tour.steps.length - 1; j > idxRef.current; j--) {
           if (find(tour.steps[j].target)) {
             setIdx(j);
@@ -343,7 +397,7 @@ function TourLayer({ tour, idx, setIdx, end }: { tour: Tour; idx: number; setIdx
         setRect(null);
         if (performance.now() - missingSince > 1600) {
           // Цель так и не появилась — пропускаем шаг (или завершаем подсказку)
-          if (tour.kind === "hint" || idxRef.current + 1 >= tour.steps.length) {
+          if (tour.kind === "hint" || tour.kind === "quest" || idxRef.current + 1 >= tour.steps.length) {
             end();
             return;
           }
@@ -383,7 +437,7 @@ function TourLayer({ tour, idx, setIdx, end }: { tour: Tour; idx: number; setIdx
     const py = e.clientY - fr.top;
     const inside = px >= cut.x && px <= cut.x + cut.w && py >= cut.y && py <= cut.y + cut.h;
     if (inside && mode === "next") next();
-    else if (tour.kind === "hint") end();
+    else if (tour.kind === "hint" || tour.kind === "quest") end();
     else setShake((s) => s + 1);
   };
 
@@ -455,7 +509,7 @@ function TourLayer({ tour, idx, setIdx, end }: { tour: Tour; idx: number; setIdx
         <div className="flex items-start gap-2">
           <div className="min-w-0 flex-1">
             <div className="mb-1 text-[11px] font-semibold uppercase tracking-wide text-accent-text">
-              {tour.kind === "hint" ? "Подсказка" : total > 1 ? `Шаг ${idx + 1} из ${total}` : app.mode === "training" ? "Тренировка" : "Подсказка"}
+              {tour.kind === "quest" ? "Первая покупка" : tour.kind === "hint" ? "Подсказка" : total > 1 ? `Шаг ${idx + 1} из ${total}` : app.mode === "training" ? "Тренировка" : "Подсказка"}
             </div>
             <div className="text-[18px] font-semibold leading-6">{step.title}</div>
             <p className="mt-1 text-[14px] leading-5 text-ink-2">{step.text}</p>
@@ -475,6 +529,18 @@ function TourLayer({ tour, idx, setIdx, end }: { tour: Tour; idx: number; setIdx
             <span className="text-[12px] text-ink-3">{mode === "click" ? "Нажмите на выделенное" : ""}</span>
           )}
           <div className="flex items-center gap-1">
+            {step.secondary && (
+              <button
+                type="button"
+                onClick={() => {
+                  end();
+                  tour.onSecondary?.();
+                }}
+                className="h-9 px-2 text-[13px] font-semibold text-ink-2 cursor-pointer"
+              >
+                {step.secondary}
+              </button>
+            )}
             {tour.kind === "onboarding" && (
               <button type="button" onClick={close} className="h-9 px-2 text-[13px] font-semibold text-ink-2 cursor-pointer">
                 Закрыть

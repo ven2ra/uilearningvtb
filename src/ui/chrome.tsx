@@ -1,7 +1,8 @@
 import { useEffect, useState, type ReactNode } from "react";
 import { useApp, type ScreenName } from "../state/AppState";
 import { useTour } from "../tour/Tour";
-import { ACHIEVEMENTS, STAGES, TASKS, tasksUntilNextAchievement } from "../lib/training";
+import { STAGES, TASKS, tasksUntilNextAchievement } from "../lib/training";
+import { ACHIEVEMENTS, ACH_BY_ID, type AchievementDef } from "../lib/achievements";
 import { plural } from "../lib/format";
 import Icon, { type IconName } from "./Icons";
 import { Button, ProgressBar, cx } from "./kit";
@@ -227,40 +228,248 @@ export function WelcomeSheet() {
   );
 }
 
-// ---------- Реальная сделка в прототипе недоступна ----------
-export function DealInfoSheet() {
+// ---------- «Помощь»: подсказки, обучение, переключение режима, достижения ----------
+export function HelpSheet() {
   const app = useApp();
+  const tour = useTour();
+  const training = app.mode === "training";
+  const q = app.buyQuest;
+  const unlocked = app.achievements.length;
+  const Row = ({ icon, title, sub, onClick, tone = "accent", tourId }: { icon: IconName; title: string; sub: string; onClick: () => void; tone?: "accent" | "training" | "warning"; tourId?: string }) => (
+    <button type="button" data-tour={tourId} onClick={onClick} className="flex w-full items-center gap-3 rounded-l px-4 py-2.5 text-left cursor-pointer active:bg-surface-muted">
+      <span
+        className={cx(
+          "flex h-10 w-10 shrink-0 items-center justify-center rounded-l",
+          tone === "training" && "bg-tr-surface text-tr border border-tr-border",
+          tone === "accent" && "bg-accent-subtle text-accent-text",
+          tone === "warning" && "bg-warning-surface text-[#B45309]",
+        )}
+      >
+        <Icon name={icon} size={22} />
+      </span>
+      <span className="min-w-0 flex-1">
+        <span className="block text-[15px] font-semibold leading-5">{title}</span>
+        <span className="block text-[12px] leading-4 text-ink-2">{sub}</span>
+      </span>
+      <Icon name="chevronRight" size={18} className="text-ink-3" />
+    </button>
+  );
   return (
-    <Sheet open={app.dealInfoOpen} onClose={() => app.setDealInfoOpen(false)} label="Сделки в прототипе">
-      <div className="px-5 pb-2 pt-5">
-        <div className="mb-3 flex h-11 w-11 items-center justify-center rounded-l bg-info-surface text-info">
-          <Icon name="info" />
-        </div>
-        <h2 className="text-[20px] font-semibold">Это прототип</h2>
-        <p className="mt-1 text-[15px] leading-[22px] text-ink-2">Реальные операции здесь не проводятся. Всё то же самое можно безопасно попробовать в тренировке.</p>
-        <div className="mt-5 flex flex-col gap-2">
-          <Button full variant="tertiary" onClick={() => app.setDealInfoOpen(false)}>
-            Понятно
-          </Button>
-          <button
-            type="button"
+    <Sheet open={app.helpOpen} onClose={() => app.setHelpOpen(false)} label="Помощь и обучение">
+      <div className="flex items-center justify-between px-5 pb-1 pt-3">
+        <h2 className="text-[20px] font-semibold">Помощь и обучение</h2>
+        <button type="button" onClick={() => app.setHelpOpen(false)} className="flex h-9 w-9 items-center justify-center rounded-m text-ink-2 cursor-pointer" aria-label="Закрыть">
+          <Icon name="x" />
+        </button>
+      </div>
+      <div className="px-1 pb-1">
+        <Row icon="help" title="Подсказки к этому экрану" sub="Покажем, что здесь где" onClick={tour.startHelp} tourId="help-screen" />
+        {!q.done && (
+          <Row
+            icon="cart"
+            title={q.active ? "Продолжить: первая покупка" : "Первая покупка с подсказками"}
+            sub="Начните с минимума — от 2 ₽. Выбор за вами"
             onClick={() => {
-              app.setDealInfoOpen(false);
-              app.enterTraining();
+              app.setHelpOpen(false);
+              if (q.active === app.mode) tour.startQuest();
+              else app.setOfferOpen(true);
             }}
-            className="h-11 text-[14px] font-semibold text-tr-text cursor-pointer"
-          >
-            Открыть тренировку
-          </button>
+          />
+        )}
+        {training ? (
+          <Row icon="logout" title="Вернуться в реальное приложение" sub="Останетесь на этом же экране, прогресс сохранится" onClick={() => app.switchMode("real")} tourId="help-switch" />
+        ) : (
+          <Row
+            icon="cap"
+            tone="training"
+            title="Перейти в фейковые торги"
+            sub={app.training.started ? `Пройдено ${app.doneStages} из 7 этапов · тот же экран, виртуальные деньги` : "Тот же экран, 1 000 000 ₽ виртуальных"}
+            onClick={() => app.switchMode("training")}
+            tourId="help-switch"
+          />
+        )}
+        <Row icon="trophy" tone="warning" title="Мои достижения" sub={`Открыто ${unlocked} из ${ACHIEVEMENTS.length} · почти за каждое действие`} onClick={() => app.go("achievements")} />
+        {!training && (
+          <Row
+            icon="refresh"
+            title="Пройти знакомство заново"
+            sub="Короткие подсказки по главному экрану"
+            onClick={() => {
+              app.tab("home");
+              app.setOnboarding("running");
+            }}
+          />
+        )}
+      </div>
+      <p className="px-5 pb-2 pt-1 text-[12px] leading-4 text-ink-3">Обучение можно закрыть в любой момент — и вернуться к нему отсюда.</p>
+    </Sheet>
+  );
+}
+
+// ---------- Баннер биржи: фейковые торги или обучение в реальном приложении ----------
+export function MarketOfferSheet() {
+  const app = useApp();
+  const tour = useTour();
+  const choose = (where: "real" | "training") => {
+    app.startBuyQuest(where);
+    window.setTimeout(() => tour.startQuest(), where === app.mode ? 50 : 450);
+  };
+  return (
+    <Sheet open={app.offerOpen} onClose={() => app.setOfferOpen(false)} label="Первая покупка" tour="market-offer">
+      <div className="px-5 pb-2 pt-4">
+        <div className="flex items-center gap-1.5 text-[12px] font-semibold uppercase tracking-wide text-accent-text">
+          <Icon name="market" size={16} /> Вы на бирже
         </div>
+        <h2 className="mt-1 text-[24px] font-bold leading-8 tracking-tight">Первая покупка — как удобнее?</h2>
+        <p className="mt-1 text-[14px] leading-5 text-ink-2">Начнём с минимума: пай фонда ликвидности стоит около 2 ₽. Можно выбрать и любую акцию — решать вам.</p>
+
+        <button
+          type="button"
+          data-tour="offer-training"
+          onClick={() => choose("training")}
+          className="mt-4 flex w-full items-center gap-3 overflow-hidden rounded-l border border-tr-border bg-tr-surface p-3.5 text-left cursor-pointer active:brightness-95"
+        >
+          <span className="training-stripe flex h-11 w-11 shrink-0 items-center justify-center rounded-l text-white">
+            <Icon name="cap" size={24} />
+          </span>
+          <span className="flex-1">
+            <span className="block text-[16px] font-semibold leading-5">Попробовать на фейковых торгах</span>
+            <span className="block text-[12px] leading-4 text-tr-text">Тот же интерфейс · 1 000 000 ₽ виртуальных · без риска</span>
+          </span>
+          <Icon name="chevronRight" size={20} className="text-tr" />
+        </button>
+        <button
+          type="button"
+          data-tour="offer-real"
+          onClick={() => choose("real")}
+          className="mt-2 flex w-full items-center gap-3 rounded-l border border-line bg-surface p-3.5 text-left cursor-pointer active:bg-surface-muted"
+        >
+          <span className="flex h-11 w-11 shrink-0 items-center justify-center rounded-l bg-brand text-white">
+            <Icon name="bulb" size={24} />
+          </span>
+          <span className="flex-1">
+            <span className="block text-[16px] font-semibold leading-5">Учиться в приложении</span>
+            <span className="block text-[12px] leading-4 text-ink-2">Подсказки на каждом шаге · покупка с вашего счёта</span>
+          </span>
+          <Icon name="chevronRight" size={20} className="text-ink-3" />
+        </button>
+
+        <div className="mt-3 flex items-center gap-2 rounded-m bg-warning-surface px-3 py-2 text-[12px] font-medium text-[#92400E]">
+          <Icon name="trophy" size={16} />
+          За первую покупку — достижение. И почти за каждое действие дальше
+        </div>
+        <button type="button" onClick={() => app.setOfferOpen(false)} className="mt-2 h-10 w-full text-[14px] font-semibold text-ink-2 cursor-pointer">
+          Разберусь сам
+        </button>
       </div>
     </Sheet>
   );
 }
 
-// ---------- Завершение этапа ----------
-const ACH_ICON: Record<string, IconName> = { flag: "flag", compass: "compass", cart: "cart", briefcase: "briefcase", medal: "medal" };
+// ---------- Панель квеста «Первая покупка» ----------
+export function QuestPanel() {
+  const app = useApp();
+  const tour = useTour();
+  const training = app.mode === "training";
+  return (
+    <div data-tour="quest-panel" className={cx("absolute bottom-[72px] left-3 right-3 z-[160] rounded-l border bg-surface p-3 shadow-e3 anim-rise", training ? "border-tr-border" : "border-line")}>
+      <div className="flex items-center gap-2">
+        <span className={cx("rounded-s px-1.5 py-0.5 text-[11px] font-bold", training ? "bg-tr-surface text-tr-text" : "bg-brand-subtle text-brand")}>{training ? "ТРЕНИРОВКА" : "ОБУЧЕНИЕ"}</span>
+        <span className="min-w-0 flex-1 truncate text-[12px] font-semibold text-ink-2">Первая покупка</span>
+        <button type="button" onClick={app.closeBuyQuest} className="flex h-7 items-center gap-1 rounded-m px-1.5 text-[12px] font-semibold text-ink-3 cursor-pointer" aria-label="Закрыть обучение">
+          Закрыть <Icon name="x" size={16} />
+        </button>
+      </div>
+      <p className="mt-1 text-[15px] font-semibold leading-[21px]">Купите пай фонда ликвидности — или любой актив на выбор</p>
+      <div className="mt-2 flex items-center gap-2">
+        <span className="flex flex-1 items-center gap-1.5 text-[12px] font-medium text-[#B45309]">
+          <Icon name="trophy" size={16} /> Награда: «{training ? "Первая виртуальная покупка" : "Первая покупка"}»
+        </span>
+        <button type="button" onClick={tour.startQuest} className="flex h-8 items-center gap-1 rounded-m bg-accent-subtle px-2.5 text-[12px] font-semibold text-accent-text cursor-pointer">
+          <Icon name="bulb" size={16} />
+          Подсказка
+        </button>
+      </div>
+    </div>
+  );
+}
 
+// ---------- Праздник: новое достижение ----------
+export function AchBadge({ def, size = 56, locked }: { def: AchievementDef; size?: number; locked?: boolean }) {
+  return (
+    <span
+      className={cx("flex shrink-0 items-center justify-center rounded-l", locked ? "bg-muted text-ink-4" : "border border-tr-border bg-tr-surface text-tr")}
+      style={{ width: size, height: size }}
+    >
+      <Icon name={locked ? "lock" : def.icon} size={Math.round(size * 0.5)} />
+    </span>
+  );
+}
+
+export function AchievementModal() {
+  const app = useApp();
+  const ids = app.achModal;
+  if (!ids) return null;
+  const defs = ids.map((id) => ACH_BY_ID[id]);
+  const main = defs.find((d) => d.major) ?? defs[0];
+  const rest = defs.filter((d) => d !== main);
+  return (
+    <div className="absolute inset-0 z-[560] flex items-end" role="dialog" aria-label="Новое достижение">
+      <div className="absolute inset-0 anim-fade" style={{ background: "var(--overlay)" }} onClick={() => app.setAchModal(null)} />
+      <div className="relative w-full overflow-hidden rounded-t-xl bg-surface px-5 pb-[max(env(safe-area-inset-bottom),20px)] pt-7 text-center anim-sheet">
+        <Confetti />
+        <div className="relative mx-auto w-fit anim-pop">
+          <AchBadge def={main} size={88} />
+          <span className="absolute -right-2 -top-2 flex h-8 w-8 items-center justify-center rounded-full bg-warning text-white shadow-e2">
+            <Icon name="trophy" size={18} />
+          </span>
+        </div>
+        <div className="relative mt-4 text-[12px] font-semibold uppercase tracking-wide text-[#B45309]">Новое достижение</div>
+        <h2 className="relative text-[26px] font-bold leading-8 tracking-tight">{main.title}</h2>
+        <p className="relative mt-1 text-[14px] text-ink-2">{main.desc}</p>
+        {rest.length > 0 && (
+          <div className="relative mt-4 flex flex-col gap-2 text-left">
+            {rest.map((d) => (
+              <div key={d.id} className="flex items-center gap-3 rounded-l border border-tr-border bg-tr-surface p-2.5 anim-rise">
+                <AchBadge def={d} size={40} />
+                <div className="min-w-0 flex-1">
+                  <div className="text-[15px] font-semibold leading-5">+ {d.title}</div>
+                  <div className="text-[12px] text-ink-2">{d.desc}</div>
+                </div>
+              </div>
+            ))}
+          </div>
+        )}
+        <div className="relative mt-4">
+          <div className="mb-1.5 flex justify-between text-[13px] font-semibold">
+            <span>Коллекция</span>
+            <span className="num text-tr-text">
+              {app.achievements.length} из {ACHIEVEMENTS.length}
+            </span>
+          </div>
+          <ProgressBar value={app.achievements.length} max={ACHIEVEMENTS.length} tone="training" />
+        </div>
+        <div className="relative mt-5 flex flex-col gap-2">
+          <Button full onClick={() => app.setAchModal(null)}>
+            Отлично
+          </Button>
+          <Button
+            full
+            variant="tertiary"
+            onClick={() => {
+              app.setAchModal(null);
+              app.go("achievements");
+            }}
+          >
+            Все достижения
+          </Button>
+        </div>
+      </div>
+    </div>
+  );
+}
+
+// ---------- Завершение этапа ----------
 function Confetti() {
   const colors = ["#885CF6", "#D946EF", "#A788FA", "#F59E0B", "#16A34A"];
   return (
@@ -293,7 +502,7 @@ export function StageModalView() {
   if (!m) return null;
   const stage = STAGES[m.stage - 1];
   const nextStage = STAGES[m.stage];
-  const ach = ACHIEVEMENTS.find((a) => a.id === m.achievementId);
+  const achs = m.achievementIds.map((id) => ACH_BY_ID[id]);
   const isFinal = !nextStage;
   const until = tasksUntilNextAchievement(app.training.done);
 
@@ -307,7 +516,11 @@ export function StageModalView() {
             <Icon name="check" size={28} />
           </span>
           <div>
-            <div className="text-[12px] font-semibold uppercase tracking-wide text-success">Этап {String(m.stage).padStart(2, "0")} пройден</div>
+            <div className="text-[12px] font-semibold uppercase tracking-wide text-success">
+              {m.fromStage && m.fromStage < m.stage
+                ? `Этапы ${String(m.fromStage).padStart(2, "0")}–${String(m.stage).padStart(2, "0")} пройдены`
+                : `Этап ${String(m.stage).padStart(2, "0")} пройден`}
+            </div>
             <div className="text-[20px] font-semibold leading-7">{stage.title}</div>
           </div>
         </div>
@@ -323,11 +536,9 @@ export function StageModalView() {
           <ProgressBar value={fill} max={STAGES.length} tone="training" />
         </div>
 
-        {ach && (
-          <div className="relative mt-4 flex items-center gap-3 rounded-l border border-tr-border bg-tr-surface p-3 anim-pop" style={{ animationDelay: "300ms" }}>
-            <span className="flex h-12 w-12 shrink-0 items-center justify-center rounded-l bg-surface text-tr border border-tr-border">
-              <Icon name={ACH_ICON[ach.icon]} size={26} />
-            </span>
+        {achs.map((ach, i) => (
+          <div key={ach.id} className="relative mt-3 flex items-center gap-3 rounded-l border border-tr-border bg-tr-surface p-3 anim-pop" style={{ animationDelay: `${300 + i * 120}ms` }}>
+            <AchBadge def={ach} size={48} />
             <div className="min-w-0 flex-1">
               <div className="flex items-center gap-1 text-[11px] font-semibold uppercase tracking-wide text-[#B45309]">
                 <Icon name="trophy" size={14} /> Новое достижение
@@ -336,7 +547,7 @@ export function StageModalView() {
               <div className="text-[13px] text-ink-2">{ach.desc}</div>
             </div>
           </div>
-        )}
+        ))}
 
         {!isFinal && (
           <div className="relative mt-4 rounded-l bg-surface-muted p-3">
@@ -389,13 +600,17 @@ export function StageModalView() {
 // ---------- Тосты: success / error / info ----------
 export function Toasts() {
   const app = useApp();
+  const tour = useTour();
+  // Во время подсказки тосты не должны перекрывать подсвеченный элемент — оставляем только ошибки
+  const visible = tour.active ? app.toasts.filter((t) => t.kind === "error") : app.toasts;
   return (
     <div className="pointer-events-none absolute inset-x-3 top-14 z-[800] flex flex-col gap-2" aria-live="polite">
-      {app.toasts.map((t) => {
+      {visible.map((t) => {
         const tone = {
           success: { icon: "checkCircle", cls: "text-success", bg: "bg-success-surface" },
           error: { icon: "alert", cls: "text-error", bg: "bg-error-surface" },
           info: { icon: "info", cls: "text-info", bg: "bg-info-surface" },
+          achievement: { icon: "trophy", cls: "text-[#B45309]", bg: "bg-warning-surface" },
         }[t.kind];
         return (
           <div key={t.id} className={cx("pointer-events-auto flex items-start gap-2.5 rounded-l border border-line-subtle bg-surface p-3 shadow-e3 anim-rise", t.kind === "error" && "anim-shake")} role="status">

@@ -1,6 +1,8 @@
 // Программа тренировочного режима: этапы → задания → достижения.
 // Принцип: показал → попросил сделать → дал обратную связь → открыл следующий уровень.
 
+import { ACHIEVEMENTS } from "./achievements";
+
 export interface TaskDef {
   id: string;
   stage: number;
@@ -18,15 +20,6 @@ export interface StageDef {
   n: number;
   title: string;
   short: string;
-}
-
-export interface AchievementDef {
-  id: string;
-  title: string;
-  desc: string;
-  /** Выдаётся после этапа */
-  stage: number;
-  icon: "flag" | "compass" | "cart" | "briefcase" | "medal";
 }
 
 export const STAGES: StageDef[] = [
@@ -122,12 +115,13 @@ export const TASKS: TaskDef[] = [
   {
     id: "t8",
     stage: 5,
-    instruction: "Попробуйте совершить виртуальную покупку",
+    instruction: "Купите пай фонда ликвидности — или любой другой актив на выбор",
     success: "Первая покупка! Деньги виртуальные — никакого риска.",
     event: "do:buy",
     hint: [
       toMarket,
-      toInstrument,
+      { target: "seg-Фонды", title: "Начните с минимума", text: "Пай фонда ликвидности стоит около 2 ₽. Можно выбрать и любую акцию" },
+      { target: "instr-LQDT", title: "Фонд ликвидности", text: "Самый простой старт: продать можно в любой момент" },
       { target: "btn-buy", title: "Купить", text: "Нажмите «Купить»" },
       { target: "trade-submit", title: "Подтверждение", text: "Проверьте сумму и подтвердите" },
     ],
@@ -165,14 +159,6 @@ export const TASKS: TaskDef[] = [
   },
 ];
 
-export const ACHIEVEMENTS: AchievementDef[] = [
-  { id: "a1", title: "Первый шаг", desc: "Нашли главное меню операций", stage: 1, icon: "flag" },
-  { id: "a2", title: "Навигатор", desc: "Нашли пополнение и документы", stage: 3, icon: "compass" },
-  { id: "a3", title: "Первая покупка", desc: "Купили первый актив виртуально", stage: 5, icon: "cart" },
-  { id: "a4", title: "Первый портфель", desc: "Разобрались в портфеле и истории", stage: 6, icon: "briefcase" },
-  { id: "a5", title: "Инвестор-новичок", desc: "Прошли все этапы обучения", stage: 7, icon: "medal" },
-];
-
 export const STATUSES = [
   { min: 0, title: "Гость" },
   { min: 1, title: "Исследователь" },
@@ -195,8 +181,8 @@ export function stagesDone(doneTasks: number) {
 }
 
 export function tasksUntilNextAchievement(doneTasks: number) {
-  const next = ACHIEVEMENTS.find((a) => stagesDone(doneTasks) < a.stage);
+  const next = ACHIEVEMENTS.find((a) => a.stage && stagesDone(doneTasks) < a.stage);
   if (!next) return null;
-  const lastTaskIdx = TASKS.map((t) => t.stage).lastIndexOf(next.stage);
+  const lastTaskIdx = TASKS.map((t) => t.stage).lastIndexOf(next.stage!);
   return { achievement: next, left: lastTaskIdx + 1 - doneTasks };
 }

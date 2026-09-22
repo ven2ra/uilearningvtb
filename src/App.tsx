@@ -1,12 +1,13 @@
 import { useEffect, useState } from "react";
 import { AppProvider, useApp } from "./state/AppState";
 import { TourProvider } from "./tour/Tour";
-import { ActionsSheet, BottomNav, DealInfoSheet, StageModalView, StatusBar, TaskPanel, Toasts, TrainingBanner, WelcomeSheet } from "./ui/chrome";
+import { AchievementModal, ActionsSheet, BottomNav, HelpSheet, MarketOfferSheet, QuestPanel, StageModalView, StatusBar, TaskPanel, Toasts, TrainingBanner, WelcomeSheet } from "./ui/chrome";
 import Home from "./screens/Home";
 import { History, Instrument, Market, Portfolio, Trade } from "./screens/Invest";
 import { DocOrder, DocReady, Documents, MoveMoney } from "./screens/Service";
-import { DemoButtons, Hub, More, TrainingFinish, TrainingIntro } from "./screens/Learning";
+import { Achievements, DemoButtons, Hub, More, TrainingFinish, TrainingIntro } from "./screens/Learning";
 import { cx } from "./ui/kit";
+import { ACHIEVEMENTS } from "./lib/achievements";
 
 function useIsDesktop() {
   const q = "(min-width: 720px)";
@@ -36,6 +37,8 @@ function CurrentScreen() {
       return <More />;
     case "hub":
       return <Hub />;
+    case "achievements":
+      return <Achievements />;
     case "instrument":
       return <Instrument id={p.id!} />;
     case "trade":
@@ -61,7 +64,10 @@ function Phone({ framed }: { framed: boolean }) {
   const app = useApp();
   const training = app.mode === "training";
   const fullScreen = app.current.name === "training-intro" || app.current.name === "training-finish";
-  const showTaskPanel = training && app.training.started && !app.training.finished && app.current.name !== "hub";
+  const panelHidden = fullScreen || app.current.name === "hub" || app.current.name === "achievements";
+  // Квест «Первая покупка» важнее текущего задания программы: сначала он
+  const showQuest = !panelHidden && app.buyQuest.active === app.mode;
+  const showTaskPanel = !panelHidden && !showQuest && training && app.training.started && !app.training.finished;
 
   return (
     <div
@@ -75,15 +81,18 @@ function Phone({ framed }: { framed: boolean }) {
       {framed && (training ? <div className="training-stripe"><StatusBar dark /></div> : <StatusBar />)}
       {training && !fullScreen && <TrainingBanner />}
       {training && fullScreen && <div className="training-stripe h-1.5 shrink-0" />}
-      <main key={`${app.mode}-${app.stack.length}-${app.current.name}`} className={cx("no-scrollbar relative flex-1 overflow-y-auto anim-fade", showTaskPanel && !fullScreen && "pb-36")}>
+      <main key={`${app.mode}-${app.stack.length}-${app.current.name}`} className={cx("no-scrollbar relative flex-1 overflow-y-auto anim-fade", (showTaskPanel || showQuest) && "pb-36")}>
         <CurrentScreen />
       </main>
       {showTaskPanel && <TaskPanel />}
+      {showQuest && <QuestPanel />}
       {!fullScreen && <BottomNav />}
       <ActionsSheet />
       <WelcomeSheet />
-      <DealInfoSheet />
+      <MarketOfferSheet />
+      <HelpSheet />
       <StageModalView />
+      <AchievementModal />
       <Toasts />
     </div>
   );
@@ -115,13 +124,19 @@ function Shell() {
             <b className="text-ink">1. Онбординг.</b> Короткие подсказки: «Действия» → Пополнить, Вывести, Отчёты и справки → Документы.
           </li>
           <li>
-            <b className="text-ink">2. «Помощь»</b> вверху любого экрана повторяет подсказки для него.
+            <b className="text-ink">2. «Помощь»</b> вверху любого экрана: подсказки к экрану, переключение на фейковые торги и обратно, достижения.
           </li>
           <li>
-            <b className="text-ink">3. «Пройти обучение»</b> на главной открывает тренировку: 7 этапов, 11 заданий, 5 достижений.
+            <b className="text-ink">3. «Пройти обучение»</b> на главной открывает тренировку: 7 этапов, 11 заданий. Действия, сделанные заранее, засчитываются, когда программа до них дойдёт.
           </li>
           <li>
             <b className="text-ink">4. Возврат.</b> Выйдите из тренировки — на главной появится прогресс и «Продолжить обучение».
+          </li>
+          <li>
+            <b className="text-ink">5. Первая покупка.</b> После пополнения — на биржу: баннер предлагает фейковые торги или обучение в приложении. Старт с фонда ликвидности, но выбор за клиентом.
+          </li>
+          <li>
+            <b className="text-ink">6. Достижения</b> — {ACHIEVEMENTS.length} наград почти за каждое первое действие. Фьючерсы без теста можно попробовать на фейковых торгах.
           </li>
         </ol>
         <div className="mt-6 rounded-l border border-line bg-white p-4">

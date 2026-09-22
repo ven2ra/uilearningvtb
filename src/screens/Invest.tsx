@@ -1,4 +1,4 @@
-import { useMemo, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { useApp } from "../state/AppState";
 import { INSTRUMENTS, INSTRUMENT_BY_ID, type InstrumentType, type Operation } from "../lib/data";
 import { PERIODS, series, type Period } from "../lib/chart";
@@ -114,11 +114,25 @@ export function Portfolio() {
 }
 
 // ================= Рынок =================
-const TYPES: InstrumentType[] = ["Акции", "Облигации", "Фонды"];
+const TYPES: InstrumentType[] = ["Акции", "Облигации", "Фонды", "Фьючерсы"];
 export function Market() {
   const app = useApp();
   const [type, setType] = useState<InstrumentType>("Акции");
   const [q, setQ] = useState("");
+  const training = app.mode === "training";
+  const quest = app.buyQuest;
+
+  // Первый заход на биржу после первых шагов — предлагаем выбрать, как учиться покупать
+  useEffect(() => {
+    if (app.mode === "real" && (app.onboarding === "done" || app.onboarding === "skipped") && quest.offer === "new" && !quest.done) {
+      const t = window.setTimeout(() => {
+        app.markOfferSeen();
+        app.setOfferOpen(true);
+      }, 450);
+      return () => window.clearTimeout(t);
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
   const list = INSTRUMENTS.filter((i) => (q ? (i.name + i.ticker).toLowerCase().includes(q.toLowerCase()) : i.type === type));
 
   return (
@@ -134,9 +148,37 @@ export function Market() {
             </button>
           )}
         </label>
+        {!quest.done && !quest.active && quest.offer === "seen" && (
+          <button
+            type="button"
+            data-tour="market-banner"
+            onClick={() => app.setOfferOpen(true)}
+            className={cx(
+              "mt-3 flex w-full items-center gap-3 rounded-l border p-3 text-left cursor-pointer",
+              training ? "border-tr-border bg-surface" : "border-tr-border bg-tr-surface",
+            )}
+          >
+            <span className="flex h-9 w-9 shrink-0 items-center justify-center rounded-m bg-surface text-tr border border-tr-border">
+              <Icon name="cart" size={20} />
+            </span>
+            <span className="flex-1">
+              <span className="block text-[14px] font-semibold leading-5">Первая покупка с подсказками</span>
+              <span className="block text-[12px] text-ink-2">От 2 ₽ · в приложении или на фейковых торгах</span>
+            </span>
+            <Icon name="trophy" size={18} className="text-warning" />
+          </button>
+        )}
         {!q && (
           <div className="mt-3">
-            <Segmented tour="market-segments" options={TYPES} value={type} onChange={setType} />
+            <Segmented tour="market-segments" itemTour={(o) => `seg-${o}`} options={TYPES} value={type} onChange={setType} />
+          </div>
+        )}
+        {!q && type === "Фьючерсы" && (
+          <div className={cx("mt-3 flex items-start gap-2 rounded-m p-3 text-[12px] leading-[18px]", training ? "bg-tr-surface text-tr-text border border-tr-border" : "bg-warning-surface text-[#92400E]")}>
+            <Icon name={training ? "cap" : "lock"} size={16} className="mt-0.5 shrink-0" />
+            {training
+              ? "На фейковых торгах фьючерсы доступны без тестирования — пробуйте смело."
+              : "Для торговли фьючерсами нужно пройти тестирование. Попробовать можно уже сейчас — на фейковых торгах."}
           </div>
         )}
         <div className="mt-3 overflow-hidden rounded-l border border-line-subtle bg-surface">
@@ -148,14 +190,17 @@ export function Market() {
               <button
                 key={i.id}
                 type="button"
-                data-tour={idx === 0 ? "market-first" : undefined}
+                data-tour={`instr-${i.id}${idx === 0 ? " market-first" : ""}`}
                 onClick={() => app.go("instrument", { id: i.id })}
                 className="flex w-full items-center gap-3 border-b border-line-subtle px-4 py-3 text-left last:border-0 cursor-pointer active:bg-surface-muted"
               >
                 <Monogram id={i.id} />
                 <div className="min-w-0 flex-1">
                   <div className="truncate text-[15px] font-medium">{i.name}</div>
-                  <div className="text-[13px] text-ink-2">{i.ticker}</div>
+                  <div className="flex items-center gap-1 text-[13px] text-ink-2">
+                    {i.ticker}
+                    {i.needsTest && !training && <Icon name="lock" size={12} className="text-ink-3" />}
+                  </div>
                 </div>
                 <Sparkline data={series(i.id, "1Д", price, 24)} />
                 <div className="w-[92px] text-right">
@@ -184,11 +229,9 @@ export function Instrument({ id }: { id: string }) {
   const pos = app.account.positions.find((p) => p.id === id);
   const training = app.mode === "training";
 
+  const locked = !training && !!i.needsTest;
   const openTrade = (side: "buy" | "sell") => {
-    if (!training) {
-      app.setDealInfoOpen(true);
-      return;
-    }
+    if (locked) return;
     app.go("trade", { id, side });
   };
 
@@ -225,6 +268,29 @@ export function Instrument({ id }: { id: string }) {
           </div>
         </section>
 
+        {locked && (
+          <section data-tour="test-gate" className="mt-3 rounded-l border border-warning/40 bg-warning-surface p-4">
+            <div className="flex items-center gap-2 text-[15px] font-semibold">
+              <Icon name="lock" size={18} className="text-[#B45309]" />
+              Нужно тестирование
+            </div>
+            <p className="mt-1 text-[13px] leading-5 text-ink-2">Фьючерсы доступны после теста для неквалифицированных инвесторов. Хотите попробовать уже сейчас — на фейковых торгах, без риска.</p>
+            <div className="mt-3 flex flex-col gap-2">
+              <button
+                type="button"
+                data-tour="try-training"
+                onClick={() => app.switchMode("training")}
+                className="training-stripe flex h-11 items-center justify-center gap-2 rounded-m text-[14px] font-semibold text-white cursor-pointer"
+              >
+                <Icon name="cap" size={18} /> Попробовать на фейковых торгах
+              </button>
+              <Button size="m" variant="ghost" onClick={() => app.toast({ kind: "info", title: "Тестирование", text: "Прохождение теста не входит в сценарий прототипа" })}>
+                Пройти тест
+              </Button>
+            </div>
+          </section>
+        )}
+
         {pos && (
           <section className={cx("mt-3 rounded-l border p-4", training ? "border-tr-border bg-tr-surface" : "border-line-subtle bg-surface")}>
             <div className="flex items-center justify-between">
@@ -248,7 +314,7 @@ export function Instrument({ id }: { id: string }) {
             ["Открытие", fmtMoney(i.open)],
             ["Макс. за день", fmtMoney(Math.max(...series(id, "1Д", price, 60)))],
             ["Мин. за день", fmtMoney(Math.min(...series(id, "1Д", price, 60)))],
-            ["Лот", "1 шт."],
+            ["Минимум для покупки", `1 шт. ≈ ${fmtMoney(price)}`],
           ].map(([k, v]) => (
             <div key={k} className="rounded-l border border-line-subtle bg-surface p-3">
               <div className="text-[12px] text-ink-3">{k}</div>
@@ -271,12 +337,19 @@ export function Instrument({ id }: { id: string }) {
           type="button"
           data-tour="btn-sell"
           onClick={() => openTrade("sell")}
-          disabled={training && !pos}
+          disabled={!pos || locked}
           className="h-12 flex-1 rounded-m bg-muted text-[15px] font-semibold text-ink disabled:text-ink-4 cursor-pointer disabled:cursor-not-allowed"
         >
           Продать
         </button>
-        <button type="button" data-tour="btn-buy" onClick={() => openTrade("buy")} className="h-12 flex-1 rounded-m bg-accent text-[15px] font-semibold text-white active:bg-accent-pressed cursor-pointer">
+        <button
+          type="button"
+          data-tour="btn-buy"
+          onClick={() => openTrade("buy")}
+          disabled={locked}
+          className="flex h-12 flex-1 items-center justify-center gap-1.5 rounded-m bg-accent text-[15px] font-semibold text-white active:bg-accent-pressed disabled:bg-muted disabled:text-ink-4 cursor-pointer disabled:cursor-not-allowed"
+        >
+          {locked && <Icon name="lock" size={16} />}
           {training ? "Купить виртуально" : "Купить"}
         </button>
       </div>
@@ -289,8 +362,10 @@ const SIDES = ["Купить", "Продать"] as const;
 export function Trade({ id, side: initialSide }: { id: string; side: "buy" | "sell" }) {
   const app = useApp();
   const i = INSTRUMENT_BY_ID[id];
+  const training = app.mode === "training";
   const [side, setSide] = useState(initialSide);
-  const [qty, setQty] = useState(side === "buy" ? 10 : 1);
+  // Для недорогих бумаг (фонд ликвидности) сразу предлагаем 100 шт. — это всё ещё пара сотен рублей
+  const [qty, setQty] = useState(initialSide === "sell" ? 1 : app.prices[id] < 10 ? 100 : training ? 10 : 1);
   const [error, setError] = useState<string | null>(null);
   const [done, setDone] = useState<{ side: "buy" | "sell"; qty: number; sum: number } | null>(null);
   const price = app.prices[id];
@@ -312,8 +387,13 @@ export function Trade({ id, side: initialSide }: { id: string; side: "buy" | "se
             {i.name} · {fmtQty(done.qty)} на {fmtMoney(done.sum)}
           </p>
           <div className="mt-3">
-            <Badge tone="training">Виртуальная сделка · реальные деньги не использовались</Badge>
+            {training ? (
+              <Badge tone="training">Виртуальная сделка · реальные деньги не использовались</Badge>
+            ) : (
+              <Badge tone="accent">Брокерский счёт ···4821</Badge>
+            )}
           </div>
+          {!training && <p className="mt-2 text-[12px] text-ink-3">В прототипе сделка имитируется на тестовых данных</p>}
           <div className="mt-8 flex w-full flex-col gap-2">
             <Button full onClick={() => app.tab("portfolio")}>
               Открыть портфель
@@ -335,7 +415,7 @@ export function Trade({ id, side: initialSide }: { id: string; side: "buy" | "se
 
   return (
     <>
-      <TopBar back title={side === "buy" ? "Покупка" : "Продажа"} subtitle={`${i.name} · виртуальная заявка`} />
+      <TopBar back title={side === "buy" ? "Покупка" : "Продажа"} subtitle={training ? `${i.name} · виртуальная заявка` : `${i.name} · брокерский счёт ···4821`} />
       <Page>
         <div className="mt-4">
           <Segmented
@@ -391,7 +471,12 @@ export function Trade({ id, side: initialSide }: { id: string; side: "buy" | "se
           {error && (
             <div className="mt-3 flex items-center gap-2 rounded-m bg-error-surface px-3 py-2 text-[13px] font-medium text-error" role="alert">
               <Icon name="alert" size={18} />
-              {error}
+              <span className="flex-1">{error}</span>
+              {!training && side === "buy" && error.includes("Недостаточно") && (
+                <button type="button" onClick={() => app.go("topup")} className="h-7 rounded-s bg-surface px-2 text-[12px] font-semibold text-brand cursor-pointer">
+                  Пополнить
+                </button>
+              )}
             </div>
           )}
         </section>
@@ -401,16 +486,27 @@ export function Trade({ id, side: initialSide }: { id: string; side: "buy" | "se
           <Row k="Комиссия 0,05%" v={fmtMoney(fee)} />
           <div className="my-2 border-t border-line-subtle" />
           <Row k={side === "buy" ? "Итого спишется" : "Итого поступит"} v={fmtMoney(side === "buy" ? sum + fee : sum - fee)} bold />
-          <Row k="Виртуальных средств" v={fmtMoney(app.account.cash)} />
+          <Row k={training ? "Виртуальных средств" : "Доступно на счёте"} v={fmtMoney(app.account.cash)} />
         </section>
 
-        <div className="mt-3 flex items-start gap-2 rounded-m bg-tr-surface p-3 text-[12px] leading-[18px] text-tr-text border border-tr-border">
-          <Icon name="shield" size={18} className="shrink-0" />
-          Это тренировка. Сделка виртуальная — настоящие деньги и ценные бумаги не затрагиваются.
-        </div>
+        {training ? (
+          <div className="mt-3 flex items-start gap-2 rounded-m border border-tr-border bg-tr-surface p-3 text-[12px] leading-[18px] text-tr-text">
+            <Icon name="shield" size={18} className="shrink-0" />
+            Это тренировка. Сделка виртуальная — настоящие деньги и ценные бумаги не затрагиваются.
+          </div>
+        ) : (
+          <div className="mt-3 flex items-start gap-2 rounded-m bg-info-surface p-3 text-[12px] leading-[18px] text-ink-2">
+            <Icon name="info" size={18} className="shrink-0 text-info" />
+            <span>
+              Сделка на вашем брокерском счёте: деньги спишутся после подтверждения. Продать актив можно в любой момент в часы торгов.
+              <span className="mt-1 block text-ink-3">В прототипе сделка имитируется.</span>
+            </span>
+          </div>
+        )}
 
         <Button full className="mt-4" data-tour="trade-submit" onClick={submit}>
-          {side === "buy" ? "Купить" : "Продать"} виртуально · {fmtMoney(side === "buy" ? sum + fee : sum - fee)}
+          {side === "buy" ? "Купить" : "Продать"}
+          {training ? " виртуально" : ""} · {fmtMoney(side === "buy" ? sum + fee : sum - fee)}
         </Button>
       </Page>
     </>
