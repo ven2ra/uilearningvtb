@@ -1,5 +1,42 @@
 @import "tailwindcss";
 
+/* Фирменный шрифт VTB Group Cond (Light 300, Book 400, DemiBold 600, Bold 700, ExtraBold 800) */
+@font-face {
+  font-family: "VTB Group Cond";
+  src: url("./assets/fonts/VTBGroupCond-Light.woff2") format("woff2"), url("./assets/fonts/VTBGroupCond-Light.woff") format("woff");
+  font-weight: 300;
+  font-style: normal;
+  font-display: swap;
+}
+@font-face {
+  font-family: "VTB Group Cond";
+  src: url("./assets/fonts/VTBGroupCond-Book.woff2") format("woff2"), url("./assets/fonts/VTBGroupCond-Book.woff") format("woff");
+  font-weight: 400;
+  font-style: normal;
+  font-display: swap;
+}
+@font-face {
+  font-family: "VTB Group Cond";
+  src: url("./assets/fonts/VTBGroupCond-DemiBold.woff2") format("woff2"), url("./assets/fonts/VTBGroupCond-DemiBold.woff") format("woff");
+  font-weight: 600;
+  font-style: normal;
+  font-display: swap;
+}
+@font-face {
+  font-family: "VTB Group Cond";
+  src: url("./assets/fonts/VTBGroupCond-Bold.woff2") format("woff2"), url("./assets/fonts/VTBGroupCond-Bold.woff") format("woff");
+  font-weight: 700;
+  font-style: normal;
+  font-display: swap;
+}
+@font-face {
+  font-family: "VTB Group Cond";
+  src: url("./assets/fonts/VTBGroupCond-ExtraBold.woff2") format("woff2"), url("./assets/fonts/VTBGroupCond-ExtraBold.woff") format("woff");
+  font-weight: 800;
+  font-style: normal;
+  font-display: swap;
+}
+
 /* Токены дизайн-системы «ВТБ Мои Инвестиции» */
 :root {
   --bg: #f8fafc;
@@ -38,7 +75,7 @@
   --elevation-2: 0 4px 12px rgba(15, 23, 42, 0.08);
   --elevation-3: 0 8px 24px rgba(15, 23, 42, 0.12);
   --ease: cubic-bezier(0.2, 0, 0, 1);
-  --font-app: "VTB Sans", Arial, system-ui, -apple-system, sans-serif;
+  --font-app: "VTB Group Cond", "VTB Sans", Arial, system-ui, -apple-system, sans-serif;
 }
 
 /* Режимы: реальный интерфейс — синий, тренировка — фиолетово-розовый */
