@@ -1,5 +1,4 @@
 @import "tailwindcss";
-@import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap');
 
 /* Токены дизайн-системы «ВТБ Мои Инвестиции»
    Источник: design-code-reference (23.09.2026) — статичный HTML-срез с CSS-переменными,
@@ -153,6 +152,11 @@
 
 .training-stripe {
   background: linear-gradient(90deg, var(--training) 0%, var(--training-accent) 100%);
+}
+
+.profile-cover {
+  height: 92px;
+  background: radial-gradient(circle at 12% 20%, rgba(255, 255, 255, 0.9), transparent 30%), linear-gradient(115deg, #dcecff 0%, #b9d8ff 42%, #e8f2ff 100%);
 }
 
 /* Микроанимации */

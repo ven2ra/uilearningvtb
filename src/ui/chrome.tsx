@@ -5,6 +5,7 @@ import { STAGES, TASKS, tasksUntilNextAchievement } from "../lib/training";
 import { ACHIEVEMENTS, ACH_BY_ID, type AchievementDef } from "../lib/achievements";
 import { plural } from "../lib/format";
 import Icon, { type IconName } from "./Icons";
+import ReferenceIcon, { type ReferenceIconName } from "../components/home/ReferenceIcon";
 import { Button, ProgressBar, cx } from "./kit";
 
 // ---------- Статус-бар телефона (только в рамке на десктопе) ----------
@@ -53,6 +54,26 @@ export function TrainingBanner() {
 export function BottomNav() {
   const app = useApp();
   const training = app.mode === "training";
+  if (!training) {
+    const sourceItems: { name: ScreenName; label: string; icon: ReferenceIconName }[] = [
+      { name: "home", label: "Главная", icon: "nav-home" },
+      { name: "portfolio", label: "Портфель", icon: "nav-portfolio" },
+      { name: "market", label: "Рынок", icon: "nav-market" },
+      { name: "more", label: "Ещё", icon: "nav-more" },
+    ];
+    const root = app.stack[0].name;
+    return (
+      <nav data-tour="bottom-nav" className="source-bottom-nav relative z-[100] flex shrink-0 flex-col border border-[#f0f1f3] bg-white px-2 pb-[max(env(safe-area-inset-bottom),4px)]">
+        <button type="button" onClick={() => app.tab("market")} aria-label="Поиск инструментов" className="source-bottom-ticker flex h-11 items-center gap-2 rounded-xl bg-[#f0f0f2] px-3 text-left text-[14px] text-[#8e8e96]"><Icon name="search" size={22} className="text-[#b2b2b7]" /> 🏆 ВТБ — лучший брокер года</button>
+        <div className="flex h-[70px] items-center justify-around px-5">
+          {sourceItems.map((it) => {
+            const active = root === it.name;
+            return <button key={it.name} type="button" data-tour={`nav-${it.name}`} aria-label={it.label} title={it.label} aria-current={active ? "page" : undefined} onClick={() => app.tab(it.name)} className={cx("flex h-11 w-12 items-center justify-center rounded-full", active && "reference-nav-active")}><ReferenceIcon name={it.icon} size={32} /></button>;
+          })}
+        </div>
+      </nav>
+    );
+  }
   const items: { name: ScreenName; label: string; icon: IconName; tour: string }[] = [
     { name: "home", label: "Главная", icon: "home", tour: "nav-home" },
     { name: "portfolio", label: "Портфель", icon: "briefcase", tour: "nav-portfolio" },

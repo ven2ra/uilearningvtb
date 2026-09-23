@@ -11,6 +11,7 @@ export type ScreenName =
   | "market"
   | "history"
   | "more"
+  | "profile"
   | "hub"
   | "achievements"
   | "instrument"
@@ -89,6 +90,7 @@ const freshReal = (): Account => ({ cash: REAL_ACCOUNT.cash, positions: REAL_ACC
 const freshQuest = (): BuyQuest => ({ offer: "new", active: null, done: false });
 
 interface Persisted {
+  favorites?: string[];
   onboarding: OnboardingStatus;
   training: TrainingState;
   real: Account;
@@ -127,6 +129,8 @@ function useAppStateValue() {
   const frameRef = useRef<HTMLDivElement | null>(null);
 
   const [mode, setMode] = useState<Mode>("real");
+  const [favorites, setFavorites] = useState<string[]>(persisted?.favorites ?? []);
+  const toggleFavorite = (id: string) => setFavorites(items => items.includes(id) ? items.filter(item => item !== id) : [...items, id]);
   const [stack, setStack] = useState<Screen[]>([{ name: "home" }]);
   const [actionsOpen, setActionsOpen] = useState(false);
   const [helpOpen, setHelpOpen] = useState(false);
@@ -145,8 +149,8 @@ function useAppStateValue() {
   const [moves, setMoves] = useState<Record<string, "up" | "down">>({});
 
   useEffect(
-    () => savePersisted({ onboarding, training, real, achievements, buyQuest }),
-    [onboarding, training, real, achievements, buyQuest],
+    () => savePersisted({ onboarding, training, real, achievements, buyQuest, favorites }),
+    [onboarding, training, real, achievements, buyQuest, favorites],
   );
 
   // Имитация движения котировок (тестовые данные)
@@ -621,6 +625,8 @@ function useAppStateValue() {
   const has = useCallback((id: string) => achievements.some((a) => a.id === id), [achievements]);
 
   return {
+    favorites,
+    toggleFavorite,
     frameRef: frameRef as RefObject<HTMLDivElement | null>,
     mode,
     stack,

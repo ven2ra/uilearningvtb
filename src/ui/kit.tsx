@@ -3,6 +3,7 @@ import Icon, { type IconName } from "./Icons";
 import { useApp } from "../state/AppState";
 import { fmtMoney, fmtPct, signOf } from "../lib/format";
 import { INSTRUMENT_BY_ID } from "../lib/data";
+import { referenceImage } from "../components/home/referenceImages";
 
 export function cx(...c: (string | false | null | undefined)[]) {
   return c.filter(Boolean).join(" ");
@@ -194,6 +195,8 @@ function monogram(name: string) {
 
 export function Monogram({ id, size = 40 }: { id: string; size?: number }) {
   const i = INSTRUMENT_BY_ID[id];
+  const logos: Record<string, string> = { SBER: "asset-018.png", GAZP: "asset-026.png", LKOH: "asset-164.png", YDEX: "asset-028.png", LQDT: "asset-201.png", EQMX: "asset-201.png" };
+  if (logos[id]) return <img src={referenceImage(logos[id])} alt="" width={size} height={size} className="shrink-0 rounded-full" />;
   return (
     <div
       className="flex shrink-0 items-center justify-center rounded-full font-bold text-white"

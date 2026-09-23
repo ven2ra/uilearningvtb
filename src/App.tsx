@@ -6,12 +6,13 @@ import Home from "./screens/Home";
 import { History, Instrument, Market, Portfolio, Trade } from "./screens/Invest";
 import { DocOrder, DocReady, Documents, MoveMoney } from "./screens/Service";
 import { Achievements, DemoButtons, Hub, More, TrainingFinish, TrainingIntro } from "./screens/Learning";
+import Profile from "./screens/Profile";
 import { cx } from "./ui/kit";
 import { ACHIEVEMENTS } from "./lib/achievements";
 import Splash from "./ui/Splash";
 
 function useIsDesktop() {
-  const q = "(min-width: 720px)";
+  const q = "(min-width: 1100px)";
   const [v, setV] = useState(() => window.matchMedia(q).matches);
   useEffect(() => {
     const m = window.matchMedia(q);
@@ -36,6 +37,8 @@ function CurrentScreen() {
       return <History />;
     case "more":
       return <More />;
+    case "profile":
+      return <Profile />;
     case "hub":
       return <Hub />;
     case "achievements":
@@ -74,7 +77,7 @@ function Phone({ framed }: { framed: boolean }) {
     <div
       ref={app.frameRef}
       className={cx(
-        "relative flex flex-col overflow-hidden bg-page transition-colors duration-300",
+        "source-design relative flex flex-col overflow-hidden bg-page transition-colors duration-300",
         training ? "mode-training" : "mode-real",
         framed ? "h-[844px] w-[390px] rounded-[44px] border-[10px] border-[#0F172A] shadow-[0_30px_80px_rgba(15,23,42,0.35)]" : "h-dvh w-full",
       )}
@@ -103,6 +106,9 @@ function Shell() {
   const desktop = useIsDesktop();
   const app = useApp();
   if (!desktop) return <Phone framed={false} />;
+  if (app.mode === "real") {
+    return <div className="source-desktop-host"><Phone framed={false} /></div>;
+  }
   const training = app.mode === "training";
   return (
     <div className="flex min-h-full items-center justify-center gap-10 p-8">

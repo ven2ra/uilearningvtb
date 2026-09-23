@@ -172,6 +172,16 @@ const paths: Record<string, ReactNode> = {
       <path d="M15 3.5A9 9 0 0 1 20.5 9H15z" />
     </>
   ),
+  vtbMark: (
+    <>
+      <path d="m6.62 6-1.09 3.19h15.13L22 6z" fill="currentColor" stroke="none" />
+      <path d="m4.98 10.78-1.09 3.19h15.14l1.09-3.19z" fill="currentColor" stroke="none" />
+      <path d="M3.34 15.56 2 18.75h15.13l1.09-3.19z" fill="currentColor" stroke="none" />
+    </>
+  ),
+  pulse: <path d="M3 13h4l2-6 4 12 2-6h6" />,
+  diamond: <path d="m12 3 7 8-7 10-7-10zM5 11h14M12 3l-2 8 2 10 2-10z" />,
+  bubble: <path d="M20 11.5a7.5 7.5 0 0 1-11.8 6.1L4 20l1.6-4.4A7.5 7.5 0 1 1 20 11.5Z" />,
 };
 
 export type IconName = keyof typeof paths;

@@ -264,7 +264,7 @@ export function More() {
 
         <div className="mt-3 overflow-hidden rounded-l border border-line-subtle bg-surface">
           <MoreRow icon="trophy" title="Мои достижения" sub={`Открыто ${app.achievements.length} из ${ACHIEVEMENTS.length}`} onClick={() => app.go("achievements")} />
-          <MoreRow icon="user" title="Профиль" sub="Данные и документы" />
+          <MoreRow icon="user" title="Профиль" sub="Данные и документы" onClick={() => app.go("profile")} />
           <MoreRow icon="shield" title="Безопасность" sub="Код входа, биометрия" />
           <MoreRow icon="settings" title="Настройки" sub="Уведомления, внешний вид" />
           <MoreRow icon="chat" title="Чат с поддержкой" sub="Ответим за пару минут" />

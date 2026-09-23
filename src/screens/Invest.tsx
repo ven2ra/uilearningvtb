@@ -9,18 +9,20 @@ import { Badge, Button, Change, LineChart, Monogram, Page, Segmented, SectionTit
 // ================= Портфель =================
 export function Portfolio() {
   const app = useApp();
+  const [hidden, setHidden] = useState(false);
   const training = app.mode === "training";
   const { positions, cash } = app.account;
   const profit = app.positionsValue - app.investedCost;
   const profitPct = app.investedCost ? (profit / app.investedCost) * 100 : 0;
 
   const byType = useMemo(() => {
-    const m: Record<string, number> = { Акции: 0, Облигации: 0, Фонды: 0 };
+    const m: Record<string, number> = { Акции: 0, Облигации: 0, Фонды: 0, Фьючерсы: 0 };
     positions.forEach((p) => (m[INSTRUMENT_BY_ID[p.id].type] += p.qty * app.prices[p.id]));
     return [
       { label: "Акции", value: m["Акции"], color: "var(--accent)" },
       { label: "Облигации", value: m["Облигации"], color: "#0EA5E9" },
       { label: "Фонды", value: m["Фонды"], color: "#F59E0B" },
+      { label: "Фьючерсы", value: m["Фьючерсы"], color: "#885CF6" },
       { label: "Рубли", value: cash, color: "var(--border-strong)" },
     ];
   }, [positions, cash, app.prices]);
@@ -35,14 +37,16 @@ export function Portfolio() {
             <span>Стоимость</span>
             {training && <VirtualTag />}
           </div>
-          <div className="num mt-1 text-[36px] font-bold leading-none tracking-tight">{fmtMoney(app.portfolioValue)}</div>
+          <div className="mt-1 flex items-center justify-center gap-2"><span className="num text-[36px] font-medium leading-none tracking-tight">{hidden ? "••• ₽" : fmtMoney(app.portfolioValue)}</span><button type="button" aria-label={hidden ? "Показать сумму" : "Скрыть сумму"} onClick={() => setHidden(v => !v)} className="p-2 text-ink-3"><Icon name={hidden ? "eye" : "eyeOff"} size={20} /></button></div>
           <div className="mt-3 flex flex-wrap items-center justify-center gap-x-3 gap-y-2 text-[13px]">
-            <Change value={profit} pct={profitPct} />
+            {hidden ? <span>•••</span> : <Change value={profit} pct={profitPct} />}
             <span className="text-ink-3">
-              Свободно <span className="num font-semibold text-ink">{fmtMoney(cash)}</span>
+              Свободно <span className="num font-semibold text-ink">{hidden ? "••• ₽" : fmtMoney(cash)}</span>
             </span>
           </div>
         </section>
+
+        <div className="reference-actions portfolio-actions"><button type="button" onClick={app.openActions}><Icon name="grid" size={20} />Действия</button><button type="button" onClick={() => app.go("topup")}><Icon name="plus" size={20} />Пополнить</button><button type="button" onClick={() => app.tab("history")}><Icon name="clock" size={20} />История</button></div>
 
         <section data-tour="portfolio-alloc" className="mt-3 rounded-l border border-line-subtle bg-surface p-4">
           <div className="mb-3 text-[13px] font-semibold text-ink-2">Структура</div>
@@ -232,7 +236,7 @@ export function Instrument({ id }: { id: string }) {
 
   return (
     <>
-      <TopBar back title={i.name} subtitle={`${i.ticker} · ${i.type}`} />
+      <TopBar back title={i.name} subtitle={`${i.ticker} · ${i.type}`} right={<button type="button" onClick={() => app.toggleFavorite(id)} aria-label={app.favorites.includes(id) ? "Удалить из избранного" : "Добавить в избранное"} aria-pressed={app.favorites.includes(id)} className="p-2 text-accent"><Icon name="star" /></button>} />
       <Page className="pb-28">
         <section data-tour="instr-price" className="mt-4 flex items-center gap-3">
           <Monogram id={id} size={48} />

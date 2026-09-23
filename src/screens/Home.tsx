@@ -1,14 +1,20 @@
-import { useEffect, useRef, useState } from "react";
+import { useState } from "react";
 import { useApp } from "../state/AppState";
 import { INSTRUMENTS, INSTRUMENT_BY_ID } from "../lib/data";
 import { STAGES, TASKS, statusFor, tasksUntilNextAchievement } from "../lib/training";
-import { ACHIEVEMENTS } from "../lib/achievements";
+import { AchChip, FirstSteps, LearningCard } from "../components/learning/HomeLearning";
 import { fmtMoney, plural } from "../lib/format";
 import { series } from "../lib/chart";
+import SourceHome from "./SourceHome";
 import Icon, { type IconName } from "../ui/Icons";
-import { Button, Change, HelpButton, Monogram, ProgressBar, SectionTitle, Sparkline, VirtualTag, cx } from "../ui/kit";
+import { Change, HelpButton, Monogram, ProgressBar, SectionTitle, Sparkline, VirtualTag, cx } from "../ui/kit";
 
 export default function Home() {
+  const app = useApp();
+  return app.mode === "real" ? <SourceHome /> : <TrainingHome />;
+}
+
+function TrainingHome() {
   const app = useApp();
   const training = app.mode === "training";
   const pct = app.portfolioValue - app.dayChange ? (app.dayChange / (app.portfolioValue - app.dayChange)) * 100 : 0;
@@ -65,6 +71,8 @@ export default function Home() {
           <QuickAction icon="search" label="Рынок" onClick={() => app.tab("market")} />
           <QuickAction icon="pie" label="Портфель" onClick={() => app.tab("portfolio")} />
         </div>
+
+        <AccountsStrip />
 
         {/* Обучение */}
         {!training && <FirstSteps />}
@@ -137,88 +145,91 @@ export default function Home() {
             );
           })}
         </div>
+
+        <AiSummary />
+        <NewsFeed />
+        <WeeklyCollections />
+        <FundsSection />
         <p className="mt-4 px-1 text-[11px] leading-4 text-ink-3">Котировки — тестовые данные прототипа и не являются инвестиционной рекомендацией.</p>
       </div>
     </div>
   );
 }
 
-/** Счётчик достижений в шапке — напоминает, что награды есть почти за всё */
-export function AchChip() {
+function AccountsStrip() {
   const app = useApp();
-  const count = app.achievements.length;
-  const prev = useRef(count);
-  const [pulse, setPulse] = useState(false);
-  useEffect(() => {
-    if (count > prev.current) {
-      setPulse(true);
-      const t = window.setTimeout(() => setPulse(false), 2400);
-      prev.current = count;
-      return () => window.clearTimeout(t);
-    }
-    prev.current = count;
-  }, [count]);
   return (
-    <button
-      type="button"
-      data-tour="ach-chip"
-      onClick={() => app.go("achievements")}
-      className={cx("flex h-9 items-center gap-1 rounded-m bg-warning-surface px-2 text-[13px] font-semibold text-[#B45309] cursor-pointer", pulse && "anim-pulse")}
-      aria-label={`Достижения: ${app.achievements.length} из ${ACHIEVEMENTS.length}`}
-    >
-      <Icon name="trophy" size={18} />
-      <span className="num">{app.achievements.length}</span>
-    </button>
+    <section className="mt-5">
+      <SectionTitle action={<button type="button" onClick={() => app.go("profile")} className="text-[13px] font-semibold text-accent-text">Все счета</button>}>Счета</SectionTitle>
+      <button type="button" onClick={() => app.tab("portfolio")} className="flex w-full items-center gap-3 rounded-l border border-line-subtle bg-surface p-4 text-left active:bg-surface-muted">
+        <span className="flex h-10 w-10 items-center justify-center rounded-m bg-accent-subtle text-accent-text"><Icon name="wallet" size={21} /></span>
+        <span className="min-w-0 flex-1"><span className="block text-[15px] font-semibold">Брокерский счёт</span><span className="block text-[12px] text-ink-2">···4821 · доступно {fmtMoney(app.account.cash)}</span></span>
+        <Icon name="chevronRight" size={19} className="text-ink-3" />
+      </button>
+    </section>
   );
 }
 
-/** «Первые шаги» в реальном приложении: знакомство → пополнение → первая покупка */
-function FirstSteps() {
+function AiSummary() {
   const app = useApp();
-  const steps = [
-    { title: "Познакомиться с приложением", done: app.onboarding === "done" || app.has("welcome"), reward: "Добро пожаловать" },
-    { title: "Пополнить счёт", done: app.has("first-topup"), reward: "Первое пополнение" },
-    { title: "Первая покупка — от 2 ₽", done: app.has("first-buy"), reward: "Первая покупка" },
-  ];
-  const doneCount = steps.filter((s) => s.done).length;
-  if (doneCount === steps.length) return null;
-  const nextIdx = steps.findIndex((s) => !s.done);
-  const cta =
-    nextIdx === 0
-      ? { label: "Показать подсказки", fn: () => app.setOnboarding("running") }
-      : nextIdx === 1
-        ? { label: "Пополнить счёт", fn: () => app.go("topup") }
-        : { label: "Перейти на биржу", fn: () => app.tab("market") };
+  const points = ["Азиатские рынки акций демонстрируют рост", "Снижение остатков на корсчетах банков в ЦБ РФ", "Центральный банк Узбекистана улучшил прогноз роста ВВП"];
   return (
-    <section data-tour="first-steps" className="mt-3 rounded-l border border-line-subtle bg-surface p-4">
-      <div className="flex items-center justify-between">
-        <span className="text-[18px] font-semibold leading-6">Первые шаги</span>
-        <span className="num text-[13px] font-semibold text-ink-2">
-          {doneCount}/{steps.length}
-        </span>
+    <section className="source-ai mt-6 overflow-hidden rounded-l border border-[#d9d8ff] bg-white p-4 shadow-e1">
+      <button type="button" onClick={() => app.toast({ kind: "info", title: "AI-саммари", text: "Обновление картины дня доступно в полном приложении" })} className="flex w-full items-center gap-2 text-left">
+        <span className="flex h-7 w-7 items-center justify-center rounded-full bg-[#ecebff] text-[#5f5fff]"><Icon name="sparkle" size={16} /></span>
+        <span className="text-[14px] font-semibold text-[#5f5fff]">AI-саммари: картина дня</span>
+        <Icon name="chevronRight" size={17} className="ml-auto text-ink-3" />
+      </button>
+      <ul className="mt-3 space-y-2 text-[13px] leading-[18px] text-ink">
+        {points.map((point) => <li key={point} className="flex gap-2"><span className="text-brand">•</span><span>{point}</span></li>)}
+      </ul>
+    </section>
+  );
+}
+
+function NewsFeed() {
+  const app = useApp();
+  const news = [
+    ["ЦБ РФ в 2027г может рассмотреть расширение перечня признаков мошеннических операций", "Сегодня 18:30 · Интерфакс"],
+    ["Суд прекратил производство по иску Аэрофлота на 2,4 млрд руб.", "Сегодня 18:29 · Интерфакс · Транспорт"],
+    ["Нефтяные цены могут оказаться выше июльского прогноза ЦБ РФ", "Сегодня 18:26 · Интерфакс"],
+  ];
+  return (
+    <section className="mt-6">
+      <SectionTitle action={<button type="button" onClick={() => app.toast({ kind: "info", title: "Новости", text: "Полная лента новостей доступна в приложении" })} className="text-[13px] font-semibold text-accent-text">Все новости</button>}>Новости</SectionTitle>
+      <div className="overflow-hidden rounded-l border border-line-subtle bg-surface">
+        {news.map(([title, meta]) => <button key={title} type="button" onClick={() => app.toast({ kind: "info", title: "Новость", text: title })} className="w-full border-b border-line-subtle px-4 py-3 text-left last:border-0 active:bg-surface-muted"><span className="block text-[14px] font-medium leading-5">{title}</span><span className="mt-1 block text-[12px] text-ink-2">{meta}</span></button>)}
       </div>
-      <ProgressBar value={doneCount} max={steps.length} className="mt-2" />
-      <ol className="mt-3 space-y-2">
-        {steps.map((s, i) => (
-          <li key={s.title} className="flex items-center gap-2.5">
-            <span
-              className={cx(
-                "flex h-6 w-6 shrink-0 items-center justify-center rounded-full text-[12px] font-bold",
-                s.done ? "bg-success-surface text-success" : i === nextIdx ? "bg-brand text-white" : "bg-muted text-ink-3",
-              )}
-            >
-              {s.done ? <Icon name="check" size={14} /> : i + 1}
-            </span>
-            <span className={cx("flex-1 text-[14px]", s.done ? "text-ink-3 line-through" : i === nextIdx ? "font-semibold" : "text-ink-2")}>{s.title}</span>
-            <span className={cx("flex items-center gap-1 text-[11px] font-semibold", s.done ? "text-ink-3" : "text-[#B45309]")} title={`Достижение «${s.reward}»`}>
-              <Icon name="trophy" size={14} />
-            </span>
-          </li>
-        ))}
-      </ol>
-      <Button full size="m" className="mt-3" onClick={cta.fn}>
-        {cta.label}
-      </Button>
+    </section>
+  );
+}
+
+function WeeklyCollections() {
+  const app = useApp();
+  const collections = [
+    ["Дивидендные лидеры", "20%", "#bce9e5"],
+    ["Фавориты стратегии", "25%", "#d9d9ff"],
+    ["Золотой баланс", "15%", "#ffe5a8"],
+  ];
+  return (
+    <section className="mt-6">
+      <SectionTitle>Подборки недели</SectionTitle>
+      <div className="no-scrollbar -mx-4 flex gap-2 overflow-x-auto px-4">
+        {collections.map(([title, value, color]) => <button key={title} type="button" onClick={() => app.tab("market")} className="relative h-[150px] w-[164px] shrink-0 overflow-hidden rounded-l border border-line-subtle p-3 text-left" style={{ background: `radial-gradient(circle at 10% 8%, #fff 0, ${color} 72%)` }}><span className="absolute right-3 top-3 rounded-full bg-white/70 px-2 py-0.5 text-[11px] font-semibold text-ink-2">+7</span><span className="absolute bottom-10 left-3 right-3 text-[16px] font-semibold leading-5">{title}</span><span className="absolute bottom-3 left-3 text-[13px] text-ink-2">до {value} за 12 месяцев</span></button>)}
+      </div>
+    </section>
+  );
+}
+
+function FundsSection() {
+  const app = useApp();
+  const funds = [["ВИМ - Корпоративные облигации", "20%"], ["ВИМ-Накопительный резерв", "25%"], ["Ликвидность (LQDT)", "14,2%"], ["Инвестидея: купить паи ПИФа «Золото. Биржевой»", "15%"]];
+  return (
+    <section className="mt-6">
+      <SectionTitle action={<button type="button" onClick={() => app.tab("market")} className="text-[13px] font-semibold text-accent-text">Все фонды</button>}>Фонды</SectionTitle>
+      <div className="overflow-hidden rounded-l border border-line-subtle bg-surface">
+        {funds.map(([name, value]) => <button key={name} type="button" onClick={() => app.tab("market")} className="flex w-full items-center gap-3 border-b border-line-subtle px-4 py-3 text-left last:border-0 active:bg-surface-muted"><span className="flex h-9 w-9 shrink-0 items-center justify-center rounded-full bg-gradient-to-br from-[#9bd5db] to-[#706dff] text-[12px] font-bold text-white">Ф</span><span className="min-w-0 flex-1"><span className="block text-[14px] font-medium leading-5">{name}</span><span className="block text-[12px] text-ink-2">Фонд · за 12 месяцев</span></span><span className="num text-[15px] font-semibold text-success">{value}</span></button>)}
+      </div>
     </section>
   );
 }
@@ -237,105 +248,6 @@ function QuickAction({ icon, label, onClick, primary, tour }: { icon: IconName; 
       <Icon name={icon} size={20} />
       {label}
     </button>
-  );
-}
-
-/** Карточка обучения в обычном интерфейсе: старт → возврат к прогрессу → «Готовы продолжить самостоятельно?» */
-function LearningCard() {
-  const app = useApp();
-  const t = app.training;
-  const nextTask = TASKS[t.done];
-  const nextStage = nextTask ? STAGES[nextTask.stage - 1] : null;
-  const until = tasksUntilNextAchievement(t.done);
-
-  if (t.finished && t.readyCardDismissed) {
-    return (
-      <button
-        type="button"
-        data-tour="training-card"
-        onClick={app.enterTraining}
-        className="mt-3 flex w-full items-center gap-3 rounded-l border border-tr-border bg-tr-surface p-3 text-left cursor-pointer"
-      >
-        <span className="flex h-10 w-10 items-center justify-center rounded-m bg-surface text-tr border border-tr-border">
-          <Icon name="medal" size={22} />
-        </span>
-        <span className="flex-1">
-          <span className="block text-[15px] font-semibold">Обучение пройдено</span>
-          <span className="block text-[13px] text-tr-text">Статус: Инвестор-новичок · 7/7</span>
-        </span>
-        <Icon name="chevronRight" size={20} className="text-ink-3" />
-      </button>
-    );
-  }
-
-  return (
-    <section data-tour="training-card" className="relative mt-3 overflow-hidden rounded-l border border-tr-border bg-tr-surface p-4">
-      <div className="training-stripe absolute inset-x-0 top-0 h-1" />
-      <div className="flex items-start gap-3">
-        <span className="flex h-11 w-11 shrink-0 items-center justify-center rounded-l bg-surface text-tr border border-tr-border">
-          <Icon name={t.finished ? "medal" : "cap"} size={24} />
-        </span>
-        <div className="min-w-0 flex-1">
-          {!t.started && (
-            <>
-              <div className="text-[18px] font-semibold leading-6">Пройти обучение</div>
-              <div className="text-[13px] leading-5 text-ink-2">Попробуйте инвестировать без риска</div>
-            </>
-          )}
-          {t.started && !t.finished && (
-            <>
-              <div className="text-[18px] font-semibold leading-6">
-                Вы прошли {app.doneStages} из {STAGES.length} этапов
-              </div>
-              <div className="text-[13px] leading-5 text-ink-2">Следующий этап: {nextStage?.title.toLowerCase()}</div>
-            </>
-          )}
-          {t.finished && (
-            <>
-              <div className="text-[18px] font-semibold leading-6">Готовы продолжить самостоятельно?</div>
-              <div className="text-[13px] leading-5 text-ink-2">Вы прошли все этапы и получили статус «{statusFor(STAGES.length)}»</div>
-            </>
-          )}
-        </div>
-      </div>
-
-      {t.started && !t.finished && (
-        <div className="mt-3">
-          <ProgressBar value={app.doneStages} max={STAGES.length} tone="training" />
-          {until && until.left > 0 && (
-            <div className="mt-2 flex items-center gap-1.5 text-[12px] font-medium text-ink-2">
-              <Icon name="trophy" size={14} className="text-warning" />
-              До достижения «{until.achievement.title}» — {until.left} {plural(until.left, "задание", "задания", "заданий")}
-            </div>
-          )}
-        </div>
-      )}
-
-      {!t.started && (
-        <div className="mt-3 flex gap-1.5 text-[12px] text-ink-2">
-          <span className="rounded-s bg-surface px-2 py-1 border border-tr-border">1 000 000 ₽ виртуальных</span>
-          <span className="rounded-s bg-surface px-2 py-1 border border-tr-border">7 этапов</span>
-          <span className="rounded-s bg-surface px-2 py-1 border border-tr-border">~5 минут</span>
-        </div>
-      )}
-
-      <div className={cx("mt-4 flex gap-2", t.finished && "flex-col-reverse")}>
-        {!t.finished ? (
-          <button type="button" onClick={app.enterTraining} className="h-11 flex-1 rounded-m bg-tr text-[15px] font-semibold text-white cursor-pointer active:brightness-90">
-            {t.started ? "Продолжить обучение" : "Начать обучение"}
-          </button>
-        ) : (
-          <>
-            <button type="button" onClick={app.restartTraining} className="h-11 w-full rounded-m border border-tr-border bg-surface text-[14px] font-semibold text-tr-text cursor-pointer">
-              Повторить обучение
-            </button>
-            <Button full className="h-11" size="m" variant="primary" onClick={() => app.setTraining((x) => ({ ...x, readyCardDismissed: true }))}>
-              Перейти к приложению
-            </Button>
-          </>
-        )}
-      </div>
-    </section>
   );
 }
 
