@@ -8,6 +8,7 @@ import { DocOrder, DocReady, Documents, MoveMoney } from "./screens/Service";
 import { Achievements, DemoButtons, Hub, More, TrainingFinish, TrainingIntro } from "./screens/Learning";
 import { cx } from "./ui/kit";
 import { ACHIEVEMENTS } from "./lib/achievements";
+import Splash from "./ui/Splash";
 
 function useIsDesktop() {
   const q = "(min-width: 720px)";
@@ -150,11 +151,13 @@ function Shell() {
 }
 
 export default function App() {
+  const [booting, setBooting] = useState(true);
   return (
     <AppProvider>
       <TourProvider>
         <Shell />
       </TourProvider>
+      {booting && <Splash onDone={() => setBooting(false)} />}
     </AppProvider>
   );
 }
