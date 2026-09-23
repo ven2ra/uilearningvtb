@@ -16,6 +16,7 @@ export interface Instrument {
 }
 
 export const INSTRUMENTS: Instrument[] = [
+  { id: "VTBR", ticker: "VTBR", name: "ВТБ", type: "Акции", open: 92.3, color: "#1D4ED8", sector: "Финансы", about: "Один из крупнейших банков страны. Розничный и корпоративный бизнес, финансовые услуги." },
   { id: "SBER", ticker: "SBER", name: "Сбербанк", type: "Акции", open: 305.8, color: "#16A34A", sector: "Финансы", about: "Крупнейший банк страны. Акции входят в индекс Мосбиржи." },
   { id: "GAZP", ticker: "GAZP", name: "Газпром", type: "Акции", open: 131.2, color: "#0284C7", sector: "Энергетика", about: "Добыча и транспортировка природного газа." },
   { id: "LKOH", ticker: "LKOH", name: "Лукойл", type: "Акции", open: 7088, color: "#DC2626", sector: "Энергетика", about: "Нефтяная компания полного цикла." },
@@ -33,6 +34,7 @@ export const INSTRUMENTS: Instrument[] = [
 export const INSTRUMENT_BY_ID: Record<string, Instrument> = Object.fromEntries(INSTRUMENTS.map((i) => [i.id, i]));
 
 export const INITIAL_PRICES: Record<string, number> = {
+  VTBR: 95.1,
   SBER: 312.45,
   GAZP: 128.9,
   LKOH: 7145,
