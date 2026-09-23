@@ -12,6 +12,7 @@ export default function Home() {
   const app = useApp();
   const training = app.mode === "training";
   const pct = app.portfolioValue - app.dayChange ? (app.dayChange / (app.portfolioValue - app.dayChange)) * 100 : 0;
+  const [hidden, setHidden] = useState(false);
 
   return (
     <div className="pb-6">
@@ -30,21 +31,36 @@ export default function Home() {
         {/* Баланс */}
         <section
           data-tour="balance"
-          className={cx("mt-1 rounded-l border p-5", training ? "border-tr-border bg-tr-surface" : "border-line-subtle bg-surface")}
+          className={cx("mt-1 rounded-l border p-6 text-center", training ? "border-tr-border bg-tr-surface" : "border-line-subtle bg-surface")}
         >
-          <div className="flex items-center justify-between">
-            <span className="text-[13px] font-medium text-ink-2">{training ? "Виртуальный баланс" : "Стоимость портфеля"}</span>
-            {training ? <VirtualTag /> : <span className="rounded-s bg-muted px-2 py-0.5 text-[11px] font-semibold text-ink-2">Брокерский ···4821</span>}
+          <span className="text-[13px] font-medium text-ink-2">{training ? "Виртуальный баланс" : "Стоимость портфеля"}</span>
+          <div className="mt-1.5 flex items-center justify-center gap-2">
+            <span className="num text-[36px] font-bold leading-none tracking-tight">{hidden ? "•••• ₽" : fmtMoney(app.portfolioValue)}</span>
+            <button
+              type="button"
+              onClick={() => setHidden((h) => !h)}
+              className="flex h-8 w-8 shrink-0 items-center justify-center rounded-full text-ink-3 cursor-pointer active:bg-muted"
+              aria-label={hidden ? "Показать сумму" : "Скрыть сумму"}
+            >
+              <Icon name={hidden ? "eyeOff" : "eye"} size={20} />
+            </button>
           </div>
-          <div className="num mt-1 text-[32px] font-bold leading-10 tracking-tight">{fmtMoney(app.portfolioValue)}</div>
-          <div className="mt-0.5 text-[13px]">
-            <Change value={app.dayChange} pct={pct} /> <span className="text-ink-3">за день</span>
+          <div className="mt-2 flex items-center justify-center gap-2 text-[13px]">
+            <Change value={app.dayChange} pct={pct} />
+            <span className="text-ink-3">за день</span>
+          </div>
+          <div className="mt-3">
+            {training ? (
+              <VirtualTag />
+            ) : (
+              <span className="rounded-full bg-muted px-2.5 py-1 text-[11px] font-semibold text-ink-2">Брокерский ···4821</span>
+            )}
           </div>
           {training && <div className="mt-2 text-[12px] text-tr-text">Виртуальные средства. Реальные деньги не списываются.</div>}
         </section>
 
         {/* Быстрые действия */}
-        <div className="mt-3 grid grid-cols-3 gap-2">
+        <div className="mt-3 flex gap-2">
           <QuickAction tour="actions" icon="grid" label="Действия" primary onClick={app.openActions} />
           <QuickAction icon="search" label="Рынок" onClick={() => app.tab("market")} />
           <QuickAction icon="pie" label="Портфель" onClick={() => app.tab("portfolio")} />
@@ -64,34 +80,40 @@ export default function Home() {
         >
           Мои активы
         </SectionTitle>
-        <div className="overflow-hidden rounded-l border border-line-subtle bg-surface">
-          {app.account.positions.length === 0 ? (
-            <div className="flex items-center gap-3 p-4">
-              <span className="flex h-10 w-10 items-center justify-center rounded-m bg-muted text-ink-3">
-                <Icon name="briefcase" size={22} />
-              </span>
-              <div className="flex-1 text-[13px] leading-5 text-ink-2">Пока нет активов. Они появятся после первой покупки.</div>
-            </div>
-          ) : (
-            app.account.positions.slice(0, 3).map((p) => {
+        {app.account.positions.length === 0 ? (
+          <div className="flex items-center gap-3 rounded-l border border-line-subtle bg-surface p-4">
+            <span className="flex h-10 w-10 items-center justify-center rounded-m bg-muted text-ink-3">
+              <Icon name="briefcase" size={22} />
+            </span>
+            <div className="flex-1 text-[13px] leading-5 text-ink-2">Пока нет активов. Они появятся после первой покупки.</div>
+          </div>
+        ) : (
+          <div className="flex flex-col gap-2">
+            {app.account.positions.slice(0, 3).map((p) => {
               const price = app.prices[p.id];
               const i = INSTRUMENT_BY_ID[p.id];
               return (
-                <button key={p.id} type="button" onClick={() => app.go("instrument", { id: p.id })} className="flex w-full items-center gap-3 border-b border-line-subtle px-4 py-3 text-left last:border-0 cursor-pointer active:bg-surface-muted">
-                  <Monogram id={p.id} />
-                  <div className="min-w-0 flex-1">
-                    <div className="truncate text-[15px] font-medium">{i.name}</div>
-                    <div className="text-[13px] text-ink-2">{p.qty.toLocaleString("ru-RU")} шт.</div>
+                <button
+                  key={p.id}
+                  type="button"
+                  onClick={() => app.go("instrument", { id: p.id })}
+                  className="flex w-full items-center justify-between gap-3 rounded-l border border-line-subtle bg-surface p-4 text-left cursor-pointer active:bg-surface-muted"
+                >
+                  <div className="flex min-w-0 items-center gap-3">
+                    <Monogram id={p.id} />
+                    <div className="min-w-0">
+                      <div className="num text-[17px] font-semibold leading-6">{fmtMoney(price * p.qty)}</div>
+                      <div className="truncate text-[12px] text-ink-2">
+                        {i.name} · {p.qty.toLocaleString("ru-RU")} шт.
+                      </div>
+                    </div>
                   </div>
-                  <div className="text-right">
-                    <div className="num text-[15px] font-semibold">{fmtMoney(price * p.qty)}</div>
-                    <Change pct={((price - p.avg) / p.avg) * 100} className="text-[13px]" />
-                  </div>
+                  <Change pct={((price - p.avg) / p.avg) * 100} />
                 </button>
               );
-            })
-          )}
-        </div>
+            })}
+          </div>
+        )}
 
         {/* Популярное */}
         <SectionTitle>Популярное</SectionTitle>
@@ -208,11 +230,11 @@ function QuickAction({ icon, label, onClick, primary, tour }: { icon: IconName; 
       data-tour={tour}
       onClick={onClick}
       className={cx(
-        "flex h-[72px] flex-col items-center justify-center gap-1 rounded-l border text-[13px] font-semibold cursor-pointer active:scale-[0.98] transition-transform",
+        "flex h-12 flex-1 items-center justify-center gap-2 rounded-full border text-[13px] font-semibold cursor-pointer active:scale-[0.98] transition-transform",
         primary ? "border-transparent bg-accent text-white" : "border-line-subtle bg-surface text-ink",
       )}
     >
-      <Icon name={icon} size={24} />
+      <Icon name={icon} size={20} />
       {label}
     </button>
   );

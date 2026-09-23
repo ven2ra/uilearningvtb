@@ -172,11 +172,14 @@ export function ProgressRing({ value, max, size = 72, children }: { value: numbe
 }
 
 // ---------- Финансовые значения ----------
+// Капсула вместо голого цветного текста — заметный акцент, как в референсе
 export function Change({ value, pct, className }: { value?: number; pct?: number; className?: string }) {
   const s = signOf(pct ?? value ?? 0);
-  const color = s === "pos" ? "text-success" : s === "neg" ? "text-error" : "text-ink-2";
+  const tone = s === "pos" ? "bg-success-surface text-success" : s === "neg" ? "bg-error-surface text-error" : "bg-muted text-ink-2";
+  const rotate = s === "neg" ? 90 : 0;
   return (
-    <span className={cx("num font-semibold", color, className)}>
+    <span className={cx("num inline-flex items-center gap-1 whitespace-nowrap rounded-full py-0.5 pl-1.5 pr-2 font-semibold", tone, className)}>
+      {s !== "zero" && <Icon name="trend" size={12} style={{ transform: `rotate(${rotate}deg)` }} />}
       {value !== undefined && fmtMoney(value, { sign: true })}
       {value !== undefined && pct !== undefined && " · "}
       {pct !== undefined && fmtPct(pct)}

@@ -30,20 +30,16 @@ export function Portfolio() {
     <>
       <TopBar title={training ? "Виртуальный портфель" : "Портфель"} subtitle={training ? "Учебный счёт" : "Брокерский счёт ···4821"} />
       <Page>
-        <section data-tour="portfolio-total" className={cx("mt-4 rounded-l border p-5", training ? "border-tr-border bg-tr-surface" : "border-line-subtle bg-surface")}>
-          <div className="flex items-center justify-between text-[13px] text-ink-2">
+        <section data-tour="portfolio-total" className={cx("mt-4 rounded-l border p-6 text-center", training ? "border-tr-border bg-tr-surface" : "border-line-subtle bg-surface")}>
+          <div className="flex items-center justify-center gap-2 text-[13px] text-ink-2">
             <span>Стоимость</span>
             {training && <VirtualTag />}
           </div>
-          <div className="num text-[32px] font-bold leading-10 tracking-tight">{fmtMoney(app.portfolioValue)}</div>
-          <div className="mt-1 flex flex-wrap gap-x-4 gap-y-1 text-[13px]">
-            <span>
-              <span className="text-ink-3">Доход </span>
-              <Change value={profit} pct={profitPct} />
-            </span>
-            <span>
-              <span className="text-ink-3">Свободно </span>
-              <span className="num font-semibold">{fmtMoney(cash)}</span>
+          <div className="num mt-1 text-[36px] font-bold leading-none tracking-tight">{fmtMoney(app.portfolioValue)}</div>
+          <div className="mt-3 flex flex-wrap items-center justify-center gap-x-3 gap-y-2 text-[13px]">
+            <Change value={profit} pct={profitPct} />
+            <span className="text-ink-3">
+              Свободно <span className="num font-semibold text-ink">{fmtMoney(cash)}</span>
             </span>
           </div>
         </section>
@@ -67,20 +63,20 @@ export function Portfolio() {
         </section>
 
         <SectionTitle>Активы</SectionTitle>
-        <div data-tour="portfolio-list" className="overflow-hidden rounded-l border border-line-subtle bg-surface">
-          {positions.length === 0 ? (
-            <div className="flex flex-col items-center px-6 py-8 text-center">
-              <span className="flex h-12 w-12 items-center justify-center rounded-l bg-muted text-ink-3">
-                <Icon name="briefcase" size={26} />
-              </span>
-              <div className="mt-3 text-[16px] font-semibold">Портфель пока пуст</div>
-              <div className="mt-1 text-[13px] text-ink-2">Активы появятся после первой покупки</div>
-              <Button className="mt-4" size="m" variant="secondary" onClick={() => app.tab("market")}>
-                Открыть рынок
-              </Button>
-            </div>
-          ) : (
-            positions.map((p, idx) => {
+        {positions.length === 0 ? (
+          <div data-tour="portfolio-list" className="flex flex-col items-center rounded-l border border-line-subtle bg-surface px-6 py-8 text-center">
+            <span className="flex h-12 w-12 items-center justify-center rounded-l bg-muted text-ink-3">
+              <Icon name="briefcase" size={26} />
+            </span>
+            <div className="mt-3 text-[16px] font-semibold">Портфель пока пуст</div>
+            <div className="mt-1 text-[13px] text-ink-2">Активы появятся после первой покупки</div>
+            <Button className="mt-4" size="m" variant="secondary" onClick={() => app.tab("market")}>
+              Открыть рынок
+            </Button>
+          </div>
+        ) : (
+          <div data-tour="portfolio-list" className="flex flex-col gap-2">
+            {positions.map((p, idx) => {
               const i = INSTRUMENT_BY_ID[p.id];
               const price = app.prices[p.id];
               const pl = (price - p.avg) * p.qty;
@@ -90,24 +86,23 @@ export function Portfolio() {
                   type="button"
                   data-tour={`portfolio-pos-${idx}`}
                   onClick={() => app.go("instrument", { id: p.id })}
-                  className="flex w-full items-center gap-3 border-b border-line-subtle px-4 py-3 text-left last:border-0 cursor-pointer active:bg-surface-muted"
+                  className="flex w-full items-center justify-between gap-3 rounded-l border border-line-subtle bg-surface p-4 text-left cursor-pointer active:bg-surface-muted"
                 >
-                  <Monogram id={p.id} />
-                  <div className="min-w-0 flex-1">
-                    <div className="truncate text-[15px] font-medium">{i.name}</div>
-                    <div className="num text-[13px] text-ink-2">
-                      {fmtQty(p.qty)} · ср. {fmtMoney(p.avg)}
+                  <div className="flex min-w-0 items-center gap-3">
+                    <Monogram id={p.id} />
+                    <div className="min-w-0">
+                      <div className="num text-[17px] font-semibold leading-6">{fmtMoney(price * p.qty)}</div>
+                      <div className="truncate text-[12px] text-ink-2">
+                        {i.name} · {fmtQty(p.qty)} · ср. {fmtMoney(p.avg)}
+                      </div>
                     </div>
                   </div>
-                  <div className="text-right">
-                    <div className="num text-[15px] font-semibold">{fmtMoney(price * p.qty)}</div>
-                    <Change value={pl} className="text-[13px]" />
-                  </div>
+                  <Change value={pl} />
                 </button>
               );
-            })
-          )}
-        </div>
+            })}
+          </div>
+        )}
       </Page>
     </>
   );
@@ -203,7 +198,7 @@ export function Market() {
                   </div>
                 </div>
                 <Sparkline data={series(i.id, "1Д", price, 24)} />
-                <div className="w-[92px] text-right">
+                <div className="w-[104px] text-right">
                   <div key={price} className="num rounded-[4px] text-[15px] font-semibold" style={{ animation: mv ? `flash-${mv} 900ms var(--ease)` : undefined }}>
                     {fmtMoney(price)}
                   </div>
