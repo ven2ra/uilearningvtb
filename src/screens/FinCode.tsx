@@ -1,16 +1,25 @@
 import { useState } from "react";
 import { useApp } from "../state/AppState";
-import { DIFFICULTY_LABEL, FINCODE_BY_ID, FINCODE_COVERS, FINCODE_DISCOUNTS, FINCODE_TOPICS } from "../lib/fincode";
+import { DIFFICULTY_LABEL, FINCODE_BY_ID, FINCODE_COVERS, FINCODE_DISCOUNTS, FINCODE_TOPICS, shuffleQuiz, type MicroTaskNav } from "../lib/fincode";
 import { plural } from "../lib/format";
 import Icon from "../ui/Icons";
 import { Badge, Button, Page, ProgressBar, SectionTitle, Segmented, TopBar, cx } from "../ui/kit";
+
+const NAV_LABEL: Record<MicroTaskNav, string> = { topup: "Пополнить", withdraw: "Вывести", documents: "Документы", market: "На биржу", portfolio: "В портфель" };
 
 // ================= Главная «Финкода» =================
 export function FinCodeHome() {
   const app = useApp();
   const fc = app.finCode;
-  const offered = app.finCodeToday?.offered ?? FINCODE_TOPICS.filter((t) => t.id !== "final").map((t) => t.id);
-  const completedToday = app.finCodeToday?.completedId;
+  const daily = app.finCodeDaily;
+
+  const goToTask = (nav: MicroTaskNav) => {
+    if (nav === "topup") app.go("topup");
+    else if (nav === "withdraw") app.go("withdraw");
+    else if (nav === "documents") app.go("documents");
+    else if (nav === "market") app.tab("market");
+    else if (nav === "portfolio") app.tab("portfolio");
+  };
 
   return (
     <>
@@ -32,35 +41,42 @@ export function FinCodeHome() {
               <span className="num text-[16px] font-bold">{fc.coins}</span>
             </button>
           </div>
-          {!completedToday && (
+          {daily.doneIds.length === 0 && (
             <div className="mt-3 flex items-center gap-2 rounded-m bg-warning-surface px-3 py-2 text-[12px] font-medium text-[#92400E]">
               <Icon name="flame" size={16} />
-              Выполните любое из заданий на сегодня, чтобы продлить стрик
+              Не выполните ни одного задания сегодня — огонёк погаснет, и стрик начнётся заново
             </div>
           )}
         </section>
 
         <SectionTitle>Задания на сегодня</SectionTitle>
+        <p className="-mt-2 mb-2 px-1 text-[12px] leading-4 text-ink-2">Любое одно продлевает стрик. Все три — больше финкоинов. Задания меняются каждый день.</p>
         <div className="flex flex-col gap-2">
-          {offered.map((id) => {
-            const topic = FINCODE_BY_ID[id];
-            if (!topic) return null;
-            const done = completedToday === id;
+          {daily.offered.map((task) => {
+            const done = daily.doneIds.includes(task.id);
             return (
               <button
-                key={id}
+                key={task.id}
                 type="button"
-                onClick={() => app.go("fincode-topic", { id })}
-                className="flex w-full items-center gap-3 rounded-l border border-line-subtle bg-surface p-3 text-left cursor-pointer active:bg-surface-muted"
+                disabled={done}
+                onClick={() => goToTask(task.nav)}
+                className="flex w-full items-center gap-3 rounded-l border border-line-subtle bg-surface p-3 text-left cursor-pointer active:bg-surface-muted disabled:cursor-default"
               >
-                <span className="flex h-10 w-10 shrink-0 items-center justify-center rounded-m bg-accent-subtle text-accent-text">
-                  <Icon name={topic.icon} size={20} />
+                <span className={cx("flex h-10 w-10 shrink-0 items-center justify-center rounded-m", done ? "bg-success-surface text-success" : "bg-accent-subtle text-accent-text")}>
+                  <Icon name={done ? "check" : task.icon} size={20} />
                 </span>
                 <div className="min-w-0 flex-1">
-                  <div className="truncate text-[15px] font-semibold leading-5">{topic.title}</div>
-                  <div className="truncate text-[12px] text-ink-2">{topic.short}</div>
+                  <div className="truncate text-[15px] font-semibold leading-5">{task.title}</div>
+                  <div className="truncate text-[12px] text-ink-2">{done ? "Выполнено сегодня" : task.desc}</div>
                 </div>
-                {done ? <Badge tone="success">Выполнено</Badge> : <Icon name="chevronRight" size={20} className="text-ink-3" />}
+                {done ? (
+                  <Badge tone="success">+{task.coins}</Badge>
+                ) : (
+                  <span className="flex shrink-0 items-center gap-1 text-[12px] font-semibold text-[#4F46E5]">
+                    <Icon name="coin" size={14} />
+                    {task.coins} · {NAV_LABEL[task.nav]}
+                  </span>
+                )}
               </button>
             );
           })}
@@ -107,6 +123,7 @@ export function FinCodeTopicScreen({ id }: { id: string }) {
   const topic = FINCODE_BY_ID[id];
   const [phase, setPhase] = useState<"lesson" | "quiz" | "result">("lesson");
   const [cardIdx, setCardIdx] = useState(0);
+  const [quiz, setQuiz] = useState(() => (topic ? shuffleQuiz(topic.quiz) : []));
   const [qIdx, setQIdx] = useState(0);
   const [selected, setSelected] = useState<number | null>(null);
   const [revealed, setRevealed] = useState(false);
@@ -144,19 +161,20 @@ export function FinCodeTopicScreen({ id }: { id: string }) {
           </span>
           <h2 className="mt-4 text-[24px] font-bold leading-8">{result.passed ? "Тема пройдена" : "Пока не хватает баллов"}</h2>
           <p className="mt-1 text-[15px] text-ink-2">
-            Правильных ответов: {correctCount} из {topic.quiz.length}
+            Правильных ответов: {correctCount} из {quiz.length}
           </p>
           {result.passed && result.coinsEarned > 0 && (
             <div className="mt-3 flex items-center gap-2 rounded-m bg-[#EEF2FF] px-3 py-2 text-[13px] font-semibold text-[#4F46E5]">
               <Icon name="coin" size={18} />+{result.coinsEarned} финкоинов
             </div>
           )}
-          {!result.passed && <p className="mt-2 text-[13px] text-ink-3">Нужно верно ответить хотя бы на {Math.ceil(topic.quiz.length * topic.passRatio)} из {topic.quiz.length} вопросов</p>}
+          {!result.passed && <p className="mt-2 text-[13px] text-ink-3">Нужно верно ответить хотя бы на {Math.ceil(quiz.length * topic.passRatio)} из {quiz.length} вопросов</p>}
           <div className="mt-8 flex w-full flex-col gap-2">
             {!result.passed && (
               <Button
                 full
                 onClick={() => {
+                  setQuiz(shuffleQuiz(topic.quiz));
                   setPhase("quiz");
                   setQIdx(0);
                   setSelected(null);
@@ -178,8 +196,8 @@ export function FinCodeTopicScreen({ id }: { id: string }) {
   }
 
   if (phase === "quiz") {
-    const q = topic.quiz[qIdx];
-    const isLast = qIdx + 1 >= topic.quiz.length;
+    const q = quiz[qIdx];
+    const isLast = qIdx + 1 >= quiz.length;
     const answer = () => {
       if (selected === null) return;
       if (!revealed) {
@@ -188,7 +206,7 @@ export function FinCodeTopicScreen({ id }: { id: string }) {
         return;
       }
       if (isLast) {
-        const r = app.completeFinCodeQuiz(topic.id, correctCount, topic.quiz.length);
+        const r = app.completeFinCodeQuiz(topic.id, correctCount, quiz.length);
         setResult(r);
         setPhase("result");
       } else {
@@ -199,9 +217,9 @@ export function FinCodeTopicScreen({ id }: { id: string }) {
     };
     return (
       <>
-        <TopBar back title={topic.title} subtitle={`Вопрос ${qIdx + 1} из ${topic.quiz.length}`} />
+        <TopBar back title={topic.title} subtitle={`Вопрос ${qIdx + 1} из ${quiz.length}`} />
         <Page>
-          <ProgressBar value={qIdx + (revealed ? 1 : 0)} max={topic.quiz.length} className="mt-4" />
+          <ProgressBar value={qIdx + (revealed ? 1 : 0)} max={quiz.length} className="mt-4" />
           <h2 className="mt-4 text-[19px] font-semibold leading-6">{q.q}</h2>
           <div className="mt-4 flex flex-col gap-2">
             {q.options.map((opt, i) => {

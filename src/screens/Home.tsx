@@ -376,19 +376,19 @@ function TrainingProgressCard() {
 function FinCodeTeaser() {
   const app = useApp();
   const streak = app.finCodeStreak;
-  const doneToday = !!app.finCodeToday?.completedId;
+  const doneCount = app.finCodeDaily.doneIds.length;
   return (
-    <button type="button" onClick={() => app.go("fincode")} className="mt-3 flex w-full items-center gap-3 rounded-l border border-line-subtle bg-surface p-3.5 text-left cursor-pointer active:bg-surface-muted">
-      <span className={cx("flex h-11 w-11 shrink-0 items-center justify-center rounded-l", streak > 0 ? "bg-warning-surface text-[#B45309]" : "bg-[#EEF2FF] text-[#4F46E5]")}>
-        <Icon name={streak > 0 ? "flame" : "book"} size={22} />
+    <button type="button" onClick={() => app.go("fincode")} className="mt-3 flex w-full items-center gap-3 rounded-l border border-line-subtle bg-surface p-3 text-left cursor-pointer active:bg-surface-muted">
+      <span className={cx("flex h-10 w-10 shrink-0 items-center justify-center rounded-l", streak > 0 ? "bg-warning-surface text-[#B45309]" : "bg-[#EEF2FF] text-[#4F46E5]")}>
+        <Icon name={streak > 0 ? "flame" : "book"} size={20} />
       </span>
       <div className="min-w-0 flex-1">
-        <div className="text-[15px] font-semibold leading-5">Финкод</div>
-        <div className="text-[12px] leading-4 text-ink-2">
-          {streak > 0 ? `Стрик ${streak} ${plural(streak, "день", "дня", "дней")}${doneToday ? " · сегодня выполнено" : ""}` : "Обучение поручениям и бирже"}
+        <div className="text-[14px] font-semibold leading-5">Финкод</div>
+        <div className="truncate text-[12px] leading-4 text-ink-2">
+          {streak > 0 ? `Стрик ${streak} ${plural(streak, "день", "дня", "дней")} · задания ${doneCount}/3` : "Ежедневные задания · поручения и биржа"}
         </div>
       </div>
-      <span className="flex items-center gap-1 rounded-m bg-[#EEF2FF] px-2 py-1 text-[12px] font-semibold text-[#4F46E5]">
+      <span className="flex shrink-0 items-center gap-1 rounded-m bg-[#EEF2FF] px-2 py-1 text-[12px] font-semibold text-[#4F46E5]">
         <Icon name="coin" size={14} />
         {app.finCode.coins}
       </span>

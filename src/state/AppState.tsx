@@ -2,7 +2,7 @@ import { createContext, useCallback, useContext, useEffect, useMemo, useRef, use
 import { INITIAL_PRICES, INSTRUMENT_BY_ID, REAL_ACCOUNT, VIRTUAL_START_CASH, type Doc, type Operation, type Position } from "../lib/data";
 import { STAGES, TASKS } from "../lib/training";
 import { ACHIEVEMENTS, ACH_BY_ID } from "../lib/achievements";
-import { DAILY_TOPIC_IDS, FINCODE_BY_ID, FINCODE_COVERS, FINCODE_DISCOUNTS, dailyCoinsFor, daysBetween, todayStr } from "../lib/fincode";
+import { FINCODE_BY_ID, FINCODE_COVERS, FINCODE_DISCOUNTS, MICRO_TASKS, MICRO_TASK_BY_ID, dailyMicroTaskIds, daysBetween, todayStr } from "../lib/fincode";
 import { fmtMoney, fmtQty } from "../lib/format";
 
 export type Mode = "real" | "training";
@@ -82,7 +82,8 @@ export interface FinCodeState {
   longestStreak: number;
   lastActiveDate: string | null;
   coins: number;
-  dailyChoices: Record<string, { offered: string[]; completedId?: string }>;
+  /** Дата → id выполненных сегодня микро-заданий */
+  dailyChoices: Record<string, string[]>;
   ownedCovers: string[];
   equippedCover: string;
   activeDiscount: { pct: number; until: number } | null;
@@ -126,7 +127,7 @@ interface Persisted {
   finCode: FinCodeState;
 }
 
-const STORAGE_KEY = "vtb-learning-proto-v2";
+const STORAGE_KEY = "vtb-learning-proto-v3";
 
 function loadPersisted(): Persisted | null {
   try {
@@ -352,6 +353,36 @@ function useAppStateValue() {
 
       // 2. Достижения за действия
       celebrate(unlock(ACHIEVEMENTS.filter((a) => a.event === ev && (a.mode === "any" || a.mode === m)).map((a) => a.id)));
+
+      // 3. Микро-задания Финкода: стрик и финкоины за реальные действия дня
+      const today = todayStr();
+      const offeredIds = dailyMicroTaskIds(today);
+      const doneToday = finCodeRef.current.dailyChoices[today] ?? [];
+      const microTask = MICRO_TASKS.find((mt) => offeredIds.includes(mt.id) && !doneToday.includes(mt.id) && mt.events.includes(ev));
+      if (microTask) {
+        const cur = finCodeRef.current;
+        const wasEmpty = doneToday.length === 0;
+        const diff = cur.lastActiveDate ? daysBetween(cur.lastActiveDate, today) : null;
+        const newStreak = !wasEmpty ? cur.streak : diff === 0 ? cur.streak : diff === 1 ? cur.streak + 1 : 1;
+        const next: FinCodeState = {
+          ...cur,
+          coins: cur.coins + microTask.coins,
+          streak: newStreak,
+          longestStreak: Math.max(cur.longestStreak, newStreak),
+          lastActiveDate: wasEmpty ? today : cur.lastActiveDate,
+          dailyChoices: { ...cur.dailyChoices, [today]: [...doneToday, microTask.id] },
+        };
+        finCodeRef.current = next;
+        setFinCode(next);
+        toast({
+          kind: "achievement",
+          title: `Финкод: +${microTask.coins} финкоинов`,
+          text: wasEmpty ? `«${microTask.title}» — стрик продлён до ${newStreak}` : `«${microTask.title}» выполнено`,
+        });
+        if (newStreak === 7 || newStreak === 30) {
+          celebrate(unlock(ACHIEVEMENTS.filter((a) => a.event === `fincode:streak:${newStreak}`).map((a) => a.id)));
+        }
+      }
     },
     [advanceProgram, celebrate, toast, unlock],
   );
@@ -623,8 +654,14 @@ function useAppStateValue() {
     const diff = daysBetween(finCode.lastActiveDate, todayStr());
     return diff <= 1 ? finCode.streak : 0;
   })();
-  const finCodeToday = finCode.dailyChoices[todayStr()];
+  /** Три задания на сегодня (меняются по дням) и то, какие из них уже выполнены */
+  const finCodeDaily = (() => {
+    const today = todayStr();
+    const doneIds = finCode.dailyChoices[today] ?? [];
+    return { offered: dailyMicroTaskIds(today).map((id) => MICRO_TASK_BY_ID[id]), doneIds };
+  })();
 
+  /** Прохождение темы/теста: только очки прогресса и финкоины за первое прохождение — на стрик не влияет */
   const completeFinCodeQuiz = useCallback(
     (topicId: string, correct: number, total: number) => {
       const topic = FINCODE_BY_ID[topicId];
@@ -633,27 +670,16 @@ function useAppStateValue() {
       if (!passed) return { passed, coinsEarned: 0 };
       const cur = finCodeRef.current;
       const firstTime = !cur.progress[topicId]?.done;
-      const today = todayStr();
-      const alreadyToday = !!cur.dailyChoices[today]?.completedId;
-      const diff = cur.lastActiveDate ? daysBetween(cur.lastActiveDate, today) : null;
-      const newStreak = alreadyToday ? cur.streak : diff === 0 ? cur.streak : diff === 1 ? cur.streak + 1 : 1;
-      const dailyCoins = alreadyToday ? 0 : dailyCoinsFor(newStreak);
       const topicCoins = firstTime ? topic.reward : 0;
       const next: FinCodeState = {
         ...cur,
         progress: { ...cur.progress, [topicId]: { done: true, bestScore: Math.max(cur.progress[topicId]?.bestScore ?? 0, correct) } },
-        streak: newStreak,
-        longestStreak: Math.max(cur.longestStreak, newStreak),
-        lastActiveDate: today,
-        coins: cur.coins + topicCoins + dailyCoins,
-        dailyChoices: { ...cur.dailyChoices, [today]: { offered: cur.dailyChoices[today]?.offered ?? DAILY_TOPIC_IDS, completedId: topicId } },
+        coins: cur.coins + topicCoins,
       };
       finCodeRef.current = next;
       setFinCode(next);
       emit(`fincode:topic:${topicId}:passed`);
-      if (newStreak === 7) emit("fincode:streak:7");
-      if (newStreak === 30) emit("fincode:streak:30");
-      return { passed, coinsEarned: topicCoins + dailyCoins };
+      return { passed, coinsEarned: topicCoins };
     },
     [emit],
   );
@@ -809,7 +835,7 @@ function useAppStateValue() {
     has,
     finCode,
     finCodeStreak,
-    finCodeToday,
+    finCodeDaily,
     completeFinCodeQuiz,
     buyCover,
     equipCover,

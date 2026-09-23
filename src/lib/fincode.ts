@@ -102,7 +102,7 @@ export const FINCODE_TOPICS: FinCodeTopic[] = [
     difficulty: "hard",
     requires: ["orders", "exchange", "margin"],
     passRatio: 0.7,
-    reward: 150,
+    reward: 240,
     cards: [
       { title: "Что дальше", text: "Вы прошли все темы Финкода. Итоговый тест собирает вопросы по поручениям, бирже и срочному рынку — без новых карточек, сразу к делу." },
     ],
@@ -118,8 +118,39 @@ export const FINCODE_TOPICS: FinCodeTopic[] = [
 ];
 
 export const FINCODE_BY_ID: Record<string, FinCodeTopic> = Object.fromEntries(FINCODE_TOPICS.map((t) => [t.id, t]));
-/** Темы, из которых состоит ежедневный выбор — три базовые, без итогового теста */
-export const DAILY_TOPIC_IDS = FINCODE_TOPICS.filter((t) => t.id !== "final").map((t) => t.id);
+
+/** Куда вести клиента, чтобы выполнить микро-задание */
+export type MicroTaskNav = "topup" | "withdraw" | "documents" | "market" | "portfolio";
+
+export interface MicroTask {
+  id: string;
+  title: string;
+  desc: string;
+  icon: IconName;
+  /** Любое из этих событий интерфейса засчитывает задание */
+  events: string[];
+  coins: number;
+  nav: MicroTaskNav;
+}
+
+/** Пул ежедневных микро-заданий за реальные действия в приложении — три из них предлагаются в день */
+export const MICRO_TASKS: MicroTask[] = [
+  { id: "topup", title: "Пополнить счёт", desc: "Любая сумма — в приложении или на фейковых торгах", icon: "wallet", events: ["do:topup"], coins: 20, nav: "topup" },
+  { id: "trade", title: "Купить или продать", desc: "Любая сделка на бирже засчитывается", icon: "cart", events: ["do:buy", "do:sell"], coins: 25, nav: "market" },
+  { id: "withdraw", title: "Вывести средства", desc: "Вывод на карту — в приложении или на фейковых торгах", icon: "arrowUp", events: ["do:withdraw"], coins: 20, nav: "withdraw" },
+  { id: "order-doc", title: "Заказать документ", desc: "Любой отчёт или справка", icon: "file", events: ["do:order-doc"], coins: 15, nav: "documents" },
+  { id: "instrument", title: "Изучить инструмент", desc: "Откройте карточку любой бумаги на бирже", icon: "search", events: ["open:instrument"], coins: 10, nav: "market" },
+  { id: "portfolio", title: "Проверить портфель", desc: "Загляните в раздел «Портфель»", icon: "pie", events: ["open:portfolio"], coins: 10, nav: "portfolio" },
+];
+export const MICRO_TASK_BY_ID: Record<string, MicroTask> = Object.fromEntries(MICRO_TASKS.map((t) => [t.id, t]));
+
+/** Три задания дня — меняются ежедневно по кругу, без хранения состояния */
+export function dailyMicroTaskIds(date: string): string[] {
+  const dayIndex = Math.floor(Date.parse(date) / 86400000);
+  const n = MICRO_TASKS.length;
+  const start = ((dayIndex % n) + n) % n;
+  return [0, 1, 2].map((i) => MICRO_TASKS[(start + i) % n].id);
+}
 
 export interface CoverItem {
   id: string;
@@ -159,6 +190,15 @@ export function daysBetween(a: string, b: string) {
   return Math.round((Date.parse(b) - Date.parse(a)) / 86400000);
 }
 
-export function dailyCoinsFor(streak: number) {
-  return 15 + Math.min(streak * 2, 30);
+/** Перемешивает варианты ответов каждого вопроса, чтобы верный ответ не был всегда под одним номером */
+export function shuffleQuiz(quiz: QuizQuestion[]): QuizQuestion[] {
+  return quiz.map((q) => {
+    const order = q.options.map((_, i) => i);
+    for (let i = order.length - 1; i > 0; i--) {
+      const j = Math.floor(Math.random() * (i + 1));
+      [order[i], order[j]] = [order[j], order[i]];
+    }
+    return { q: q.q, options: order.map((i) => q.options[i]), correct: order.indexOf(q.correct) };
+  });
 }
+
