@@ -88,8 +88,8 @@ function onboardingTours(app: AppApi, start: (id: string) => void): Record<strin
       onClose: skip,
       onDone: () => start("onb-docs"),
       steps: [
-        { target: "actions-sheet", title: "Меню действий", text: "Здесь находятся основные операции с вашим счётом" },
-        { target: "action-topup", title: "Пополнить", text: "Нажмите на «Пополнить», чтобы открыть", mode: "click", advanceOn: "open:topup" },
+        { target: "actions-sheet", title: "Меню действий", text: "Здесь находятся основные операции с вашим счётом", lockClose: true },
+        { target: "action-topup", title: "Пополнить", text: "Нажмите на «Пополнить», чтобы открыть", mode: "click", advanceOn: "open:topup", lockClose: true },
         {
           target: "topup-amount",
           title: "Так пополняется счёт",
@@ -98,15 +98,16 @@ function onboardingTours(app: AppApi, start: (id: string) => void): Record<strin
           onNext: backToActions,
           lockClose: true,
         },
-        { target: "action-withdraw", title: "Вывести", text: "Теперь нажмите на «Вывести»", mode: "click", advanceOn: "open:withdraw" },
+        { target: "action-withdraw", title: "Вывести", text: "Теперь нажмите на «Вывести»", mode: "click", advanceOn: "open:withdraw", lockClose: true },
         {
           target: "withdraw-amount",
           title: "Вывод на карту",
           text: "Выводить можно только свободные деньги",
           button: "Назад к меню",
           onNext: backToActions,
+          lockClose: true,
         },
-        { target: "action-docs", title: "Отчёты и справки", text: "И последнее — нажмите на «Отчёты и справки»", mode: "click", advanceOn: "open:documents" },
+        { target: "action-docs", title: "Отчёты и справки", text: "И последнее — нажмите на «Отчёты и справки»", mode: "click", advanceOn: "open:documents", lockClose: true },
       ],
     },
     "onb-docs": {
