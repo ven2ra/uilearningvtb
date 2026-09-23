@@ -7,12 +7,16 @@ import Icon, { type IconName } from "../ui/Icons";
 import { Badge, Button, Change, LineChart, Monogram, Page, Segmented, SectionTitle, Sparkline, TopBar, VirtualTag, cx } from "../ui/kit";
 
 // ================= Портфель =================
+const ASSET_TABS = ["Все", "Акции", "Облигации", "Фонды"] as const;
+type AssetTab = (typeof ASSET_TABS)[number];
+
 export function Portfolio() {
   const app = useApp();
   const training = app.mode === "training";
   const { positions, cash } = app.account;
   const profit = app.positionsValue - app.investedCost;
   const profitPct = app.investedCost ? (profit / app.investedCost) * 100 : 0;
+  const [tab, setTab] = useState<AssetTab>("Все");
 
   const byType = useMemo(() => {
     const m: Record<string, number> = { Акции: 0, Облигации: 0, Фонды: 0 };
@@ -25,6 +29,7 @@ export function Portfolio() {
     ];
   }, [positions, cash, app.prices]);
   const total = app.portfolioValue || 1;
+  const shownPositions = tab === "Все" ? positions : positions.filter((p) => INSTRUMENT_BY_ID[p.id].type === tab);
 
   return (
     <>
@@ -43,6 +48,19 @@ export function Portfolio() {
             </span>
           </div>
         </section>
+
+        {/* Быстрые действия */}
+        <div className="mt-3 flex gap-2">
+          <Button size="m" variant="secondary" icon="arrowDown" className="flex-1" onClick={() => app.go("topup")}>
+            Пополнить
+          </Button>
+          <Button size="m" variant="secondary" icon="arrowUp" className="flex-1" onClick={() => app.go("withdraw")}>
+            Вывести
+          </Button>
+          <Button size="m" variant="secondary" icon="search" className="flex-1" onClick={() => app.tab("market")}>
+            Рынок
+          </Button>
+        </div>
 
         <section data-tour="portfolio-alloc" className="mt-3 rounded-l border border-line-subtle bg-surface p-4">
           <div className="mb-3 text-[13px] font-semibold text-ink-2">Структура</div>
@@ -63,6 +81,11 @@ export function Portfolio() {
         </section>
 
         <SectionTitle>Активы</SectionTitle>
+        {positions.length > 0 && (
+          <div className="mb-2">
+            <Segmented options={ASSET_TABS} value={tab} onChange={setTab} />
+          </div>
+        )}
         {positions.length === 0 ? (
           <div data-tour="portfolio-list" className="flex flex-col items-center rounded-l border border-line-subtle bg-surface px-6 py-8 text-center">
             <span className="flex h-12 w-12 items-center justify-center rounded-l bg-muted text-ink-3">
@@ -74,9 +97,11 @@ export function Portfolio() {
               Открыть рынок
             </Button>
           </div>
+        ) : shownPositions.length === 0 ? (
+          <div className="rounded-l border border-line-subtle bg-surface px-6 py-8 text-center text-[13px] text-ink-2">Нет активов этого типа</div>
         ) : (
           <div data-tour="portfolio-list" className="flex flex-col gap-2">
-            {positions.map((p, idx) => {
+            {shownPositions.map((p, idx) => {
               const i = INSTRUMENT_BY_ID[p.id];
               const price = app.prices[p.id];
               const pl = (price - p.avg) * p.qty;
@@ -103,8 +128,34 @@ export function Portfolio() {
             })}
           </div>
         )}
+
+        <SectionTitle>Специально для вас</SectionTitle>
+        <div className="no-scrollbar -mx-4 flex gap-2 overflow-x-auto px-4 pb-1">
+          <PromoCard icon="book" title="Обучение в Финкоде" sub="Пройдите тесты по бирже и поручениям — получите финкоины" onClick={() => app.go("fincode")} />
+          <PromoCard icon="medal" title="Соберите все награды" sub="Платина за коллекцию открывается автоматически" onClick={() => app.go("achievements")} />
+        </div>
       </Page>
     </>
+  );
+}
+
+function PromoCard({ icon, title, sub, onClick }: { icon: IconName; title: string; sub: string; onClick: () => void }) {
+  return (
+    <button
+      type="button"
+      onClick={onClick}
+      className="flex w-[164px] shrink-0 flex-col rounded-l border border-line-subtle bg-surface p-3 text-left cursor-pointer active:bg-surface-muted"
+    >
+      <span className="flex h-9 w-9 items-center justify-center rounded-m bg-accent-subtle text-accent-text">
+        <Icon name={icon} size={20} />
+      </span>
+      <div className="mt-2 text-[14px] font-medium leading-[18px]" style={{ display: "-webkit-box", WebkitBoxOrient: "vertical", WebkitLineClamp: 2, overflow: "hidden" }}>
+        {title}
+      </div>
+      <div className="mt-1 text-[12px] leading-4 text-ink-2" style={{ display: "-webkit-box", WebkitBoxOrient: "vertical", WebkitLineClamp: 2, overflow: "hidden" }}>
+        {sub}
+      </div>
+    </button>
   );
 }
 
