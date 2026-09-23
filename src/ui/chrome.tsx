@@ -214,7 +214,7 @@ export function WelcomeSheet() {
           <Icon name="sparkle" size={28} />
         </div>
         <h2 className="text-[24px] font-bold leading-8 tracking-tight">Покажем главное</h2>
-        <p className="mt-1 text-[15px] leading-[22px] text-ink-2">3 короткие подсказки — меньше минуты. Закрыть можно в любой момент.</p>
+        <p className="mt-1 text-[15px] leading-[22px] text-ink-2">Короткие подсказки — меньше минуты. Закрыть можно в любой момент.</p>
         <div className="mt-5 flex flex-col gap-2">
           <Button full onClick={() => app.setOnboarding("running")}>
             Показать

@@ -16,6 +16,8 @@ export interface TourStep {
   button?: string;
   /** Вторая кнопка тултипа (например, «Выберу сам») — завершает тур */
   secondary?: string;
+  /** Действие при переходе дальше: например, вернуться назад в меню после показа раздела */
+  onNext?: () => void;
 }
 
 export interface Tour {
@@ -51,6 +53,10 @@ export const useTour = () => useContext(TourCtx)!;
 // ---------- Сценарии ----------
 
 function onboardingTours(app: AppApi, start: (id: string) => void): Record<string, Tour> {
+  const backToActions = () => {
+    app.back();
+    app.openActions();
+  };
   const skip = () => {
     app.setOnboarding("skipped");
     app.toast({ kind: "info", title: "Обучение закрыто", text: "Вернуться к подсказкам можно кнопкой «Помощь» вверху экрана" });
@@ -74,6 +80,7 @@ function onboardingTours(app: AppApi, start: (id: string) => void): Record<strin
         },
       ],
     },
+    // Принцип «нажми сам»: каждый раздел пользователь открывает сам, видит его и возвращается в меню
     "onb-actions": {
       id: "onb-actions",
       kind: "onboarding",
@@ -81,16 +88,23 @@ function onboardingTours(app: AppApi, start: (id: string) => void): Record<strin
       onDone: () => start("onb-docs"),
       steps: [
         { target: "actions-sheet", title: "Меню действий", text: "Здесь находятся основные операции с вашим счётом" },
-        { target: "action-topup", title: "Пополнить", text: "Так пополняется инвестиционный счёт" },
-        { target: "action-withdraw", title: "Вывести", text: "А здесь — вывод денег на карту" },
+        { target: "action-topup", title: "Пополнить", text: "Нажмите, чтобы открыть пополнение счёта", mode: "click", advanceOn: "open:topup", button: "Открыть" },
         {
-          target: "action-docs",
-          title: "Отчёты и справки",
-          text: "Документы по счёту. Откройте раздел",
-          mode: "click",
-          advanceOn: "open:documents",
-          button: "Открыть",
+          target: "topup-amount",
+          title: "Так пополняется счёт",
+          text: "Сумма, карта и кнопка — всё на одном экране",
+          button: "Назад к меню",
+          onNext: backToActions,
         },
+        { target: "action-withdraw", title: "Вывести", text: "Теперь откройте вывод денег", mode: "click", advanceOn: "open:withdraw", button: "Открыть" },
+        {
+          target: "withdraw-amount",
+          title: "Вывод на карту",
+          text: "Выводить можно только свободные деньги",
+          button: "Назад к меню",
+          onNext: backToActions,
+        },
+        { target: "action-docs", title: "Отчёты и справки", text: "И последнее — документы. Нажмите", mode: "click", advanceOn: "open:documents", button: "Открыть" },
       ],
     },
     "onb-docs": {
@@ -102,8 +116,10 @@ function onboardingTours(app: AppApi, start: (id: string) => void): Record<strin
         start("onb-final");
       },
       steps: [
-        { target: "docs-order", title: "Заказать документ", text: "Здесь можно заказать необходимые документы" },
-        { target: "docs-ready", title: "Скачать готовые", text: "А здесь находятся документы, которые уже готовы", button: "Понятно" },
+        { target: "docs-order", title: "Заказать документ", text: "Здесь можно заказать необходимые документы. Нажмите", mode: "click", advanceOn: "open:doc-order", button: "Открыть" },
+        { target: "doc-types", title: "Выберите документ", text: "Отчёт, справка или выписка — и кнопка «Заказать»", button: "Назад", onNext: app.back },
+        { target: "docs-ready", title: "Скачать готовые", text: "А здесь документы, которые уже готовы. Нажмите", mode: "click", advanceOn: "open:doc-ready", button: "Открыть" },
+        { target: "docs-list", title: "Готовые документы", text: "Нажмите на документ, чтобы скачать", button: "Понятно" },
       ],
     },
     "onb-final": {
@@ -117,8 +133,16 @@ function onboardingTours(app: AppApi, start: (id: string) => void): Record<strin
       steps: [
         { target: "first-steps", title: "Первые шаги", text: "Пополните счёт и совершите первую покупку — подскажем на каждом шаге" },
         { target: "training-card", title: "Попробуйте без риска", text: "Фейковые торги: тот же интерфейс, виртуальные деньги" },
-        { target: "ach-chip", title: "Достижения", text: "Почти за каждое действие в приложении — достижение" },
-        { target: "help-btn", title: "Помощь", text: "Подсказки, фейковые торги и обучение — здесь. Закрыть и вернуться можно в любой момент", button: "Завершить" },
+        { target: "ach-chip", title: "Достижения", text: "Почти за каждое действие — достижение. Нажмите, чтобы посмотреть", mode: "click", advanceOn: "open:achievements", button: "Открыть" },
+        { target: "ach-summary", title: "Ваша коллекция", text: "У закрытых достижений написано, как их получить", button: "Назад", onNext: app.back },
+        { target: "help-btn", title: "Помощь", text: "Подсказки, фейковые торги и обучение — здесь. Нажмите", mode: "click", advanceOn: "help:open", button: "Открыть" },
+        {
+          target: "help-screen",
+          title: "Вернуться можно всегда",
+          text: "Закройте обучение в любой момент — и продолжите отсюда",
+          button: "Завершить",
+          onNext: () => app.setHelpOpen(false),
+        },
       ],
     },
   };
@@ -332,9 +356,10 @@ function TourLayer({ tour, idx, setIdx, end }: { tour: Tour; idx: number; setIdx
 
   const next = useCallback(() => {
     const i = idxRef.current;
+    tour.steps[i]?.onNext?.();
     if (i + 1 >= tour.steps.length) finish();
     else setIdx(i + 1);
-  }, [finish, setIdx, tour.steps.length]);
+  }, [finish, setIdx, tour.steps]);
 
   const close = () => {
     end();
@@ -450,11 +475,14 @@ function TourLayer({ tour, idx, setIdx, end }: { tour: Tour; idx: number; setIdx
   };
 
   return (
-    <div className="absolute inset-0 z-[700]" aria-live="polite">
+    // pointer-events-none на корне — иначе он сам перехватывает клики в «прозрачном» вырезе,
+    // даже когда все видимые слои внутри него pointer-events-none. Интерактивные части
+    // (блокеры фона, тултип) явно возвращают pointer-events-auto.
+    <div className="pointer-events-none absolute inset-0 z-[700]" aria-live="polite">
       {/* Затемнение с вырезом */}
       {cut ? (
         <div
-          className={cx("pointer-events-none absolute rounded-l transition-all duration-300", passThrough && "anim-pulse")}
+          className="pointer-events-none absolute rounded-l transition-all duration-300"
           style={{
             left: cut.x,
             top: cut.y,
@@ -465,7 +493,10 @@ function TourLayer({ tour, idx, setIdx, end }: { tour: Tour; idx: number; setIdx
             outlineOffset: 2,
             transitionTimingFunction: "var(--ease)",
           }}
-        />
+        >
+          {/* Пульсация — отдельным слоем: иначе анимация box-shadow перетирает затемнение вокруг выреза */}
+          {passThrough && <span className="absolute inset-0 rounded-l anim-pulse" />}
+        </div>
       ) : (
         <div className="pointer-events-none absolute inset-0 anim-fade" style={{ background: "var(--overlay)" }} />
       )}
@@ -473,13 +504,13 @@ function TourLayer({ tour, idx, setIdx, end }: { tour: Tour; idx: number; setIdx
       {/* Блокировка фона. Для шагов click вырез пропускает нажатие к настоящему элементу */}
       {passThrough && cut ? (
         <>
-          <div className="absolute left-0 right-0 top-0" style={{ height: Math.max(0, cut.y) }} onClick={onBlockerClick} />
-          <div className="absolute left-0 right-0 bottom-0" style={{ top: cut.y + cut.h }} onClick={onBlockerClick} />
-          <div className="absolute left-0" style={{ top: cut.y, height: cut.h, width: Math.max(0, cut.x) }} onClick={onBlockerClick} />
-          <div className="absolute right-0" style={{ top: cut.y, height: cut.h, left: cut.x + cut.w }} onClick={onBlockerClick} />
+          <div className="pointer-events-auto absolute left-0 right-0 top-0" style={{ height: Math.max(0, cut.y) }} onClick={onBlockerClick} />
+          <div className="pointer-events-auto absolute left-0 right-0 bottom-0" style={{ top: cut.y + cut.h }} onClick={onBlockerClick} />
+          <div className="pointer-events-auto absolute left-0" style={{ top: cut.y, height: cut.h, width: Math.max(0, cut.x) }} onClick={onBlockerClick} />
+          <div className="pointer-events-auto absolute right-0" style={{ top: cut.y, height: cut.h, left: cut.x + cut.w }} onClick={onBlockerClick} />
         </>
       ) : (
-        <div className="absolute inset-0" onClick={onBlockerClick} />
+        <div className="pointer-events-auto absolute inset-0" onClick={onBlockerClick} />
       )}
 
       {/* Указатель-«палец» для шагов, где нужно нажать самому */}
@@ -494,7 +525,7 @@ function TourLayer({ tour, idx, setIdx, end }: { tour: Tour; idx: number; setIdx
         key={`${idx}-${shake}`}
         role="dialog"
         aria-label={step.title}
-        className={cx("absolute rounded-l border border-line-subtle bg-surface p-4 shadow-e3", shake ? "anim-shake" : "anim-rise")}
+        className={cx("pointer-events-auto absolute rounded-l border border-line-subtle bg-surface p-4 shadow-e3", shake ? "anim-shake" : "anim-rise")}
         style={tipStyle}
       >
         {arrow && (
