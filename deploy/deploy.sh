@@ -4,7 +4,7 @@
 set -euo pipefail
 
 REPO_URL="${REPO_URL:-https://github.com/ven2ra/uilearningvtb.git}"
-BRANCH="${BRANCH:-claude/youthful-volta-nvazpv}"
+BRANCH="${BRANCH:-claude/fervent-curie-q4sskq}"
 SRC_DIR="${SRC_DIR:-/opt/vtb-proto}"      # исходники
 WEB_DIR="${WEB_DIR:-/var/www/vtb-proto}"  # то, что отдаёт nginx
 

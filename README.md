@@ -15,7 +15,7 @@ pnpm build    # проверка типов + сборка в dist/
 Прототип — статический сайт. На сервере нужен Node.js 20+ (только для сборки) и nginx.
 
 ```bash
-git clone -b claude/youthful-volta-nvazpv https://github.com/ven2ra/uilearningvtb.git /opt/vtb-proto
+git clone -b claude/fervent-curie-q4sskq https://github.com/ven2ra/uilearningvtb.git /opt/vtb-proto
 sudo bash /opt/vtb-proto/deploy/deploy.sh          # сборка → /var/www/vtb-proto
 sudo cp /opt/vtb-proto/deploy/nginx.conf /etc/nginx/sites-available/vtb-proto
 sudo ln -sf /etc/nginx/sites-available/vtb-proto /etc/nginx/sites-enabled/vtb-proto
