@@ -1,4 +1,5 @@
 import { useEffect, useState, type ReactNode } from "react";
+import { MoneyActionsSheet } from "../screens/MoneyOperations";
 import { useApp, type ScreenName } from "../state/AppState";
 import { useTour } from "../tour/Tour";
 import { STAGES, TASKS, tasksUntilNextAchievement } from "../lib/training";
@@ -179,6 +180,10 @@ export function Sheet({ open, onClose, children, tour, label }: { open: boolean;
 
 // ---------- Меню «Действия» ----------
 export function ActionsSheet() {
+  const app = useApp();
+  return app.mode === "real" ? <MoneyActionsSheet /> : <TrainingActionsSheet />;
+}
+function TrainingActionsSheet() {
   const app = useApp();
   const training = app.mode === "training";
   const items: { tour: string; icon: IconName; title: string; sub: string; to: ScreenName }[] = [

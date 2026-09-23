@@ -7,6 +7,7 @@ import { History, Instrument, Market, Portfolio, Trade } from "./screens/Invest"
 import { DocOrder, DocReady, Documents, MoveMoney } from "./screens/Service";
 import { Achievements, DemoButtons, Hub, More, TrainingFinish, TrainingIntro } from "./screens/Learning";
 import Profile from "./screens/Profile";
+import MoneyOperations from "./screens/MoneyOperations";
 import { cx } from "./ui/kit";
 import { ACHIEVEMENTS } from "./lib/achievements";
 import Splash from "./ui/Splash";
@@ -24,7 +25,7 @@ function useIsDesktop() {
 }
 
 function CurrentScreen() {
-  const { current } = useApp();
+  const { current, mode } = useApp();
   const p = current.params ?? {};
   switch (current.name) {
     case "home":
@@ -48,9 +49,11 @@ function CurrentScreen() {
     case "trade":
       return <Trade id={p.id!} side={p.side ?? "buy"} />;
     case "topup":
-      return <MoveMoney key="topup" kind="topup" />;
+      return mode === "real" ? <MoneyOperations kind="topup" /> : <MoveMoney key="topup" kind="topup" />;
+    case "transfer":
+      return <MoneyOperations kind="transfer" />;
     case "withdraw":
-      return <MoveMoney key="withdraw" kind="withdraw" />;
+      return mode === "real" ? <MoneyOperations kind="withdraw" /> : <MoveMoney key="withdraw" kind="withdraw" />;
     case "documents":
       return <Documents />;
     case "doc-order":
@@ -67,7 +70,7 @@ function CurrentScreen() {
 function Phone({ framed }: { framed: boolean }) {
   const app = useApp();
   const training = app.mode === "training";
-  const fullScreen = app.current.name === "training-intro" || app.current.name === "training-finish";
+  const fullScreen = app.current.name === "training-intro" || app.current.name === "training-finish" || (!training && ["topup", "transfer", "withdraw"].includes(app.current.name));
   const panelHidden = fullScreen || app.current.name === "hub" || app.current.name === "achievements";
   // Квест «Первая покупка» важнее текущего задания программы: сначала он
   const showQuest = !panelHidden && app.buyQuest.active === app.mode;

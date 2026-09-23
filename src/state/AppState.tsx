@@ -17,6 +17,7 @@ export type ScreenName =
   | "instrument"
   | "trade"
   | "topup"
+  | "transfer"
   | "withdraw"
   | "documents"
   | "doc-order"
@@ -32,6 +33,8 @@ export interface Screen {
 export type OnboardingStatus = "new" | "running" | "done" | "skipped";
 
 export interface Account {
+  balanceRevision?: number;
+  moneyBalances?: { master: number; main: number; otc: number };
   cash: number;
   positions: Position[];
   history: Operation[];
@@ -86,7 +89,8 @@ const freshTraining = (): TrainingState => ({
   readyCardDismissed: false,
 });
 
-const freshReal = (): Account => ({ cash: REAL_ACCOUNT.cash, positions: REAL_ACCOUNT.positions, history: REAL_ACCOUNT.history, docs: REAL_ACCOUNT.docs });
+const INITIAL_MONEY_BALANCES = { master: 500000, main: 0, otc: 0 };
+const freshReal = (): Account => ({ balanceRevision: 1, moneyBalances: { ...INITIAL_MONEY_BALANCES }, cash: REAL_ACCOUNT.cash, positions: REAL_ACCOUNT.positions, history: REAL_ACCOUNT.history, docs: REAL_ACCOUNT.docs });
 const freshQuest = (): BuyQuest => ({ offer: "new", active: null, done: false });
 
 interface Persisted {
@@ -137,7 +141,11 @@ function useAppStateValue() {
   const [offerOpen, setOfferOpen] = useState(false);
   const [onboarding, setOnboarding] = useState<OnboardingStatus>(persisted?.onboarding ?? "new");
   const [training, setTraining] = useState<TrainingState>(persisted?.training ?? freshTraining());
-  const [real, setReal] = useState<Account>(persisted?.real ?? freshReal());
+  const [real, setReal] = useState<Account>(() => {
+    const saved = persisted?.real;
+    if (!saved) return freshReal();
+    return saved.balanceRevision === 1 ? saved : { ...saved, balanceRevision: 1, cash: 0, positions: [], moneyBalances: { ...INITIAL_MONEY_BALANCES } };
+  });
   const [achievements, setAchievements] = useState<{ id: string; ts: number }[]>(persisted?.achievements ?? []);
   const [buyQuest, setBuyQuest] = useState<BuyQuest>(persisted?.buyQuest ?? freshQuest());
   const [toasts, setToasts] = useState<Toast[]>([]);
@@ -553,6 +561,24 @@ function useAppStateValue() {
     [emit],
   );
 
+  const moneyBalances = real.moneyBalances ?? INITIAL_MONEY_BALANCES;
+  const simulateMoney = (kind: "topup" | "transfer" | "withdraw", amount: number, from: "main" | "otc" = "main"): string | null => {
+    const acc = realRef.current;
+    const balances = acc.moneyBalances ?? INITIAL_MONEY_BALANCES;
+    const cents = Math.round(amount * 100);
+    if (!Number.isSafeInteger(cents) || cents <= 0) return "Укажите корректную сумму";
+    const debit = kind === "topup" ? "master" : kind === "withdraw" ? "main" : from;
+    const credit = kind === "topup" ? "main" : kind === "withdraw" ? "master" : from === "main" ? "otc" : "main";
+    if (cents > Math.round(balances[debit] * 100)) return "Недостаточно средств на счете списания";
+    const nextBalances = { ...balances, [debit]: (Math.round(balances[debit] * 100) - cents) / 100, [credit]: (Math.round(balances[credit] * 100) + cents) / 100 };
+    const names = { master: "Мастер-счет • 8119", main: "11MD3A • Основной", otc: "11MD3A • Внебиржевой" };
+    const op: Operation = { id: nextId("money-"), ts: Date.now(), kind, title: kind === "topup" ? "Пополнение счета" : kind === "withdraw" ? "Вывод денег" : "Перевод между счетами", amount: kind === "topup" ? cents / 100 : -cents / 100, detail: `${names[debit]} → ${names[credit]}` };
+    const next = { ...acc, moneyBalances: nextBalances, history: [op, ...acc.history] };
+    realRef.current = next;
+    setReal(next);
+    return null;
+  };
+
   const orderDoc = useCallback(
     (title: string, period: string) => {
       const doc: Doc = { id: nextId("d"), title, period, status: "pending", ts: Date.now() };
@@ -667,6 +693,8 @@ function useAppStateValue() {
     moves,
     trade,
     moveMoney,
+    moneyBalances,
+    simulateMoney,
     orderDoc,
     achievements,
     has,

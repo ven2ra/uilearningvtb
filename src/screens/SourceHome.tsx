@@ -24,13 +24,13 @@ import EditorialSections from "../components/home/EditorialSections";
 
 const accounts = [
   {
-    value: 76,
+    value: 0,
     title: "Брокерский счет • 11MD3A • Основной",
-    change: "+1 ₽ • 1,65%",
+    change: "0 ₽ • 0%",
   },
-  { value: 39, title: "ИИС • 144IMP • Основной", change: "+1 ₽ • 2,66%" },
+  { value: 0, title: "ИИС • 144IMP • Основной", change: "0 ₽ • 0%" },
   {
-    value: 1,
+    value: 0,
     title: "Инвесткопилка • 11MD3A/1CY8P • Основной",
     change: "0 ₽ • 0%",
   },
@@ -47,9 +47,12 @@ export default function SourceHome() {
   const [showPromos, setShowPromos] = useState(true);
   const [stories, setStories] = useState(false);
   const modified =
-    app.account.history.length > 0 ||
     app.account.positions.length > 0 ||
     app.account.cash > 0;
+  const moved = !!app.account.moneyBalances;
+  const moneyDelta = Math.round((app.moneyBalances.main + app.moneyBalances.otc) * 100) / 100;
+  const shownAccounts = accounts.map((account, i) => i === 0 ? { ...account, value: app.moneyBalances.main } : account);
+  if (app.moneyBalances.otc > 0) shownAccounts.splice(1, 0, { value: app.moneyBalances.otc, title: "Брокерский счет • 11MD3A • Внебиржевой", change: "0 ₽ • 0%" });
 
   return (
     <div className="reference-home">
@@ -127,9 +130,11 @@ export default function SourceHome() {
             <span>
               {hidden
                 ? "••• ₽"
-                : modified
+                : moved
+                  ? fmtMoney(moneyDelta + (modified ? app.portfolioValue : 0))
+                  : modified
                   ? fmtMoney(app.portfolioValue)
-                  : "116 ₽"}
+                  : moved ? fmtMoney(moneyDelta) : "0 ₽"}
             </span>
             <button
               aria-label={hidden ? "Показать сумму" : "Скрыть сумму"}
@@ -149,7 +154,7 @@ export default function SourceHome() {
                 ? "•••"
                 : modified
                   ? fmtMoney(app.dayChange, { sign: true })
-                  : "2 ₽ • 1,97%"}
+                  : "0 ₽ • 0%"}
             </span>
             <span>за все время</span>
           </p>
@@ -190,7 +195,7 @@ export default function SourceHome() {
               compact ? "reference-accounts is-compact" : "reference-accounts"
             }
           >
-            {(modified
+            {(moved ? [...shownAccounts, ...(modified ? [{ value: app.portfolioValue, title: "Учебный портфель • ···4821", change: fmtMoney(app.dayChange, { sign: true }) }] : [])] : modified
               ? [
                   {
                     value: app.portfolioValue,
@@ -198,7 +203,7 @@ export default function SourceHome() {
                     change: fmtMoney(app.dayChange, { sign: true }),
                   },
                 ]
-              : accounts
+              : shownAccounts
             ).map((account, i) => (
               <button
                 className="reference-account"
@@ -214,7 +219,7 @@ export default function SourceHome() {
                             <h3>
                               {hidden
                                 ? "••• ₽"
-                                : fmtMoney(account.value, { whole: !modified })}
+                                : fmtMoney(account.value, { whole: !modified && !moved })}
                             </h3>
                             <p>{account.change}</p>
                             <p className="reference-muted">
@@ -235,7 +240,7 @@ export default function SourceHome() {
                 <strong>
                   {hidden
                     ? "••• ₽"
-                    : fmtMoney(account.value, { whole: !modified })}
+                    : fmtMoney(account.value, { whole: !modified && !moved })}
                 </strong>
                 <span className="reference-account-label">{account.title}</span>
                 <span

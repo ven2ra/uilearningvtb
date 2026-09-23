@@ -523,6 +523,7 @@ function Row({ k, v, bold }: { k: string; v: string; bold?: boolean }) {
 
 // ================= История =================
 const OP_ICON: Record<Operation["kind"], IconName> = {
+  transfer: "arrowUp",
   buy: "cart",
   sell: "arrowUp",
   topup: "arrowDown",

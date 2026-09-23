@@ -56,7 +56,7 @@ export interface Position {
 export interface Operation {
   id: string;
   ts: number;
-  kind: "buy" | "sell" | "topup" | "withdraw" | "coupon" | "dividend";
+  kind: "buy" | "sell" | "topup" | "withdraw" | "transfer" | "coupon" | "dividend";
   title: string;
   amount: number; // + зачисление, − списание
   detail?: string;

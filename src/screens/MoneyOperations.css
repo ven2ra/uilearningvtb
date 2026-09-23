@@ -1,0 +1,85 @@
+.source-design.mode-real > main:has(.money-flow) { padding-bottom: 0; animation: none; }
+.money-flow { height: 100%; min-height: 0; background: #fff; color: #18191c; display: flex; flex-direction: column; font-size: 16px; line-height: 22px; }
+.money-flow button,.money-overlay button { cursor: pointer; }
+.money-flow button:disabled,.money-overlay button:disabled { cursor: default; }
+.money-header { height: 62px; flex-shrink: 0; display: flex; align-items: center; justify-content: center; padding: 0 16px; position: relative; }
+.money-header h1 { font-size: 16px; font-weight: 500; margin: 0; }
+.money-header > button { position: absolute; left: 16px; }
+.money-header > img { position: absolute; right: 20px; }
+.money-body { flex: 1; min-height: 0; overflow-y: auto; padding: 0 16px 24px; }
+.money-account { background: #f5f5f7; border-radius: 20px; margin: 0 -1px; }
+.money-account-main { height: 94px; display: flex; align-items: flex-start; padding: 16px; gap: 12px; position: relative; }
+.money-account-main > div { flex: 1; }
+.money-account-main strong { display: block; font-size: 18px; font-weight: 500; line-height: 24px; }
+.money-account-main span { display: block; color: #75767f; font-size: 14px; line-height: 18px; }
+.money-account-main > img:last-of-type { align-self: center; }
+.money-account-main select { position: absolute; inset: 0; width: 100%; opacity: 0; cursor: pointer; }
+.money-account-main:focus-within { outline: 2px solid #007aff; border-radius: 20px; }
+.money-account-details { margin: 0 16px; padding: 12px 0 15px; border-top: 1px solid #e2e2e8; font-size: 14px; line-height: 24px; }
+.money-account-details > div { display: flex; justify-content: space-between; gap: 8px; }
+.money-account-details > div > span:first-child { color: #75767f; display: flex; align-items: center; gap: 4px; }
+.money-between { position: relative; height: 24px; display: flex; justify-content: center; }
+.money-between > * { position: absolute; top: -10px; background: white; border-radius: 50%; width: 40px; height: 40px; display: grid; place-items: center; z-index: 1; }
+.money-between > button { box-shadow: 0 2px 7px #00000010; }
+.money-amount-input { margin-top: 24px; width: 100%; height: 60px; border: 0; border-radius: 20px; padding: 0 16px; background: #f5f5f7; color: #18191c; font: inherit; outline-color: #007aff; }
+.money-topup .money-amount-input { margin-top: 32px; }
+.money-amount-input::placeholder { color: #75767f; opacity: 1; }
+.money-error { color: #c52b3a; font-size: 14px; margin-top: 12px; }
+.money-flow footer { flex-shrink: 0; padding: 16px; background: white; }
+.money-primary { display: block; width: 100%; height: 48px; border: 0; border-radius: 14px; background: #007aff; color: white; font-size: 16px; font-weight: 500; }
+.money-primary:disabled { background: #f8f8fa; color: #b2b2b7; }
+.money-flow .money-confirm-footer { padding-left: 32px; padding-right: 32px; }
+.money-total { margin-top: 26px; margin-bottom: 32px; }
+.money-total > span { display: block; line-height: 22px; }
+.money-total strong { display: block; font-size: 34px; font-weight: 500; line-height: 42px; margin-top: 4px; }
+.money-confirm h2 { font-size: 18px; line-height: 24px; font-weight: 500; margin: 0 0 20px; }
+.money-confirm dl { margin: 0; }
+.money-detail { margin-bottom: 22px; }
+.money-detail dt { color: #75767f; font-size: 14px; line-height: 18px; margin-bottom: 4px; }
+.money-detail dd { margin: 0; line-height: 22px; }
+.money-notice { display: flex; align-items: flex-start; gap: 8px; border-radius: 16px; background: #f0f0f8; padding: 12px 16px; font-size: 13px; line-height: 18px; margin: 16px 0; }
+.money-notice > img { flex-shrink: 0; margin-top: 1px; }
+.money-explanation { color: #75767f; font-size: 13px; line-height: 18px; margin: 26px 0 32px; }
+.money-explanation span { color: #007aff; }
+.money-success-content { flex: 1; text-align: center; padding: 80px 16px 24px; }
+.money-success-content > img { width: 140px; height: 140px; margin: 0 auto 36px; }
+.money-success-content h2 { font-size: 24px; font-weight: 500; line-height: 30px; margin: 0; }
+.money-topup .money-success-content { padding-top: 102px; }
+.money-topup .money-success-content > img { margin-bottom: 14px; }
+.money-topup .money-success-content h2 { font-size: 18px; line-height: 24px; }
+.money-success-amount { font-size: 34px; line-height: 42px; font-weight: 500; margin-top: 16px; }
+.money-success-content p { margin: 12px 0 36px; }
+.money-processing { display: inline-flex; align-items: center; gap: 4px; border-radius: 14px; background: #007aff; color: white; padding: 4px 8px; font-size: 13px; line-height: 18px; }
+.money-success footer { padding-bottom: 20px; }
+.money-topup.money-success footer { padding-bottom: 30px; }
+.money-overlay { position: absolute; inset: 0; z-index: 600; background: #0009; display: flex; align-items: center; justify-content: center; color: #18191c; font-size: 16px; line-height: 22px; }
+.money-sheet-overlay { align-items: flex-end; }
+.money-sheet { position: relative; width: 100%; max-width: 700px; max-height: 95%; overflow-y: auto; background: white; border-radius: 20px 20px 0 0; padding: 32px 16px 10px; }
+.money-handle { width: 32px; height: 4px; border-radius: 3px; background: #d8d8dc; position: absolute; top: 8px; left: calc(50% - 16px); }
+.money-close { position: absolute; top: 12px; right: 12px; border: 0; background: transparent; z-index: 1; }
+.money-actions { padding-top: 12px; }
+.money-actions h2 { font-size: 18px; line-height: 24px; font-weight: 500; margin: 0 0 16px; }
+.money-actions h2:not(:first-child) { margin-top: 24px; }
+.money-action-row { display: flex; gap: 12px; align-items: center; width: 100%; min-height: 48px; text-align: left; border: 0; background: transparent; font: inherit; }
+.money-action-row span { flex: 1; }
+.money-method-header { height: 40px; text-align: center; font-weight: 500; position: relative; margin-bottom: 12px; display: flex; align-items: center; justify-content: center; }
+.money-method-header button { position: absolute; left: 0; }
+.money-card-strip { display: flex; gap: 8px; overflow-x: auto; scrollbar-width: none; padding: 8px 0 16px; }
+.money-card-strip > button { width: 109px; height: 89px; flex-shrink: 0; border-radius: 12px; padding: 10px 12px; color: white; background: linear-gradient(120deg,#0565d6,#199af7); text-align: left; font-size: 14px; }
+.money-card-strip > button > span { display: grid; place-items: center; width: 24px; height: 24px; border-radius: 50%; background: #0087ff; margin-bottom: 16px; }
+.money-bank-strip { display: flex; gap: 8px; overflow-x: auto; scrollbar-width: none; padding: 8px 0 12px; }
+.money-bank-strip > div { display: flex; align-items: center; gap: 8px; background: #f5f5f7; border-radius: 12px; height: 40px; padding: 8px; white-space: nowrap; font-size: 14px; }
+.money-bank-strip img { width: 24px; height: 24px; }
+.money-sms { position: relative; width: calc(100% - 48px); max-width: 652px; background: white; border-radius: 20px; padding: 24px; }
+.money-sms h2 { font-size: 24px; font-weight: 500; line-height: 30px; text-align: center; margin: 0 0 10px; }
+.money-sms > p { text-align: center; font-size: 14px; line-height: 18px; color: #75767f; margin: 0 0 12px; }
+.money-code { display: block; border-radius: 16px; height: 62px; background: #f5f5f7; padding: 10px 16px; }
+.money-code span { display: block; color: #75767f; font-size: 13px; line-height: 18px; }
+.money-code input { display: block; background: transparent; width: 100%; border: 0; outline: 0; font-size: 16px; line-height: 22px; }
+.money-sms-buttons { display: flex; gap: 16px; margin-top: 54px; }
+.money-sms-buttons > button { flex: 1; color: #007aff; }
+.money-sms-buttons > .money-primary { color: white; }
+.money-sms-buttons > .money-primary:disabled { color: #b2b2b7; }
+.money-sms > .money-resend { margin: 30px 0 0; line-height: 20px; }
+.money-resend button { color: #007aff; }
+@media (max-width: 480px) { .money-sms { width: calc(100% - 32px); padding: 24px 16px; } .money-sms h2 { font-size: 22px; } }
