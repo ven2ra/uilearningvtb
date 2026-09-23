@@ -18,10 +18,10 @@ export default function Home() {
     <div className="pb-6">
       {/* Шапка */}
       <header className="sticky top-0 z-[100] flex items-center gap-3 bg-page/95 px-4 py-2.5 backdrop-blur">
-        <div className="flex h-10 w-10 items-center justify-center rounded-full bg-accent-subtle text-[14px] font-bold text-accent-text">АК</div>
+        <div className="flex h-10 w-10 items-center justify-center rounded-full bg-accent-subtle text-[14px] font-bold text-accent-text">АД</div>
         <div className="min-w-0 flex-1 leading-tight">
           <div className="text-[12px] text-ink-2">{training ? "Учебный счёт" : "ВТБ Мои Инвестиции"}</div>
-          <div className="text-[16px] font-semibold">Анна К.</div>
+          <div className="text-[16px] font-semibold">Анастасия Д.</div>
         </div>
         <AchChip />
         <HelpButton />

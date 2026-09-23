@@ -242,9 +242,9 @@ export function More() {
       <TopBar title="Ещё" />
       <div className="px-4 pb-8">
         <section className="mt-4 flex items-center gap-3 rounded-l border border-line-subtle bg-surface p-4">
-          <div className="flex h-12 w-12 items-center justify-center rounded-full bg-brand-subtle text-[16px] font-bold text-brand">АК</div>
+          <div className="flex h-12 w-12 items-center justify-center rounded-full bg-brand-subtle text-[16px] font-bold text-brand">АД</div>
           <div className="flex-1">
-            <div className="text-[16px] font-semibold">Анна К.</div>
+            <div className="text-[16px] font-semibold">Анастасия Д.</div>
             <div className="text-[13px] text-ink-2">Брокерский счёт ···4821</div>
           </div>
         </section>
