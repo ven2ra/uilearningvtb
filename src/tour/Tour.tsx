@@ -18,6 +18,8 @@ export interface TourStep {
   secondary?: string;
   /** Действие при переходе дальше: например, вернуться назад в меню после показа раздела */
   onNext?: () => void;
+  /** Обязательный шаг: кнопка закрытия обучения скрыта, пройти можно только через «Далее» */
+  lockClose?: boolean;
 }
 
 export interface Tour {
@@ -94,6 +96,7 @@ function onboardingTours(app: AppApi, start: (id: string) => void): Record<strin
           text: "Сумма, карта и кнопка — всё на одном экране",
           button: "Назад к меню",
           onNext: backToActions,
+          lockClose: true,
         },
         { target: "action-withdraw", title: "Вывести", text: "Теперь нажмите на «Вывести»", mode: "click", advanceOn: "open:withdraw" },
         {
@@ -116,10 +119,10 @@ function onboardingTours(app: AppApi, start: (id: string) => void): Record<strin
       },
       // Клиент заказывает настоящий документ, нажимая на его название, а не на общую плитку
       steps: [
-        { target: "doc-quick-broker", title: "Заказать документ", text: "Например, «Брокерский отчёт» — нажмите на название", mode: "click", advanceOn: "open:doc-order" },
-        { target: "doc-type-pick", title: "Выберите тип", text: "Нажмите на нужный документ — например, справку о доходах", mode: "click", advanceOn: "select:doc-type", onNext: app.back },
-        { target: "docs-ready", title: "Скачать готовые", text: "А здесь документы, которые уже готовы. Нажмите", mode: "click", advanceOn: "open:doc-ready" },
-        { target: "docs-list", title: "Готовые документы", text: "Нажмите на документ, чтобы скачать", button: "Понятно" },
+        { target: "doc-quick-broker", title: "Заказать документ", text: "Например, «Брокерский отчёт» — нажмите на название", mode: "click", advanceOn: "open:doc-order", lockClose: true },
+        { target: "doc-type-pick", title: "Выберите тип", text: "Нажмите на нужный документ — например, справку о доходах", mode: "click", advanceOn: "select:doc-type", onNext: app.back, lockClose: true },
+        { target: "docs-ready", title: "Скачать готовые", text: "А здесь документы, которые уже готовы. Нажмите", mode: "click", advanceOn: "open:doc-ready", lockClose: true },
+        { target: "docs-list", title: "Готовые документы", text: "Нажмите на документ, чтобы скачать", button: "Понятно", lockClose: true },
       ],
     },
     "onb-final": {
@@ -545,10 +548,13 @@ function TourLayer({ tour, idx, setIdx, end }: { tour: Tour; idx: number; setIdx
             <div className="text-[18px] font-semibold leading-6">{step.title}</div>
             <p className="mt-1 text-[14px] leading-5 text-ink-2">{step.text}</p>
           </div>
-          <button type="button" onClick={close} className="-mr-2 -mt-2 flex h-9 w-9 shrink-0 items-center justify-center rounded-m text-ink-3 cursor-pointer" aria-label={tour.kind === "onboarding" ? "Закрыть обучение" : "Закрыть подсказку"}>
-            <Icon name="x" size={20} />
-          </button>
+          {!step.lockClose && (
+            <button type="button" onClick={close} className="-mr-2 -mt-2 flex h-9 w-9 shrink-0 items-center justify-center rounded-m text-ink-3 cursor-pointer" aria-label={tour.kind === "onboarding" ? "Закрыть обучение" : "Закрыть подсказку"}>
+              <Icon name="x" size={20} />
+            </button>
+          )}
         </div>
+        {step.lockClose && <p className="mt-1 text-[12px] text-ink-3">Этот шаг обязателен — пройдите его до конца</p>}
         <div className="mt-3 flex items-center justify-between gap-2">
           {total > 1 ? (
             <div className="flex gap-1.5" aria-hidden="true">
@@ -572,11 +578,13 @@ function TourLayer({ tour, idx, setIdx, end }: { tour: Tour; idx: number; setIdx
                 {step.secondary}
               </button>
             )}
-            {/* Шаги click требуют реального тапа по разделу — кнопки-обманки нет, только выход */}
+            {/* Шаги click требуют реального тапа по разделу — кнопки-обманки нет, только выход (если шаг не обязателен) */}
             {mode === "click" ? (
-              <button type="button" onClick={close} className="h-9 px-2 text-[13px] font-semibold text-ink-2 cursor-pointer">
-                Закрыть
-              </button>
+              !step.lockClose && (
+                <button type="button" onClick={close} className="h-9 px-2 text-[13px] font-semibold text-ink-2 cursor-pointer">
+                  Закрыть
+                </button>
+              )
             ) : (
               <button type="button" onClick={onPrimary} className="h-9 rounded-m bg-accent px-4 text-[13px] font-semibold text-white active:bg-accent-pressed cursor-pointer">
                 {primaryLabel}
