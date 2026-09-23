@@ -1,72 +1,112 @@
-import { useState, type InputHTMLAttributes, type KeyboardEvent } from "react";
-import Icon from "../ui/Icons";
-import { Button, cx } from "../ui/kit";
+import { useState } from "react";
+import vtbLogo from "../assets/vtb-logo.svg";
 
-function Field({ label, ...rest }: { label: string } & InputHTMLAttributes<HTMLInputElement>) {
-  return (
-    <div className="rounded-m bg-muted px-4 pb-2 pt-2.5">
-      <label className="block text-[12px] leading-4 text-ink-3">{label}</label>
-      <input {...rest} className="mt-0.5 h-6 w-full bg-transparent text-[16px] leading-5 text-ink outline-none placeholder:text-ink-4" />
-    </div>
-  );
-}
+// Экран входа — точная копия макета vtb_login_ui_centered.html: разметка, классы
+// и стили воспроизведены как есть, только «Войти» вместо alert() входит в приложение.
+const STYLE = `
+  .vtb-login, .vtb-login * { box-sizing: border-box; }
+  .vtb-login {
+    flex: 1;
+    min-height: 0;
+    display: flex;
+    justify-content: center;
+    background: #fff;
+    font-family: Inter, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Arial, sans-serif;
+    color: #18191c;
+    -webkit-font-smoothing: antialiased;
+  }
+  .vtb-login .app {
+    width: 100%;
+    max-width: 700px;
+    min-height: 100%;
+    padding: 24px 16px 32px;
+    display: flex;
+    flex-direction: column;
+  }
+  .vtb-login .brand-logo { width: 210px; height: auto; display: flex; align-items: center; }
+  .vtb-login .brand-logo img { display: block; width: 100%; height: auto; }
+  .vtb-login .brand { height: 68px; display: flex; align-items: center; justify-content: center; margin-bottom: 16px; }
+  .vtb-login .form { width: 100%; display: flex; flex-direction: column; gap: 12px; }
+  .vtb-login .field { min-height: 62px; border-radius: 12px; background: #f5f5f7; padding: 10px 16px 8px; }
+  .vtb-login .field label { display: block; color: #75767f; font-size: 12px; line-height: 16px; margin-bottom: 3px; }
+  .vtb-login .field input {
+    width: 100%; height: 26px; border: 0; outline: 0; padding: 0; background: transparent; color: #18191c;
+    font: 400 16px/20px Inter, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+  }
+  .vtb-login .field input::placeholder { color: #b2b2b7; }
+  .vtb-login .password-row { display: flex; align-items: center; gap: 10px; min-height: 26px; position: relative; }
+  .vtb-login .password-row input { flex: 1; }
+  .vtb-login .eye {
+    width: 28px; height: 28px; flex: 0 0 28px; align-self: center; border: 0; background: transparent;
+    color: #75767f; cursor: pointer; padding: 2px; display: grid; place-items: center;
+  }
+  .vtb-login .link {
+    appearance: none; border: 0; background: transparent; color: #007aff; padding: 0;
+    font: 500 14px/18px Inter, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+    text-align: left; cursor: pointer; align-self: flex-start; margin: 4px 0 12px;
+  }
+  .vtb-login .primary, .vtb-login .secondary {
+    min-height: 48px; border-radius: 12px; font: 500 16px/20px Inter, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+    cursor: pointer;
+  }
+  .vtb-login .primary { border: 0; background: #007aff; color: #fff; }
+  .vtb-login .primary:active { transform: translateY(1px); }
+  .vtb-login .secondary { margin-top: 8px; border: 0; background: #f1f1f8; color: #007aff; }
+  .vtb-login .note { margin-top: auto; padding-top: 28px; color: #8d8e96; font-size: 11px; line-height: 15px; text-align: center; }
+`;
 
 export default function Login({ onLogin }: { onLogin: () => void }) {
-  const [login, setLogin] = useState("");
-  const [password, setPassword] = useState("");
   const [visible, setVisible] = useState(false);
-  const [hint, setHint] = useState<string | null>(null);
-  const onEnter = (e: KeyboardEvent) => e.key === "Enter" && onLogin();
 
   return (
-    <div className="flex flex-1 flex-col px-5 pb-6 pt-12">
-      <div className="mb-10 text-center text-[22px] font-extrabold tracking-tight text-ink">ВТБ Мои Инвестиции</div>
-
-      <div className="flex flex-col gap-3">
-        <Field label="Телефон или логин" type="text" placeholder="+7 (___) ___-__-__" value={login} onChange={(e) => setLogin(e.target.value)} onKeyDown={onEnter} autoComplete="username" />
-
-        <div className="rounded-m bg-muted px-4 pb-2 pt-2.5">
-          <label className="block text-[12px] leading-4 text-ink-3">Пароль</label>
-          <div className="mt-0.5 flex items-center gap-2">
-            <input
-              type={visible ? "text" : "password"}
-              value={password}
-              onChange={(e) => setPassword(e.target.value)}
-              onKeyDown={onEnter}
-              autoComplete="current-password"
-              className="h-6 min-w-0 flex-1 bg-transparent text-[16px] leading-5 text-ink outline-none"
-            />
-            <button
-              type="button"
-              onClick={() => setVisible((v) => !v)}
-              className="flex h-6 w-6 shrink-0 items-center justify-center text-ink-3 cursor-pointer"
-              aria-label={visible ? "Скрыть пароль" : "Показать пароль"}
-            >
-              <Icon name={visible ? "eyeOff" : "eye"} size={20} />
-            </button>
+    <div className="vtb-login">
+      <style>{STYLE}</style>
+      <section className="app" aria-label="Экран входа">
+        <header className="brand" aria-label="ВТБ Мои Инвестиции">
+          <div className="brand-logo">
+            <img src={vtbLogo} alt="ВТБ Мои Инвестиции" />
           </div>
-        </div>
+        </header>
 
-        <button
-          type="button"
-          onClick={() => setHint("Восстановление пароля не входит в сценарий прототипа")}
-          className="self-start py-1 text-[14px] font-medium text-accent-text cursor-pointer"
+        <form
+          className="form"
+          autoComplete="off"
+          onSubmit={(e) => {
+            e.preventDefault();
+            onLogin();
+          }}
         >
-          Создать или изменить пароль
-        </button>
+          <div className="field">
+            <label htmlFor="login">Телефон или логин</label>
+            <input id="login" type="text" placeholder="+7 (___) ___-__-__" />
+          </div>
 
-        <div className={cx("flex flex-col gap-2", !hint && "mt-1")}>
-          {hint && <div className="mb-1 text-[12px] leading-4 text-ink-3">{hint}</div>}
-          <Button full onClick={onLogin}>
+          <div className="field">
+            <label htmlFor="password">Пароль</label>
+            <div className="password-row">
+              <input id="password" type={visible ? "text" : "password"} />
+              <button type="button" className="eye" onClick={() => setVisible((v) => !v)} aria-label={visible ? "Скрыть пароль" : "Показать пароль"}>
+                <svg width="22" height="22" viewBox="0 0 24 24" fill="none" aria-hidden="true">
+                  <path d="M2.5 12s3.5-6 9.5-6 9.5 6 9.5 6-3.5 6-9.5 6-9.5-6-9.5-6Z" stroke="currentColor" strokeWidth="1.7" />
+                  <circle cx="12" cy="12" r="2.6" stroke="currentColor" strokeWidth="1.7" />
+                </svg>
+              </button>
+            </div>
+          </div>
+
+          <button type="button" className="link">
+            Создать или изменить пароль
+          </button>
+          <button type="submit" className="primary">
             Войти
-          </Button>
-          <Button full variant="secondary" onClick={() => setHint("Открытие брокерского счёта не входит в сценарий прототипа")}>
-            Открыть брокерский счёт
-          </Button>
-        </div>
-      </div>
+          </button>
+          <button type="button" className="secondary">
+            Открыть брокерский счет
+          </button>
+        </form>
 
-      <p className="mt-auto pt-8 text-center text-[11px] leading-4 text-ink-3">Демонстрационный UI-прототип. Данные никуда не отправляются.</p>
+        <div className="note">Демонстрационный UI-прототип. Данные никуда не отправляются.</div>
+      </section>
     </div>
   );
 }
