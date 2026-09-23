@@ -8,6 +8,7 @@ import { DocOrder, DocReady, Documents, MoveMoney } from "./screens/Service";
 import { Achievements, DemoButtons, Hub, More, TrainingFinish, TrainingIntro } from "./screens/Learning";
 import { FinCodeHome, FinCodeShop, FinCodeTopicScreen } from "./screens/FinCode";
 import Chat from "./screens/Chat";
+import Login from "./screens/Login";
 import { cx } from "./ui/kit";
 import { ACHIEVEMENTS } from "./lib/achievements";
 import Splash from "./ui/Splash";
@@ -73,6 +74,7 @@ function CurrentScreen() {
 
 function Phone({ framed }: { framed: boolean }) {
   const app = useApp();
+  const [loggedIn, setLoggedIn] = useState(false);
   const training = app.mode === "training";
   const fullScreen = app.current.name === "training-intro" || app.current.name === "training-finish";
   const panelHidden = fullScreen || ["hub", "achievements", "fincode", "fincode-topic", "fincode-shop", "chat"].includes(app.current.name);
@@ -90,21 +92,27 @@ function Phone({ framed }: { framed: boolean }) {
       )}
     >
       {framed && (training ? <div className="training-stripe"><StatusBar dark /></div> : <StatusBar />)}
-      {training && !fullScreen && <TrainingBanner />}
-      {training && fullScreen && <div className="training-stripe h-1.5 shrink-0" />}
-      <main key={`${app.mode}-${app.stack.length}-${app.current.name}`} className={cx("no-scrollbar relative flex-1 overflow-y-auto anim-fade", (showTaskPanel || showQuest) && "pb-36")}>
-        <CurrentScreen />
-      </main>
-      {showTaskPanel && <TaskPanel />}
-      {showQuest && <QuestPanel />}
-      {!fullScreen && <BottomNav />}
-      <ActionsSheet />
-      <WelcomeSheet />
-      <MarketOfferSheet />
-      <HelpSheet />
-      <StageModalView />
-      <AchievementModal />
-      <Toasts />
+      {!loggedIn ? (
+        <Login onLogin={() => setLoggedIn(true)} />
+      ) : (
+        <>
+          {training && !fullScreen && <TrainingBanner />}
+          {training && fullScreen && <div className="training-stripe h-1.5 shrink-0" />}
+          <main key={`${app.mode}-${app.stack.length}-${app.current.name}`} className={cx("no-scrollbar relative flex-1 overflow-y-auto anim-fade", (showTaskPanel || showQuest) && "pb-36")}>
+            <CurrentScreen />
+          </main>
+          {showTaskPanel && <TaskPanel />}
+          {showQuest && <QuestPanel />}
+          {!fullScreen && <BottomNav />}
+          <ActionsSheet />
+          <WelcomeSheet />
+          <MarketOfferSheet />
+          <HelpSheet />
+          <StageModalView />
+          <AchievementModal />
+          <Toasts />
+        </>
+      )}
     </div>
   );
 }
