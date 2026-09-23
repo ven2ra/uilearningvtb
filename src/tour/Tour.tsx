@@ -76,7 +76,6 @@ function onboardingTours(app: AppApi, start: (id: string) => void): Record<strin
           text: "Все операции со счётом собраны здесь. Нажмите, чтобы открыть",
           mode: "click",
           advanceOn: "open:actions",
-          button: "Открыть",
         },
       ],
     },
@@ -88,7 +87,7 @@ function onboardingTours(app: AppApi, start: (id: string) => void): Record<strin
       onDone: () => start("onb-docs"),
       steps: [
         { target: "actions-sheet", title: "Меню действий", text: "Здесь находятся основные операции с вашим счётом" },
-        { target: "action-topup", title: "Пополнить", text: "Нажмите, чтобы открыть пополнение счёта", mode: "click", advanceOn: "open:topup", button: "Открыть" },
+        { target: "action-topup", title: "Пополнить", text: "Нажмите на «Пополнить», чтобы открыть", mode: "click", advanceOn: "open:topup" },
         {
           target: "topup-amount",
           title: "Так пополняется счёт",
@@ -96,7 +95,7 @@ function onboardingTours(app: AppApi, start: (id: string) => void): Record<strin
           button: "Назад к меню",
           onNext: backToActions,
         },
-        { target: "action-withdraw", title: "Вывести", text: "Теперь откройте вывод денег", mode: "click", advanceOn: "open:withdraw", button: "Открыть" },
+        { target: "action-withdraw", title: "Вывести", text: "Теперь нажмите на «Вывести»", mode: "click", advanceOn: "open:withdraw" },
         {
           target: "withdraw-amount",
           title: "Вывод на карту",
@@ -104,7 +103,7 @@ function onboardingTours(app: AppApi, start: (id: string) => void): Record<strin
           button: "Назад к меню",
           onNext: backToActions,
         },
-        { target: "action-docs", title: "Отчёты и справки", text: "И последнее — документы. Нажмите", mode: "click", advanceOn: "open:documents", button: "Открыть" },
+        { target: "action-docs", title: "Отчёты и справки", text: "И последнее — нажмите на «Отчёты и справки»", mode: "click", advanceOn: "open:documents" },
       ],
     },
     "onb-docs": {
@@ -115,10 +114,11 @@ function onboardingTours(app: AppApi, start: (id: string) => void): Record<strin
         app.tab("home");
         start("onb-final");
       },
+      // Клиент заказывает настоящий документ, нажимая на его название, а не на общую плитку
       steps: [
-        { target: "docs-order", title: "Заказать документ", text: "Здесь можно заказать необходимые документы. Нажмите", mode: "click", advanceOn: "open:doc-order", button: "Открыть" },
-        { target: "doc-types", title: "Выберите документ", text: "Отчёт, справка или выписка — и кнопка «Заказать»", button: "Назад", onNext: app.back },
-        { target: "docs-ready", title: "Скачать готовые", text: "А здесь документы, которые уже готовы. Нажмите", mode: "click", advanceOn: "open:doc-ready", button: "Открыть" },
+        { target: "doc-quick-broker", title: "Заказать документ", text: "Например, «Брокерский отчёт» — нажмите на название", mode: "click", advanceOn: "open:doc-order" },
+        { target: "doc-type-pick", title: "Выберите тип", text: "Нажмите на нужный документ — например, справку о доходах", mode: "click", advanceOn: "select:doc-type", onNext: app.back },
+        { target: "docs-ready", title: "Скачать готовые", text: "А здесь документы, которые уже готовы. Нажмите", mode: "click", advanceOn: "open:doc-ready" },
         { target: "docs-list", title: "Готовые документы", text: "Нажмите на документ, чтобы скачать", button: "Понятно" },
       ],
     },
@@ -133,9 +133,9 @@ function onboardingTours(app: AppApi, start: (id: string) => void): Record<strin
       steps: [
         { target: "first-steps", title: "Первые шаги", text: "Пополните счёт и совершите первую покупку — подскажем на каждом шаге" },
         { target: "training-card", title: "Попробуйте без риска", text: "Фейковые торги: тот же интерфейс, виртуальные деньги" },
-        { target: "ach-chip", title: "Достижения", text: "Почти за каждое действие — достижение. Нажмите, чтобы посмотреть", mode: "click", advanceOn: "open:achievements", button: "Открыть" },
+        { target: "ach-chip", title: "Достижения", text: "Почти за каждое действие — достижение. Нажмите, чтобы посмотреть", mode: "click", advanceOn: "open:achievements" },
         { target: "ach-summary", title: "Ваша коллекция", text: "У закрытых достижений написано, как их получить", button: "Назад", onNext: app.back },
-        { target: "help-btn", title: "Помощь", text: "Подсказки, фейковые торги и обучение — здесь. Нажмите", mode: "click", advanceOn: "help:open", button: "Открыть" },
+        { target: "help-btn", title: "Помощь", text: "Подсказки, фейковые торги и обучение — здесь. Нажмите", mode: "click", advanceOn: "help:open" },
         {
           target: "help-screen",
           title: "Вернуться можно всегда",
@@ -557,7 +557,7 @@ function TourLayer({ tour, idx, setIdx, end }: { tour: Tour; idx: number; setIdx
               ))}
             </div>
           ) : (
-            <span className="text-[12px] text-ink-3">{mode === "click" ? "Нажмите на выделенное" : ""}</span>
+            <span />
           )}
           <div className="flex items-center gap-1">
             {step.secondary && (
@@ -572,16 +572,19 @@ function TourLayer({ tour, idx, setIdx, end }: { tour: Tour; idx: number; setIdx
                 {step.secondary}
               </button>
             )}
-            {tour.kind === "onboarding" && (
+            {/* Шаги click требуют реального тапа по разделу — кнопки-обманки нет, только выход */}
+            {mode === "click" ? (
               <button type="button" onClick={close} className="h-9 px-2 text-[13px] font-semibold text-ink-2 cursor-pointer">
                 Закрыть
               </button>
+            ) : (
+              <button type="button" onClick={onPrimary} className="h-9 rounded-m bg-accent px-4 text-[13px] font-semibold text-white active:bg-accent-pressed cursor-pointer">
+                {primaryLabel}
+              </button>
             )}
-            <button type="button" onClick={onPrimary} className="h-9 rounded-m bg-accent px-4 text-[13px] font-semibold text-white active:bg-accent-pressed cursor-pointer">
-              {primaryLabel}
-            </button>
           </div>
         </div>
+        {mode === "click" && <p className="mt-1.5 text-[12px] text-ink-3">Нажмите на выделенный раздел на экране</p>}
       </div>
     </div>
   );

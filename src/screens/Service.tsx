@@ -187,8 +187,8 @@ export function Documents() {
 
         <div className="mb-2 mt-6 px-1 text-[15px] font-semibold">Часто заказывают</div>
         <div className="overflow-hidden rounded-l border border-line-subtle bg-surface">
-          {DOC_TYPES.slice(0, 3).map((d) => (
-            <ListRow key={d.id} icon="file" tone="neutral" title={d.title} subtitle={d.hint} onClick={() => app.go("doc-order")} />
+          {DOC_TYPES.slice(0, 3).map((d, i) => (
+            <ListRow key={d.id} tour={i === 0 ? "doc-quick-broker" : undefined} icon="file" tone="neutral" title={d.title} subtitle={d.hint} onClick={() => app.go("doc-order")} />
           ))}
         </div>
       </Page>
@@ -232,7 +232,16 @@ export function DocOrder() {
       <Page>
         <div data-tour="doc-types" className="mt-4 overflow-hidden rounded-l border border-line-subtle bg-surface">
           {DOC_TYPES.map((d) => (
-            <button key={d.id} type="button" onClick={() => setType(d.id)} className="flex w-full items-center gap-3 border-b border-line-subtle px-4 py-3 text-left last:border-0 cursor-pointer">
+            <button
+              key={d.id}
+              type="button"
+              data-tour={d.id === "ndfl" ? "doc-type-pick" : undefined}
+              onClick={() => {
+                setType(d.id);
+                app.emit("select:doc-type");
+              }}
+              className="flex w-full items-center gap-3 border-b border-line-subtle px-4 py-3 text-left last:border-0 cursor-pointer"
+            >
               <span className={cx("flex h-5 w-5 shrink-0 items-center justify-center rounded-full border-2", type === d.id ? "border-accent" : "border-line-strong")}>
                 {type === d.id && <span className="h-2.5 w-2.5 rounded-full bg-accent" />}
               </span>
