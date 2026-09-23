@@ -4,7 +4,7 @@ import { STAGES, TASKS, statusFor, tasksUntilNextAchievement } from "../lib/trai
 import { ACHIEVEMENTS, ACH_GROUPS, TIER_LABEL, TIER_ORDER, type AchievementTier } from "../lib/achievements";
 import { AchBadge } from "../ui/chrome";
 import { fmtMoney, fmtTime, plural } from "../lib/format";
-import { VIRTUAL_START_CASH } from "../lib/data";
+import { REAL_ACCOUNT, VIRTUAL_START_CASH } from "../lib/data";
 import Icon, { type IconName } from "../ui/Icons";
 import { Button, HelpButton, ProgressBar, ProgressRing, Segmented, TopBar, cx } from "../ui/kit";
 
@@ -271,7 +271,7 @@ export function More() {
 
         <div className="mt-3 overflow-hidden rounded-l border border-line-subtle bg-surface">
           <MoreRow icon="trophy" title="Мои достижения" sub={`Открыто ${app.achievements.length} из ${ACHIEVEMENTS.length}`} onClick={() => app.go("achievements")} />
-          <MoreRow icon="user" title="Профиль" sub="Данные и документы" />
+          <MoreRow icon="user" title="Профиль" sub="Данные и документы" onClick={() => app.go("profile")} />
           <MoreRow icon="shield" title="Безопасность" sub="Код входа, биометрия" />
           <MoreRow icon="settings" title="Настройки" sub="Уведомления, внешний вид" />
           <MoreRow icon="chat" title="Чат с поддержкой" sub="Ответим за пару минут" onClick={() => app.go("chat")} />
@@ -283,6 +283,67 @@ export function More() {
         </div>
       </div>
     </>
+  );
+}
+
+// ================= Профиль =================
+export function Profile() {
+  const app = useApp();
+  return (
+    <>
+      <TopBar back title="Профиль" />
+      <div className="px-4 pb-8">
+        <section className="mt-4 flex flex-col items-center rounded-l border border-line-subtle bg-surface p-5 text-center">
+          <div className="flex h-16 w-16 items-center justify-center rounded-full bg-brand-subtle text-[20px] font-bold text-brand">АД</div>
+          <div className="mt-2 text-[18px] font-semibold">Анастасия Д.</div>
+          <div className="text-[13px] text-ink-2">Клиент с сентября 2026 года</div>
+          <span className="mt-2 rounded-s bg-muted px-2 py-0.5 text-[11px] font-semibold text-ink-2">Неквалифицированный инвестор</span>
+        </section>
+
+        <h2 className="mb-2 mt-6 px-1 text-[18px] font-semibold">Личные данные</h2>
+        <div className="overflow-hidden rounded-l border border-line-subtle bg-surface">
+          <InfoRow icon="user" label="Телефон" value="+7 900 •••-··-34" />
+          <InfoRow icon="chat" label="Email" value="an••••a@mail.ru" />
+          <InfoRow icon="clock" label="Дата рождения" value="••.••.1996" />
+        </div>
+
+        <h2 className="mb-2 mt-6 px-1 text-[18px] font-semibold">Счёт</h2>
+        <div className="overflow-hidden rounded-l border border-line-subtle bg-surface">
+          <InfoRow icon="card" label="Брокерский счёт" value={`№ ${REAL_ACCOUNT.number}`} />
+          <MoreRow icon="file" title="Документы" sub={`${app.account.docs.length} в разделе`} onClick={() => app.go("documents")} />
+          <MoreRow icon="shield" title="Безопасность" sub="Код входа, биометрия" />
+        </div>
+
+        <div className="mt-6 overflow-hidden rounded-l border border-line-subtle bg-surface">
+          <button
+            type="button"
+            onClick={app.logout}
+            className="flex w-full items-center gap-3 px-4 py-3 text-left cursor-pointer active:bg-surface-muted"
+          >
+            <span className="flex h-10 w-10 items-center justify-center rounded-m bg-error-surface text-error">
+              <Icon name="logout" size={20} />
+            </span>
+            <span className="flex-1 text-[15px] font-medium text-error">Выйти из приложения</span>
+          </button>
+        </div>
+
+        <p className="mt-4 px-1 text-[11px] leading-4 text-ink-3">Все данные — тестовые. Это прототип, реальных персональных данных здесь нет.</p>
+      </div>
+    </>
+  );
+}
+
+function InfoRow({ icon, label, value }: { icon: IconName; label: string; value: string }) {
+  return (
+    <div className="flex items-center gap-3 border-b border-line-subtle px-4 py-3 last:border-0">
+      <span className="flex h-10 w-10 items-center justify-center rounded-m bg-muted text-ink-2">
+        <Icon name={icon} size={20} />
+      </span>
+      <div className="flex-1">
+        <div className="text-[12px] text-ink-3">{label}</div>
+        <div className="text-[15px] font-medium">{value}</div>
+      </div>
+    </div>
   );
 }
 

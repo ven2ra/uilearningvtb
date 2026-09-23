@@ -5,7 +5,7 @@ import { AchievementModal, ActionsSheet, BottomNav, HelpSheet, MarketOfferSheet,
 import Home from "./screens/Home";
 import { History, Instrument, Market, Portfolio, Trade } from "./screens/Invest";
 import { DocOrder, DocReady, Documents, MoveMoney } from "./screens/Service";
-import { Achievements, DemoButtons, Hub, More, TrainingFinish, TrainingIntro } from "./screens/Learning";
+import { Achievements, DemoButtons, Hub, More, Profile, TrainingFinish, TrainingIntro } from "./screens/Learning";
 import { FinCodeHome, FinCodeShop, FinCodeTopicScreen } from "./screens/FinCode";
 import Chat from "./screens/Chat";
 import Login from "./screens/Login";
@@ -69,15 +69,16 @@ function CurrentScreen() {
       return <FinCodeShop />;
     case "chat":
       return <Chat />;
+    case "profile":
+      return <Profile />;
   }
 }
 
 function Phone({ framed }: { framed: boolean }) {
   const app = useApp();
-  const [loggedIn, setLoggedIn] = useState(false);
   const training = app.mode === "training";
   const fullScreen = app.current.name === "training-intro" || app.current.name === "training-finish";
-  const panelHidden = fullScreen || ["hub", "achievements", "fincode", "fincode-topic", "fincode-shop", "chat"].includes(app.current.name);
+  const panelHidden = fullScreen || ["hub", "achievements", "fincode", "fincode-topic", "fincode-shop", "chat", "profile"].includes(app.current.name);
   // Квест «Первая покупка» важнее текущего задания программы: сначала он
   const showQuest = !panelHidden && app.buyQuest.active === app.mode;
   const showTaskPanel = !panelHidden && !showQuest && training && app.training.started && !app.training.finished;
@@ -92,8 +93,8 @@ function Phone({ framed }: { framed: boolean }) {
       )}
     >
       {framed && (training ? <div className="training-stripe"><StatusBar dark /></div> : <StatusBar />)}
-      {!loggedIn ? (
-        <Login onLogin={() => setLoggedIn(true)} />
+      {!app.loggedIn ? (
+        <Login onLogin={app.login} />
       ) : (
         <>
           {training && !fullScreen && <TrainingBanner />}

@@ -26,7 +26,8 @@ export type ScreenName =
   | "fincode"
   | "fincode-topic"
   | "fincode-shop"
-  | "chat";
+  | "chat"
+  | "profile";
 
 export interface Screen {
   name: ScreenName;
@@ -168,6 +169,7 @@ function useAppStateValue() {
   const [achievements, setAchievements] = useState<{ id: string; ts: number }[]>(persisted?.achievements ?? []);
   const [buyQuest, setBuyQuest] = useState<BuyQuest>(persisted?.buyQuest ?? freshQuest());
   const [finCode, setFinCode] = useState<FinCodeState>(persisted?.finCode ?? freshFinCode());
+  const [loggedIn, setLoggedIn] = useState(false);
   const [toasts, setToasts] = useState<Toast[]>([]);
   const [stageModal, setStageModal] = useState<StageModal | null>(null);
   const [achModal, setAchModal] = useState<string[] | null>(null);
@@ -499,6 +501,15 @@ function useAppStateValue() {
     setStack([{ name: "home" }]);
   }, []);
 
+  // ---------- Вход/выход ----------
+  const login = useCallback(() => setLoggedIn(true), []);
+  const logout = useCallback(() => {
+    resetOverlays();
+    applyMode("real");
+    setStack([{ name: "home" }]);
+    setLoggedIn(false);
+  }, []);
+
   const restartTraining = useCallback(() => {
     const fresh = { ...freshTraining(), started: true };
     setTraining(fresh);
@@ -789,6 +800,9 @@ function useAppStateValue() {
 
   return {
     frameRef: frameRef as RefObject<HTMLDivElement | null>,
+    loggedIn,
+    login,
+    logout,
     mode,
     stack,
     current,
