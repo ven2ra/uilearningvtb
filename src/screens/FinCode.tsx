@@ -7,6 +7,10 @@ import { Badge, Button, Page, ProgressBar, SectionTitle, Segmented, TopBar, cx }
 
 const NAV_LABEL: Record<MicroTaskNav, string> = { topup: "Пополнить", withdraw: "Вывести", documents: "Документы", market: "На биржу", portfolio: "В портфель" };
 
+function quizFor(topic: (typeof FINCODE_TOPICS)[number]) {
+  return topic.shuffle === false ? topic.quiz : shuffleQuiz(topic.quiz);
+}
+
 // ================= Главная «Финкода» =================
 export function FinCodeHome() {
   const app = useApp();
@@ -123,7 +127,7 @@ export function FinCodeTopicScreen({ id }: { id: string }) {
   const topic = FINCODE_BY_ID[id];
   const [phase, setPhase] = useState<"lesson" | "quiz" | "result">("lesson");
   const [cardIdx, setCardIdx] = useState(0);
-  const [quiz, setQuiz] = useState(() => (topic ? shuffleQuiz(topic.quiz) : []));
+  const [quiz, setQuiz] = useState(() => (topic ? quizFor(topic) : []));
   const [qIdx, setQIdx] = useState(0);
   const [selected, setSelected] = useState<number | null>(null);
   const [revealed, setRevealed] = useState(false);
@@ -174,7 +178,7 @@ export function FinCodeTopicScreen({ id }: { id: string }) {
               <Button
                 full
                 onClick={() => {
-                  setQuiz(shuffleQuiz(topic.quiz));
+                  setQuiz(quizFor(topic));
                   setPhase("quiz");
                   setQIdx(0);
                   setSelected(null);

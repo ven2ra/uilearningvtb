@@ -25,6 +25,8 @@ export interface FinCodeTopic {
   passRatio: number;
   /** Финкоины за первое прохождение */
   reward: number;
+  /** Перемешивать варианты ответов при каждом прохождении (по умолчанию да) */
+  shuffle?: boolean;
 }
 
 export const DIFFICULTY_LABEL: Record<FinCodeDifficulty, string> = { easy: "Легко", medium: "Средне", hard: "Сложно" };
@@ -37,7 +39,8 @@ export const FINCODE_TOPICS: FinCodeTopic[] = [
     icon: "file",
     difficulty: "easy",
     passRatio: 0.7,
-    reward: 40,
+    reward: 400,
+    shuffle: false,
     cards: [
       { title: "Рыночная заявка", text: "Покупка или продажа по лучшей доступной цене прямо сейчас. Быстро, но цена может немного отличаться от той, что вы видели." },
       { title: "Лимитная заявка", text: "Вы сами указываете цену. Заявка исполнится только по ней или лучше — но может не исполниться вовсе, если рынок не дойдёт до этой цены." },
