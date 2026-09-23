@@ -1,65 +1,32 @@
 @import "tailwindcss";
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap');
 
-/* Фирменный шрифт VTB Group Cond (Light 300, Book 400, DemiBold 600, Bold 700, ExtraBold 800) */
-@font-face {
-  font-family: "VTB Group Cond";
-  src: url("./assets/fonts/VTBGroupCond-Light.woff2") format("woff2"), url("./assets/fonts/VTBGroupCond-Light.woff") format("woff");
-  font-weight: 300;
-  font-style: normal;
-  font-display: swap;
-}
-@font-face {
-  font-family: "VTB Group Cond";
-  src: url("./assets/fonts/VTBGroupCond-Book.woff2") format("woff2"), url("./assets/fonts/VTBGroupCond-Book.woff") format("woff");
-  font-weight: 400;
-  font-style: normal;
-  font-display: swap;
-}
-@font-face {
-  font-family: "VTB Group Cond";
-  src: url("./assets/fonts/VTBGroupCond-DemiBold.woff2") format("woff2"), url("./assets/fonts/VTBGroupCond-DemiBold.woff") format("woff");
-  font-weight: 600;
-  font-style: normal;
-  font-display: swap;
-}
-@font-face {
-  font-family: "VTB Group Cond";
-  src: url("./assets/fonts/VTBGroupCond-Bold.woff2") format("woff2"), url("./assets/fonts/VTBGroupCond-Bold.woff") format("woff");
-  font-weight: 700;
-  font-style: normal;
-  font-display: swap;
-}
-@font-face {
-  font-family: "VTB Group Cond";
-  src: url("./assets/fonts/VTBGroupCond-ExtraBold.woff2") format("woff2"), url("./assets/fonts/VTBGroupCond-ExtraBold.woff") format("woff");
-  font-weight: 800;
-  font-style: normal;
-  font-display: swap;
-}
-
-/* Токены дизайн-системы «ВТБ Мои Инвестиции» */
+/* Токены дизайн-системы «ВТБ Мои Инвестиции»
+   Источник: design-code-reference (23.09.2026) — статичный HTML-срез с CSS-переменными,
+   разметкой и типографикой реального приложения, без бизнес-логики и данных клиента. */
 :root {
-  --bg: #f8fafc;
-  --bg-muted: #f1f5f9;
+  --bg: #f3f5f7;
+  --bg-muted: #f5f6f8;
   --surface: #ffffff;
-  --surface-muted: #f6f8fb;
-  --surface-selected: #e6eef7;
-  --text: #0f172a;
-  --text-secondary: #64748b;
-  --text-tertiary: #94a3b8;
-  --text-disabled: #cbd5e1;
-  --brand: #0057ff;
-  --brand-hover: #2965ff;
-  --brand-pressed: #0041cc;
-  --brand-subtle: #e6f0ff;
-  --success: #16a34a;
-  --success-surface: #ecfdf3;
+  --surface-muted: #f5f6f8;
+  --surface-selected: #e7f0ff;
+  --surface-inverse: #18191c;
+  --text: #18191c;
+  --text-secondary: #6f737a;
+  --text-tertiary: #969ba3;
+  --text-disabled: #c7cbd1;
+  --brand: #0062ff;
+  --brand-hover: #0a7cff;
+  --brand-pressed: #0050d6;
+  --brand-subtle: #eaf1ff;
+  --success: #12b76a;
+  --success-surface: #e7f9f1;
   --warning: #f59e0b;
   --warning-surface: #fff7e6;
-  --error: #ef4444;
-  --error-surface: #fff1f2;
-  --info: #3b82f6;
-  --info-surface: #eff6ff;
+  --error: #f04438;
+  --error-surface: #feecec;
+  --info: #0a7cff;
+  --info-surface: #eaf1ff;
   --training: #885cf6;
   --training-secondary: #a788fa;
   --training-accent: #d946ef;
@@ -67,15 +34,15 @@
   --training-surface: #faf8ff;
   --training-border: #e8deff;
   --training-text: #5b21b6;
-  --border: #e2e8f0;
-  --border-subtle: #eef2f7;
-  --border-strong: #cbd5e1;
-  --overlay: rgba(15, 23, 42, 0.56);
-  --elevation-1: 0 1px 2px rgba(15, 23, 42, 0.06);
-  --elevation-2: 0 4px 12px rgba(15, 23, 42, 0.08);
-  --elevation-3: 0 8px 24px rgba(15, 23, 42, 0.12);
+  --border: #e7e9ed;
+  --border-subtle: #f0f1f3;
+  --border-strong: #d5d8dd;
+  --overlay: rgba(24, 25, 28, 0.5);
+  --elevation-1: 0 1px 2px rgba(16, 24, 40, 0.04);
+  --elevation-2: 0 4px 12px rgba(16, 24, 40, 0.07);
+  --elevation-3: 0 8px 24px rgba(16, 24, 40, 0.12);
   --ease: cubic-bezier(0.2, 0, 0, 1);
-  --font-app: "VTB Group Cond", "VTB Sans", Arial, system-ui, -apple-system, sans-serif;
+  --font-app: "Inter", Arial, system-ui, -apple-system, sans-serif;
 }
 
 /* Режимы: реальный интерфейс — синий, тренировка — фиолетово-розовый */
@@ -131,10 +98,10 @@
   --color-line-subtle: var(--border-subtle);
   --color-line-strong: var(--border-strong);
   --font-sans: var(--font-app);
-  --radius-s: 6px;
-  --radius-m: 8px;
-  --radius-l: 12px;
-  --radius-xl: 16px;
+  --radius-s: 8px;
+  --radius-m: 12px;
+  --radius-l: 16px;
+  --radius-xl: 20px;
   --shadow-e1: var(--elevation-1);
   --shadow-e2: var(--elevation-2);
   --shadow-e3: var(--elevation-3);
@@ -154,9 +121,11 @@
 
   body {
     margin: 0;
-    background: #e9edf3;
+    background: #e5e8eb;
     color: var(--text);
     font-family: var(--font-app);
+    font-size: 14px;
+    line-height: 1.35;
     -webkit-font-smoothing: antialiased;
   }
 
