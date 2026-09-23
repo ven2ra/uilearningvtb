@@ -3,6 +3,7 @@ import { useApp } from "../state/AppState";
 import { INSTRUMENTS, INSTRUMENT_BY_ID } from "../lib/data";
 import { STAGES, TASKS, statusFor, tasksUntilNextAchievement } from "../lib/training";
 import { ACHIEVEMENTS } from "../lib/achievements";
+import { COVER_BY_ID } from "../lib/fincode";
 import { fmtMoney, plural } from "../lib/format";
 import { series } from "../lib/chart";
 import Icon, { type IconName } from "../ui/Icons";
@@ -13,6 +14,8 @@ export default function Home() {
   const training = app.mode === "training";
   const pct = app.portfolioValue - app.dayChange ? (app.dayChange / (app.portfolioValue - app.dayChange)) * 100 : 0;
   const [hidden, setHidden] = useState(false);
+  const cover = COVER_BY_ID[app.finCode.equippedCover] ?? COVER_BY_ID.classic;
+  const covered = !training && cover.id !== "classic";
 
   return (
     <div className="pb-6">
@@ -31,15 +34,16 @@ export default function Home() {
         {/* Баланс */}
         <section
           data-tour="balance"
-          className={cx("mt-1 rounded-l border p-6 text-center", training ? "border-tr-border bg-tr-surface" : "border-line-subtle bg-surface")}
+          className={cx("mt-1 rounded-l border p-6 text-center", training ? "border-tr-border bg-tr-surface" : covered ? "border-transparent" : "border-line-subtle bg-surface")}
+          style={covered ? { background: cover.gradient } : undefined}
         >
-          <span className="text-[13px] font-medium text-ink-2">{training ? "Виртуальный баланс" : "Стоимость портфеля"}</span>
+          <span className={cx("text-[13px] font-medium", covered ? "text-white/80" : "text-ink-2")}>{training ? "Виртуальный баланс" : "Стоимость портфеля"}</span>
           <div className="mt-1.5 flex items-center justify-center gap-2">
-            <span className="num text-[36px] font-bold leading-none tracking-tight">{hidden ? "•••• ₽" : fmtMoney(app.portfolioValue)}</span>
+            <span className={cx("num text-[36px] font-bold leading-none tracking-tight", covered && "text-white")}>{hidden ? "•••• ₽" : fmtMoney(app.portfolioValue)}</span>
             <button
               type="button"
               onClick={() => setHidden((h) => !h)}
-              className="flex h-8 w-8 shrink-0 items-center justify-center rounded-full text-ink-3 cursor-pointer active:bg-muted"
+              className={cx("flex h-8 w-8 shrink-0 items-center justify-center rounded-full cursor-pointer", covered ? "text-white/80 active:bg-white/15" : "text-ink-3 active:bg-muted")}
               aria-label={hidden ? "Показать сумму" : "Скрыть сумму"}
             >
               <Icon name={hidden ? "eyeOff" : "eye"} size={20} />
@@ -47,13 +51,13 @@ export default function Home() {
           </div>
           <div className="mt-2 flex items-center justify-center gap-2 text-[13px]">
             <Change value={app.dayChange} pct={pct} />
-            <span className="text-ink-3">за день</span>
+            <span className={covered ? "text-white/70" : "text-ink-3"}>за день</span>
           </div>
           <div className="mt-3">
             {training ? (
               <VirtualTag />
             ) : (
-              <span className="rounded-full bg-muted px-2.5 py-1 text-[11px] font-semibold text-ink-2">Брокерский ···4821</span>
+              <span className={cx("rounded-full px-2.5 py-1 text-[11px] font-semibold", covered ? "bg-white/15 text-white" : "bg-muted text-ink-2")}>Брокерский ···4821</span>
             )}
           </div>
           {training && <div className="mt-2 text-[12px] text-tr-text">Виртуальные средства. Реальные деньги не списываются.</div>}
@@ -69,6 +73,7 @@ export default function Home() {
         {/* Обучение */}
         {!training && <FirstSteps />}
         {training ? <TrainingProgressCard /> : <LearningCard />}
+        <FinCodeTeaser />
 
         {/* Активы */}
         <SectionTitle
@@ -363,6 +368,30 @@ function TrainingProgressCard() {
           Все этапы <Icon name="chevronRight" size={16} />
         </span>
       </div>
+    </button>
+  );
+}
+
+/** Тизер «Финкода»: стрик и финкоины, ссылка на обучение поручениям и бирже */
+function FinCodeTeaser() {
+  const app = useApp();
+  const streak = app.finCodeStreak;
+  const doneToday = !!app.finCodeToday?.completedId;
+  return (
+    <button type="button" onClick={() => app.go("fincode")} className="mt-3 flex w-full items-center gap-3 rounded-l border border-line-subtle bg-surface p-3.5 text-left cursor-pointer active:bg-surface-muted">
+      <span className={cx("flex h-11 w-11 shrink-0 items-center justify-center rounded-l", streak > 0 ? "bg-warning-surface text-[#B45309]" : "bg-[#EEF2FF] text-[#4F46E5]")}>
+        <Icon name={streak > 0 ? "flame" : "book"} size={22} />
+      </span>
+      <div className="min-w-0 flex-1">
+        <div className="text-[15px] font-semibold leading-5">Финкод</div>
+        <div className="text-[12px] leading-4 text-ink-2">
+          {streak > 0 ? `Стрик ${streak} ${plural(streak, "день", "дня", "дней")}${doneToday ? " · сегодня выполнено" : ""}` : "Обучение поручениям и бирже"}
+        </div>
+      </div>
+      <span className="flex items-center gap-1 rounded-m bg-[#EEF2FF] px-2 py-1 text-[12px] font-semibold text-[#4F46E5]">
+        <Icon name="coin" size={14} />
+        {app.finCode.coins}
+      </span>
     </button>
   );
 }

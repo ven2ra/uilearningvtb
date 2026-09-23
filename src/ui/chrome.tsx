@@ -234,7 +234,6 @@ export function HelpSheet() {
   const tour = useTour();
   const training = app.mode === "training";
   const q = app.buyQuest;
-  const unlocked = app.achievements.length;
   const Row = ({ icon, title, sub, onClick, tone = "accent", tourId }: { icon: IconName; title: string; sub: string; onClick: () => void; tone?: "accent" | "training" | "warning"; tourId?: string }) => (
     <button type="button" data-tour={tourId} onClick={onClick} className="flex w-full items-center gap-3 rounded-l px-4 py-2.5 text-left cursor-pointer active:bg-surface-muted">
       <span
@@ -288,7 +287,16 @@ export function HelpSheet() {
             tourId="help-switch"
           />
         )}
-        <Row icon="trophy" tone="warning" title="Мои достижения" sub={`Открыто ${unlocked} из ${ACHIEVEMENTS.length} · почти за каждое действие`} onClick={() => app.go("achievements")} />
+        <Row
+          icon="flame"
+          tone="warning"
+          title="Финкод"
+          sub={app.finCodeStreak > 0 ? `Стрик ${app.finCodeStreak} ${plural(app.finCodeStreak, "день", "дня", "дней")} · ${app.finCode.coins} финкоинов` : "Обучение поручениям и бирже, стрики, финкоины"}
+          onClick={() => {
+            app.setHelpOpen(false);
+            app.go("fincode");
+          }}
+        />
         {!training && (
           <Row
             icon="refresh"
@@ -300,8 +308,17 @@ export function HelpSheet() {
             }}
           />
         )}
+        <Row
+          icon="chat"
+          title="Чат с поддержкой"
+          sub="Ответим за пару минут"
+          onClick={() => {
+            app.setHelpOpen(false);
+            app.go("chat");
+          }}
+        />
       </div>
-      <p className="px-5 pb-2 pt-1 text-[12px] leading-4 text-ink-3">Обучение можно закрыть в любой момент — и вернуться к нему отсюда.</p>
+      <p className="px-5 pb-2 pt-1 text-[12px] leading-4 text-ink-3">Обучение можно закрыть в любой момент — и вернуться к нему отсюда. Достижения — в отдельной кнопке вверху экрана.</p>
     </Sheet>
   );
 }

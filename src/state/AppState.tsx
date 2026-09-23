@@ -2,6 +2,7 @@ import { createContext, useCallback, useContext, useEffect, useMemo, useRef, use
 import { INITIAL_PRICES, INSTRUMENT_BY_ID, REAL_ACCOUNT, VIRTUAL_START_CASH, type Doc, type Operation, type Position } from "../lib/data";
 import { STAGES, TASKS } from "../lib/training";
 import { ACHIEVEMENTS, ACH_BY_ID } from "../lib/achievements";
+import { DAILY_TOPIC_IDS, FINCODE_BY_ID, FINCODE_COVERS, FINCODE_DISCOUNTS, dailyCoinsFor, daysBetween, todayStr } from "../lib/fincode";
 import { fmtMoney, fmtQty } from "../lib/format";
 
 export type Mode = "real" | "training";
@@ -21,7 +22,11 @@ export type ScreenName =
   | "doc-order"
   | "doc-ready"
   | "training-intro"
-  | "training-finish";
+  | "training-finish"
+  | "fincode"
+  | "fincode-topic"
+  | "fincode-shop"
+  | "chat";
 
 export interface Screen {
   name: ScreenName;
@@ -70,6 +75,19 @@ export interface StageModal {
   achievementIds: string[];
 }
 
+/** Прогресс «Финкода»: темы, стрик, финкоины, магазин */
+export interface FinCodeState {
+  progress: Record<string, { done: boolean; bestScore: number }>;
+  streak: number;
+  longestStreak: number;
+  lastActiveDate: string | null;
+  coins: number;
+  dailyChoices: Record<string, { offered: string[]; completedId?: string }>;
+  ownedCovers: string[];
+  equippedCover: string;
+  activeDiscount: { pct: number; until: number } | null;
+}
+
 type Listener = (ev: string) => void;
 
 const freshTraining = (): TrainingState => ({
@@ -87,6 +105,17 @@ const freshTraining = (): TrainingState => ({
 
 const freshReal = (): Account => ({ cash: REAL_ACCOUNT.cash, positions: REAL_ACCOUNT.positions, history: REAL_ACCOUNT.history, docs: REAL_ACCOUNT.docs });
 const freshQuest = (): BuyQuest => ({ offer: "new", active: null, done: false });
+const freshFinCode = (): FinCodeState => ({
+  progress: {},
+  streak: 0,
+  longestStreak: 0,
+  lastActiveDate: null,
+  coins: 0,
+  dailyChoices: {},
+  ownedCovers: ["classic"],
+  equippedCover: "classic",
+  activeDiscount: null,
+});
 
 interface Persisted {
   onboarding: OnboardingStatus;
@@ -94,6 +123,7 @@ interface Persisted {
   real: Account;
   achievements: { id: string; ts: number }[];
   buyQuest: BuyQuest;
+  finCode: FinCodeState;
 }
 
 const STORAGE_KEY = "vtb-learning-proto-v2";
@@ -136,6 +166,7 @@ function useAppStateValue() {
   const [real, setReal] = useState<Account>(persisted?.real ?? freshReal());
   const [achievements, setAchievements] = useState<{ id: string; ts: number }[]>(persisted?.achievements ?? []);
   const [buyQuest, setBuyQuest] = useState<BuyQuest>(persisted?.buyQuest ?? freshQuest());
+  const [finCode, setFinCode] = useState<FinCodeState>(persisted?.finCode ?? freshFinCode());
   const [toasts, setToasts] = useState<Toast[]>([]);
   const [stageModal, setStageModal] = useState<StageModal | null>(null);
   const [achModal, setAchModal] = useState<string[] | null>(null);
@@ -145,8 +176,8 @@ function useAppStateValue() {
   const [moves, setMoves] = useState<Record<string, "up" | "down">>({});
 
   useEffect(
-    () => savePersisted({ onboarding, training, real, achievements, buyQuest }),
-    [onboarding, training, real, achievements, buyQuest],
+    () => savePersisted({ onboarding, training, real, achievements, buyQuest, finCode }),
+    [onboarding, training, real, achievements, buyQuest, finCode],
   );
 
   // Имитация движения котировок (тестовые данные)
@@ -192,6 +223,8 @@ function useAppStateValue() {
   realRef.current = real;
   const achRef = useRef(achievements);
   achRef.current = achievements;
+  const finCodeRef = useRef(finCode);
+  finCodeRef.current = finCode;
   const hintRef = useRef<() => void>(() => {});
   const goRef = useRef<(name: ScreenName) => void>(() => {});
 
@@ -248,6 +281,16 @@ function useAppStateValue() {
     stageModalRef.current = m;
     setStageModal(m);
   }, []);
+
+  // ---------- Платина: все остальные достижения собраны — как в PlayStation ----------
+  useEffect(() => {
+    const rest = ACHIEVEMENTS.filter((a) => a.id !== "platinum");
+    const got = new Set(achievements.map((a) => a.id));
+    if (rest.every((a) => got.has(a.id)) && !got.has("platinum")) {
+      celebrate(unlock(["platinum"]));
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [achievements]);
 
   // ---------- Программа тренировки ----------
   /** Засчитывает задание idx и все следующие, выполненные заранее. Возвращает завершённые этапы. */
@@ -470,6 +513,14 @@ function useAppStateValue() {
   const positionsValue = portfolioValue - account.cash;
   const dayChange = account.positions.reduce((s, p) => s + p.qty * ((prices[p.id] ?? 0) - INSTRUMENT_BY_ID[p.id].open), 0);
 
+  // ---------- Комиссия с учётом скидки за финкоины ----------
+  const currentFeeRate = () => {
+    const d = finCodeRef.current.activeDiscount;
+    const active = d && d.until > Date.now() ? d : null;
+    return 0.0005 * (1 - (active?.pct ?? 0) / 100);
+  };
+  const activeDiscount = finCode.activeDiscount && finCode.activeDiscount.until > Date.now() ? finCode.activeDiscount : null;
+
   /**
    * Сделка. В тренировке — виртуальная, в реальном режиме прототипа — имитация на тестовом счёте.
    * Возвращает текст ошибки или null.
@@ -478,12 +529,15 @@ function useAppStateValue() {
     (id: string, side: "buy" | "sell", qty: number): string | null => {
       const training = modeRef.current === "training";
       const instr = INSTRUMENT_BY_ID[id];
-      if (!training && instr.needsTest) return "Для этого инструмента нужно пройти тестирование";
+      if (!training && instr.needsTest) {
+        const passedMargin = finCodeRef.current.progress["margin"]?.done || finCodeRef.current.progress["final"]?.done;
+        if (!passedMargin) return "Пройдите тему «Срочный рынок и маржа» в Финкоде, чтобы открыть этот инструмент";
+      }
       const price = prices[id];
       const acc = accountNow();
       const pos = acc.positions.find((p) => p.id === id);
       const sum = price * qty;
-      const fee = +(sum * 0.0005).toFixed(2);
+      const fee = +(sum * currentFeeRate()).toFixed(2);
       if (!qty || qty <= 0) return "Укажите количество";
       if (side === "buy" && sum + fee > acc.cash) {
         emit("err:insufficient");
@@ -560,6 +614,93 @@ function useAppStateValue() {
       emit("do:order-doc");
     },
     [emit],
+  );
+
+  // ---------- Финкод: темы, стрик, финкоины ----------
+  /** Эффективный стрик для показа: если пропущен день и больше — считаем прерванным, даже если ещё не записали это */
+  const finCodeStreak = (() => {
+    if (!finCode.lastActiveDate) return 0;
+    const diff = daysBetween(finCode.lastActiveDate, todayStr());
+    return diff <= 1 ? finCode.streak : 0;
+  })();
+  const finCodeToday = finCode.dailyChoices[todayStr()];
+
+  const completeFinCodeQuiz = useCallback(
+    (topicId: string, correct: number, total: number) => {
+      const topic = FINCODE_BY_ID[topicId];
+      if (!topic) return { passed: false, coinsEarned: 0 };
+      const passed = total > 0 && correct / total >= topic.passRatio;
+      if (!passed) return { passed, coinsEarned: 0 };
+      const cur = finCodeRef.current;
+      const firstTime = !cur.progress[topicId]?.done;
+      const today = todayStr();
+      const alreadyToday = !!cur.dailyChoices[today]?.completedId;
+      const diff = cur.lastActiveDate ? daysBetween(cur.lastActiveDate, today) : null;
+      const newStreak = alreadyToday ? cur.streak : diff === 0 ? cur.streak : diff === 1 ? cur.streak + 1 : 1;
+      const dailyCoins = alreadyToday ? 0 : dailyCoinsFor(newStreak);
+      const topicCoins = firstTime ? topic.reward : 0;
+      const next: FinCodeState = {
+        ...cur,
+        progress: { ...cur.progress, [topicId]: { done: true, bestScore: Math.max(cur.progress[topicId]?.bestScore ?? 0, correct) } },
+        streak: newStreak,
+        longestStreak: Math.max(cur.longestStreak, newStreak),
+        lastActiveDate: today,
+        coins: cur.coins + topicCoins + dailyCoins,
+        dailyChoices: { ...cur.dailyChoices, [today]: { offered: cur.dailyChoices[today]?.offered ?? DAILY_TOPIC_IDS, completedId: topicId } },
+      };
+      finCodeRef.current = next;
+      setFinCode(next);
+      emit(`fincode:topic:${topicId}:passed`);
+      if (newStreak === 7) emit("fincode:streak:7");
+      if (newStreak === 30) emit("fincode:streak:30");
+      return { passed, coinsEarned: topicCoins + dailyCoins };
+    },
+    [emit],
+  );
+
+  const buyCover = useCallback(
+    (id: string) => {
+      const item = FINCODE_COVERS.find((c) => c.id === id);
+      if (!item) return "Такой обложки нет";
+      const cur = finCodeRef.current;
+      if (cur.ownedCovers.includes(id)) {
+        equipCoverInner(id);
+        return null;
+      }
+      if (cur.coins < item.price) return "Недостаточно финкоинов";
+      const next: FinCodeState = { ...cur, coins: cur.coins - item.price, ownedCovers: [...cur.ownedCovers, id], equippedCover: id };
+      finCodeRef.current = next;
+      setFinCode(next);
+      toast({ kind: "success", title: "Обложка куплена", text: item.title });
+      return null;
+    },
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+    [toast],
+  );
+
+  function equipCoverInner(id: string) {
+    const cur = finCodeRef.current;
+    if (!cur.ownedCovers.includes(id)) return;
+    const next = { ...cur, equippedCover: id };
+    finCodeRef.current = next;
+    setFinCode(next);
+  }
+  const equipCover = useCallback((id: string) => equipCoverInner(id), []);
+
+  const buyDiscount = useCallback(
+    (id: string) => {
+      const item = FINCODE_DISCOUNTS.find((d) => d.id === id);
+      if (!item) return "Такого предложения нет";
+      const cur = finCodeRef.current;
+      if (cur.coins < item.price) return "Недостаточно финкоинов";
+      const until = Date.now() + item.hours * 3600000;
+      const next: FinCodeState = { ...cur, coins: cur.coins - item.price, activeDiscount: { pct: item.pct, until } };
+      finCodeRef.current = next;
+      setFinCode(next);
+      toast({ kind: "success", title: "Скидка активирована", text: item.title });
+      return null;
+    },
+    [toast],
   );
 
   // ---------- Состояния для демонстрации ----------
@@ -660,10 +801,19 @@ function useAppStateValue() {
     prices,
     moves,
     trade,
+    feeRate: currentFeeRate(),
+    activeDiscount,
     moveMoney,
     orderDoc,
     achievements,
     has,
+    finCode,
+    finCodeStreak,
+    finCodeToday,
+    completeFinCodeQuiz,
+    buyCover,
+    equipCover,
+    buyDiscount,
     achModal,
     setAchModal,
     toasts,

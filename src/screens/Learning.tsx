@@ -1,11 +1,12 @@
+import { useState } from "react";
 import { useApp } from "../state/AppState";
 import { STAGES, TASKS, statusFor, tasksUntilNextAchievement } from "../lib/training";
-import { ACHIEVEMENTS, ACH_GROUPS } from "../lib/achievements";
+import { ACHIEVEMENTS, ACH_GROUPS, TIER_LABEL, TIER_ORDER, type AchievementTier } from "../lib/achievements";
 import { AchBadge } from "../ui/chrome";
 import { fmtMoney, fmtTime, plural } from "../lib/format";
 import { VIRTUAL_START_CASH } from "../lib/data";
 import Icon, { type IconName } from "../ui/Icons";
-import { Button, HelpButton, ProgressBar, ProgressRing, TopBar, cx } from "../ui/kit";
+import { Button, HelpButton, ProgressBar, ProgressRing, Segmented, TopBar, cx } from "../ui/kit";
 
 // ================= Вход в тренировку =================
 export function TrainingIntro() {
@@ -252,6 +253,12 @@ export function More() {
         <div data-tour="more-learning" className="mt-3 overflow-hidden rounded-l border border-line-subtle bg-surface">
           <MoreRow icon="cap" tone="training" title="Фейковые торги" sub={t.started ? `Пройдено ${app.doneStages} из 7 этапов` : "Тренировка на виртуальных деньгах"} onClick={app.enterTraining} />
           <MoreRow
+            icon="book"
+            title="Финкод"
+            sub={app.finCodeStreak > 0 ? `Стрик ${app.finCodeStreak} ${plural(app.finCodeStreak, "день", "дня", "дней")} · ${app.finCode.coins} финкоинов` : "Поручения, биржа, стрики и финкоины"}
+            onClick={() => app.go("fincode")}
+          />
+          <MoreRow
             icon="help"
             title="Подсказки по приложению"
             sub="Пройти онбординг заново"
@@ -267,7 +274,7 @@ export function More() {
           <MoreRow icon="user" title="Профиль" sub="Данные и документы" />
           <MoreRow icon="shield" title="Безопасность" sub="Код входа, биометрия" />
           <MoreRow icon="settings" title="Настройки" sub="Уведомления, внешний вид" />
-          <MoreRow icon="chat" title="Чат с поддержкой" sub="Ответим за пару минут" />
+          <MoreRow icon="chat" title="Чат с поддержкой" sub="Ответим за пару минут" onClick={() => app.go("chat")} />
         </div>
 
         <div data-tour="more-demo" className="mt-6 rounded-l border border-dashed border-line-strong bg-surface p-4">
@@ -319,10 +326,23 @@ export function DemoButtons({ compact }: { compact?: boolean }) {
   );
 }
 
+const TIER_CLS: Record<AchievementTier, string> = {
+  bronze: "bg-[#FDF0E4] text-[#9A5B13]",
+  silver: "bg-[#F1F2F4] text-[#52575E]",
+  gold: "bg-warning-surface text-[#B45309]",
+  platinum: "bg-[#EEF2FF] text-[#4F46E5]",
+};
+
+function TierBadge({ tier }: { tier: AchievementTier }) {
+  return <span className={cx("inline-flex items-center rounded-s px-2 py-0.5 text-[11px] font-semibold leading-4", TIER_CLS[tier])}>{TIER_LABEL[tier]}</span>;
+}
+
 // ================= Мои достижения =================
 export function Achievements() {
   const app = useApp();
   const got = app.achievements.length;
+  const [view, setView] = useState<"По разделам" | "По уровню">("По разделам");
+
   return (
     <>
       <TopBar back={app.stack.length > 1} title="Мои достижения" />
@@ -340,16 +360,33 @@ export function Achievements() {
             </div>
           </div>
           <ProgressBar value={got} max={ACHIEVEMENTS.length} tone="training" className="mt-3" />
+          <div className="mt-3 flex gap-1.5">
+            {TIER_ORDER.map((tr) => {
+              const n = ACHIEVEMENTS.filter((a) => a.tier === tr && app.has(a.id)).length;
+              const total = ACHIEVEMENTS.filter((a) => a.tier === tr).length;
+              return (
+                <span key={tr} className={cx("flex flex-1 items-center justify-center gap-1 rounded-m py-1.5 text-[12px] font-semibold", TIER_CLS[tr])}>
+                  {n}/{total}
+                </span>
+              );
+            })}
+          </div>
         </section>
 
+        <div className="mt-4">
+          <Segmented options={["По разделам", "По уровню"] as const} value={view} onChange={setView} />
+        </div>
+
         <div data-tour="ach-grid">
-          {ACH_GROUPS.map((g) => {
-            const list = ACHIEVEMENTS.filter((a) => a.group === g);
+          {(view === "По разделам" ? ACH_GROUPS : TIER_ORDER).map((key) => {
+            const list = view === "По разделам" ? ACHIEVEMENTS.filter((a) => a.group === key) : ACHIEVEMENTS.filter((a) => a.tier === key);
+            if (!list.length) return null;
             const n = list.filter((a) => app.has(a.id)).length;
+            const title = view === "По разделам" ? key : TIER_LABEL[key as AchievementTier];
             return (
-              <section key={g}>
+              <section key={key}>
                 <div className="mb-2 mt-6 flex items-center justify-between px-1">
-                  <h2 className="text-[18px] font-semibold">{g}</h2>
+                  <h2 className="text-[18px] font-semibold">{title}</h2>
                   <span className="num text-[13px] font-semibold text-ink-2">
                     {n}/{list.length}
                   </span>
@@ -361,7 +398,8 @@ export function Achievements() {
                       <div key={a.id} className={cx("flex flex-col items-center rounded-l border p-3 text-center", rec ? "border-tr-border bg-tr-surface" : "border-line-subtle bg-surface")}>
                         <AchBadge def={a} locked={!rec} size={52} />
                         <div className={cx("mt-2 text-[14px] font-semibold leading-5", !rec && "text-ink-2")}>{a.title}</div>
-                        <div className="mt-0.5 text-[12px] leading-4 text-ink-2">{a.desc}</div>
+                        <TierBadge tier={a.tier} />
+                        <div className="mt-1 text-[12px] leading-4 text-ink-2">{a.auto ? "Особое: открывается автоматически" : a.desc}</div>
                         <div className={cx("mt-1.5 text-[11px] font-semibold", rec ? "text-tr-text" : "text-ink-3")}>
                           {rec ? `Получено ${fmtTime(rec.ts)}` : a.mode === "training" ? "На фейковых торгах" : a.mode === "real" ? "В приложении" : "В любом режиме"}
                         </div>

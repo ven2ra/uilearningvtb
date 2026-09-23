@@ -116,6 +116,7 @@ export function Market() {
   const [q, setQ] = useState("");
   const training = app.mode === "training";
   const quest = app.buyQuest;
+  const passedMargin = !!(app.finCode.progress.margin?.done || app.finCode.progress.final?.done);
 
   // Первый заход на биржу после первых шагов — предлагаем выбрать, как учиться покупать
   useEffect(() => {
@@ -168,12 +169,12 @@ export function Market() {
             <Segmented tour="market-segments" itemTour={(o) => `seg-${o}`} options={TYPES} value={type} onChange={setType} />
           </div>
         )}
-        {!q && type === "Фьючерсы" && (
+        {!q && type === "Фьючерсы" && (training || !passedMargin) && (
           <div className={cx("mt-3 flex items-start gap-2 rounded-m p-3 text-[12px] leading-[18px]", training ? "bg-tr-surface text-tr-text border border-tr-border" : "bg-warning-surface text-[#92400E]")}>
             <Icon name={training ? "cap" : "lock"} size={16} className="mt-0.5 shrink-0" />
             {training
               ? "На фейковых торгах фьючерсы доступны без тестирования — пробуйте смело."
-              : "Для торговли фьючерсами нужно пройти тестирование. Попробовать можно уже сейчас — на фейковых торгах."}
+              : "Для торговли фьючерсами нужно пройти тему «Срочный рынок и маржа» в Финкоде. Попробовать можно уже сейчас — на фейковых торгах."}
           </div>
         )}
         <div className="mt-3 overflow-hidden rounded-l border border-line-subtle bg-surface">
@@ -194,7 +195,7 @@ export function Market() {
                   <div className="truncate text-[15px] font-medium">{i.name}</div>
                   <div className="flex items-center gap-1 text-[13px] text-ink-2">
                     {i.ticker}
-                    {i.needsTest && !training && <Icon name="lock" size={12} className="text-ink-3" />}
+                    {i.needsTest && !training && !passedMargin && <Icon name="lock" size={12} className="text-ink-3" />}
                   </div>
                 </div>
                 <Sparkline data={series(i.id, "1Д", price, 24)} />
@@ -224,7 +225,8 @@ export function Instrument({ id }: { id: string }) {
   const pos = app.account.positions.find((p) => p.id === id);
   const training = app.mode === "training";
 
-  const locked = !training && !!i.needsTest;
+  const passedMargin = !!(app.finCode.progress.margin?.done || app.finCode.progress.final?.done);
+  const locked = !training && !!i.needsTest && !passedMargin;
   const openTrade = (side: "buy" | "sell") => {
     if (locked) return;
     app.go("trade", { id, side });
@@ -269,7 +271,9 @@ export function Instrument({ id }: { id: string }) {
               <Icon name="lock" size={18} className="text-[#B45309]" />
               Нужно тестирование
             </div>
-            <p className="mt-1 text-[13px] leading-5 text-ink-2">Фьючерсы доступны после теста для неквалифицированных инвесторов. Хотите попробовать уже сейчас — на фейковых торгах, без риска.</p>
+            <p className="mt-1 text-[13px] leading-5 text-ink-2">
+              Фьючерсы доступны после темы «Срочный рынок и маржа» в Финкоде. Хотите попробовать уже сейчас — на фейковых торгах, без риска.
+            </p>
             <div className="mt-3 flex flex-col gap-2">
               <button
                 type="button"
@@ -279,8 +283,8 @@ export function Instrument({ id }: { id: string }) {
               >
                 <Icon name="cap" size={18} /> Попробовать на фейковых торгах
               </button>
-              <Button size="m" variant="ghost" onClick={() => app.toast({ kind: "info", title: "Тестирование", text: "Прохождение теста не входит в сценарий прототипа" })}>
-                Пройти тест
+              <Button size="m" variant="ghost" icon="book" onClick={() => app.go("fincode-topic", { id: "margin" })}>
+                Пройти тему в Финкоде
               </Button>
             </div>
           </section>
@@ -365,9 +369,9 @@ export function Trade({ id, side: initialSide }: { id: string; side: "buy" | "se
   const [done, setDone] = useState<{ side: "buy" | "sell"; qty: number; sum: number } | null>(null);
   const price = app.prices[id];
   const sum = price * qty;
-  const fee = sum * 0.0005;
+  const fee = sum * app.feeRate;
   const pos = app.account.positions.find((p) => p.id === id);
-  const available = side === "buy" ? Math.floor(app.account.cash / (price * 1.0005)) : pos?.qty ?? 0;
+  const available = side === "buy" ? Math.floor(app.account.cash / (price * (1 + app.feeRate))) : pos?.qty ?? 0;
 
   if (done) {
     return (
@@ -478,7 +482,7 @@ export function Trade({ id, side: initialSide }: { id: string; side: "buy" | "se
 
         <section data-tour="trade-total" className="mt-3 rounded-l border border-line-subtle bg-surface p-4 text-[14px]">
           <Row k="Сумма" v={fmtMoney(sum)} />
-          <Row k="Комиссия 0,05%" v={fmtMoney(fee)} />
+          <Row k={`Комиссия ${(app.feeRate * 100).toFixed(3).replace(/0+$/, "").replace(/\.$/, "")}%${app.activeDiscount ? ` · скидка −${app.activeDiscount.pct}%` : ""}`} v={fmtMoney(fee)} />
           <div className="my-2 border-t border-line-subtle" />
           <Row k={side === "buy" ? "Итого спишется" : "Итого поступит"} v={fmtMoney(side === "buy" ? sum + fee : sum - fee)} bold />
           <Row k={training ? "Виртуальных средств" : "Доступно на счёте"} v={fmtMoney(app.account.cash)} />

@@ -172,6 +172,36 @@ const paths: Record<string, ReactNode> = {
       <path d="M15 3.5A9 9 0 0 1 20.5 9H15z" />
     </>
   ),
+  flame: <path d="M12 2c1 3-3 4-3 7.5A3.5 3.5 0 0 0 12 13a3.5 3.5 0 0 0 3-5c2 1 3 3 3 5.5A6 6 0 0 1 6 13.5C6 8 12 6 12 2z" />,
+  coin: (
+    <>
+      <circle cx="12" cy="12" r="9" />
+      <path d="M12 7v10" />
+      <path d="M14.5 9.3c-.3-.8-1.2-1.3-2.3-1.3-1.4 0-2.4.7-2.4 1.7 0 1 .9 1.4 2.2 1.7 1.5.3 2.7.7 2.7 1.9 0 1.1-1.1 1.8-2.5 1.8-1.2 0-2.1-.5-2.4-1.4" />
+    </>
+  ),
+  palette: (
+    <>
+      <path d="M12 3a9 8 0 1 0 0 16c1 0 1.5-.6 1.5-1.4 0-.4-.2-.7-.4-1-.2-.3-.4-.6-.4-1 0-.8.6-1.4 1.4-1.4H16a4 4 0 0 0 4-4c0-4.4-3.6-7.2-8-7.2z" />
+      <circle cx="7.5" cy="11" r="1" fill="currentColor" stroke="none" />
+      <circle cx="9.5" cy="7.3" r="1" fill="currentColor" stroke="none" />
+      <circle cx="14.5" cy="7.3" r="1" fill="currentColor" stroke="none" />
+      <circle cx="16.5" cy="11" r="1" fill="currentColor" stroke="none" />
+    </>
+  ),
+  percent: (
+    <>
+      <path d="M5 19 19 5" />
+      <circle cx="7" cy="7" r="2.3" />
+      <circle cx="17" cy="17" r="2.3" />
+    </>
+  ),
+  book: (
+    <>
+      <path d="M4 5.5A2.5 2.5 0 0 1 6.5 3H20v15H6.5A2.5 2.5 0 0 0 4 20.5z" />
+      <path d="M4 5.5v15A2.5 2.5 0 0 1 6.5 18H20" />
+    </>
+  ),
 };
 
 export type IconName = keyof typeof paths;

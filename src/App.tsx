@@ -6,6 +6,8 @@ import Home from "./screens/Home";
 import { History, Instrument, Market, Portfolio, Trade } from "./screens/Invest";
 import { DocOrder, DocReady, Documents, MoveMoney } from "./screens/Service";
 import { Achievements, DemoButtons, Hub, More, TrainingFinish, TrainingIntro } from "./screens/Learning";
+import { FinCodeHome, FinCodeShop, FinCodeTopicScreen } from "./screens/FinCode";
+import Chat from "./screens/Chat";
 import { cx } from "./ui/kit";
 import { ACHIEVEMENTS } from "./lib/achievements";
 import Splash from "./ui/Splash";
@@ -58,6 +60,14 @@ function CurrentScreen() {
       return <TrainingIntro />;
     case "training-finish":
       return <TrainingFinish />;
+    case "fincode":
+      return <FinCodeHome />;
+    case "fincode-topic":
+      return <FinCodeTopicScreen id={p.id!} />;
+    case "fincode-shop":
+      return <FinCodeShop />;
+    case "chat":
+      return <Chat />;
   }
 }
 
@@ -65,7 +75,7 @@ function Phone({ framed }: { framed: boolean }) {
   const app = useApp();
   const training = app.mode === "training";
   const fullScreen = app.current.name === "training-intro" || app.current.name === "training-finish";
-  const panelHidden = fullScreen || app.current.name === "hub" || app.current.name === "achievements";
+  const panelHidden = fullScreen || ["hub", "achievements", "fincode", "fincode-topic", "fincode-shop", "chat"].includes(app.current.name);
   // Квест «Первая покупка» важнее текущего задания программы: сначала он
   const showQuest = !panelHidden && app.buyQuest.active === app.mode;
   const showTaskPanel = !panelHidden && !showQuest && training && app.training.started && !app.training.finished;
