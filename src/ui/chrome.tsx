@@ -1,5 +1,6 @@
 import { useEffect, useState, type ReactNode } from "react";
 import { MoneyActionsSheet } from "../screens/MoneyOperations";
+import HelpPanel from "./HelpPanel";
 import { useApp, type ScreenName } from "../state/AppState";
 import { useTour } from "../tour/Tour";
 import { STAGES, TASKS, tasksUntilNextAchievement } from "../lib/training";
@@ -256,6 +257,10 @@ export function WelcomeSheet() {
 
 // ---------- «Помощь»: подсказки, обучение, переключение режима, достижения ----------
 export function HelpSheet() {
+  const app = useApp();
+  return app.mode === "real" ? <HelpPanel /> : <TrainingHelpSheet />;
+}
+function TrainingHelpSheet() {
   const app = useApp();
   const tour = useTour();
   const training = app.mode === "training";

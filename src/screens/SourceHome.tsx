@@ -2,7 +2,6 @@
 import { useApp } from "../state/AppState";
 import { INSTRUMENT_BY_ID } from "../lib/data";
 import { fmtMoney } from "../lib/format";
-import { HelpButton } from "../ui/kit";
 import Icon from "../ui/Icons";
 import {
   AchChip,
@@ -76,6 +75,10 @@ export default function SourceHome() {
           )}
         </button>
         <div>
+          <button className="reference-header-help" data-help-trigger data-tour="help-btn" aria-label="Помощь">
+            <svg width="20" height="20" viewBox="0 0 20 20" fill="none" aria-hidden="true"><circle cx="10" cy="10" r="8.5" stroke="currentColor" strokeWidth="1.5" /><path d="M7.2 7a2.8 2.8 0 0 1 5.6 0c0 2-2.8 2-2.8 4" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" /><circle cx="10" cy="14.5" r="1" fill="currentColor" /></svg>
+            Помощь
+          </button>
           <button aria-label="Профиль" onClick={() => app.go("profile")}>
             <ReferenceIcon name="profile" />
           </button>
@@ -320,7 +323,6 @@ export default function SourceHome() {
         <section className="reference-learning">
           <div className="reference-learning-tools">
             <AchChip />
-            <HelpButton />
           </div>
           <FirstSteps />
           <LearningCard />

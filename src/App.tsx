@@ -8,6 +8,7 @@ import { History, Instrument, Market, Portfolio, Trade } from "./screens/Invest"
 import { DocOrder, DocReady, Documents, MoveMoney } from "./screens/Service";
 import { Achievements, DemoButtons, Hub, More, TrainingFinish, TrainingIntro } from "./screens/Learning";
 import Profile from "./screens/Profile";
+import LearningPath from "./screens/LearningPath";
 import { SourceProfile, ProfileLearning } from "./screens/SourceProfile";
 import MoneyOperations from "./screens/MoneyOperations";
 import { cx } from "./ui/kit";
@@ -44,6 +45,8 @@ function CurrentScreen() {
       return mode === "real" ? <SourceProfile /> : <Profile />;
     case "profile-learning":
       return <ProfileLearning />;
+    case "learning-path":
+      return <LearningPath />;
     case "hub":
       return <Hub />;
     case "achievements":
@@ -75,7 +78,7 @@ function Phone({ framed }: { framed: boolean }) {
   const app = useApp();
   const training = app.mode === "training";
   const fullScreen = app.current.name === "training-intro" || app.current.name === "training-finish" || (!training && ["topup", "transfer", "withdraw"].includes(app.current.name));
-  const profileScreen = !training && ["profile", "profile-learning"].includes(app.current.name);
+  const profileScreen = !training && ["profile", "profile-learning", "learning-path"].includes(app.current.name);
   const panelHidden = fullScreen || profileScreen || app.current.name === "hub" || app.current.name === "achievements";
   // РљРІРµСЃС‚ В«РџРµСЂРІР°СЏ РїРѕРєСѓРїРєР°В» РІР°Р¶РЅРµРµ С‚РµРєСѓС‰РµРіРѕ Р·Р°РґР°РЅРёСЏ РїСЂРѕРіСЂР°РјРјС‹: СЃРЅР°С‡Р°Р»Р° РѕРЅ
   const showQuest = !panelHidden && app.buyQuest.active === app.mode;

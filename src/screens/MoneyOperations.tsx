@@ -8,7 +8,7 @@ const asset = (name: string) => assets[`../assets/operations/${name}`];
 function Glyph({ name, size = 24 }: { name: string; size?: number }) {
   return <img src={asset(`${name}.svg`)} width={size} height={size} alt="" />;
 }
-function Overlay({ children, close, label, sheet = false }: { children: ReactNode; close: () => void; label: string; sheet?: boolean }) {
+export function Overlay({ children, close, label, sheet = false }: { children: ReactNode; close: () => void; label: string; sheet?: boolean }) {
   const app = useApp();
   const ref = useRef<HTMLDivElement>(null);
   const closeRef = useRef(close);

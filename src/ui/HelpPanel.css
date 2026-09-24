@@ -1,0 +1,27 @@
+.money-sheet:has(.help-reference) { padding: 0; border-radius: 24px 24px 0 0; max-height: 90%; background: #f6f8fc; }
+.money-overlay:has(.help-reference) { background: #15213999; }
+.help-reference { position: relative; padding: 32px 12px 24px; color: #080e25; }
+.help-reference-handle { position: absolute; top: 13px; left: calc(50% - 18px); width: 36px; height: 4px; border-radius: 4px; background: #cdd1df; }
+.help-reference-close { position: absolute; top: 18px; right: 16px; width: 32px; height: 32px; display: grid; place-items: center; border-radius: 12px; background: #eaeef5; color: #596177; }
+.help-reference header { padding: 4px 10px 20px; }
+.help-reference h2 { font-size: 27px; line-height: 34px; font-weight: 600; letter-spacing: -.8px; margin: 0 0 5px; }
+.help-reference p { color: #77809d; font-size: 15px; line-height: 19px; margin: 0; }
+.help-reference-options { display: grid; gap: 12px; }
+.help-reference-options > button { display: flex; align-items: center; gap: 16px; width: 100%; padding: 12px; background: #fff; border-radius: 18px; text-align: left; }
+.help-reference-icon { width: 64px; height: 64px; flex-shrink: 0; background: #f5f7fb; border-radius: 15px; display: grid; place-items: center; }
+.help-reference-icon svg { width: 56px; height: 56px; }
+.help-reference-options > button > span:nth-child(2) { flex: 1; min-width: 0; }
+.help-reference-options strong { display: block; font-weight: 600; font-size: 16px; line-height: 20px; letter-spacing: -.5px; }
+.help-reference-options small { display: block; color: #77809d; font-size: 13px; line-height: 17px; margin-top: 6px; }
+.help-reference-options i { width: 28px; height: 28px; flex-shrink: 0; display: grid; place-items: center; border-radius: 50%; background: #f2f4f8; color: #596177; }
+.help-support-back { color: #007aff; margin: 10px 0 16px; }
+@media(min-width:600px) { .help-reference { padding: 36px 20px 24px; } .help-reference header { padding-bottom: 24px; } .help-reference-options > button { padding: 16px; } .help-reference-learning { padding: 20px 24px; } }
+@media(max-width:390px) { .help-reference-options > button { gap: 10px; padding: 10px; } .help-reference-icon { width: 48px; height: 58px; } .help-reference-icon svg { width: 46px; height: 46px; } .help-reference-options strong { font-size: 14px; } .help-reference-options small { font-size: 11px; line-height: 15px; } .help-reference-art { width: 28%; right: 2px; top: 50px; } .help-reference-learning h3 { font-size: 18px; } }
+
+.money-sheet:has(.help-reference) { height: auto; }
+.help-reference-options > button { display: grid; grid-template-columns: 64px minmax(0,1fr) 28px; min-height: 96px; }
+.help-reference-icon { overflow: hidden; }
+.help-reference-icon .help-fincode { width: 100%; height: 100%; object-fit: cover; object-position: right center; }
+.help-reference-options > button:hover i { background: #deebff; color: #007aff; }
+.help-reference-options > button:active i { background: #c4d9ff; }
+@media(max-width:440px) { .help-reference-options > button { grid-template-columns: 58px minmax(0,1fr) 26px; gap: 10px; padding: 10px; min-height: 94px; } .help-reference-icon { width: 58px; height: 58px; } .help-reference-icon svg { width: 50px; height: 50px; } .help-reference-options strong { font-size: 14px; line-height: 18px; } .help-reference-options small { font-size: 11px; line-height: 15px; } .help-reference-options i { width: 26px; height: 26px; } }

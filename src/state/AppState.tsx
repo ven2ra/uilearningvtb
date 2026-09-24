@@ -13,6 +13,7 @@ export type ScreenName =
   | "more"
   | "profile"
   | "profile-learning"
+  | "learning-path"
   | "hub"
   | "achievements"
   | "instrument"
@@ -94,7 +95,16 @@ const INITIAL_MONEY_BALANCES = { master: 500000, main: 0, otc: 0 };
 const freshReal = (): Account => ({ balanceRevision: 1, moneyBalances: { ...INITIAL_MONEY_BALANCES }, cash: REAL_ACCOUNT.cash, positions: REAL_ACCOUNT.positions, history: REAL_ACCOUNT.history, docs: REAL_ACCOUNT.docs });
 const freshQuest = (): BuyQuest => ({ offer: "new", active: null, done: false });
 
+export interface CourseProgress {
+  completed: number;
+  steps: Record<number, number>;
+  answers: Record<number, number>;
+  coins: number;
+  days: string[];
+}
+
 interface Persisted {
+  course?: CourseProgress;
   favorites?: string[];
   onboarding: OnboardingStatus;
   training: TrainingState;
@@ -133,6 +143,7 @@ function useAppStateValue() {
   const persisted = useMemo(loadPersisted, []);
   const frameRef = useRef<HTMLDivElement | null>(null);
 
+  const [course, setCourse] = useState<CourseProgress>(persisted?.course ?? { completed: 0, steps: {}, answers: {}, coins: 0, days: [] });
   const [mode, setMode] = useState<Mode>("real");
   const [favorites, setFavorites] = useState<string[]>(persisted?.favorites ?? []);
   const toggleFavorite = (id: string) => setFavorites(items => items.includes(id) ? items.filter(item => item !== id) : [...items, id]);
@@ -158,8 +169,8 @@ function useAppStateValue() {
   const [moves, setMoves] = useState<Record<string, "up" | "down">>({});
 
   useEffect(
-    () => savePersisted({ onboarding, training, real, achievements, buyQuest, favorites }),
-    [onboarding, training, real, achievements, buyQuest, favorites],
+    () => savePersisted({ onboarding, training, real, achievements, buyQuest, favorites, course }),
+    [onboarding, training, real, achievements, buyQuest, favorites, course],
   );
 
   // Имитация движения котировок (тестовые данные)
@@ -694,6 +705,8 @@ function useAppStateValue() {
     moves,
     trade,
     moveMoney,
+    course,
+    setCourse,
     moneyBalances,
     simulateMoney,
     orderDoc,

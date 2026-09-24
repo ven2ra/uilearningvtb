@@ -2,10 +2,11 @@ import { useState } from "react";
 import { useApp } from "../../state/AppState";
 import { referenceImage } from "./ReferenceIcon";
 import type { Detail } from "./DetailSheet";
+import TrainingBanner from "./TrainingBanner";
 
 const banners = [
   [
-    "Принцип Нобелевской премии",
+    "Добро пожаловать в ВТБ Мои Инвестиции!",
     "Что поддержать — решаете вы",
     "asset-056.jpeg",
   ],
@@ -61,24 +62,26 @@ export default function Promotions({
 }) {
   const [index, setIndex] = useState(0);
   const app = useApp();
-  const [title, subtitle, image] = banners[index];
+  const visibleBanners = app.training.finished ? banners.slice(1) : banners;
+  const activeIndex = Math.min(index, visibleBanners.length - 1);
+  const [title, subtitle, image] = visibleBanners[activeIndex];
   return (
     <>
       <section className="reference-banners" aria-label="Предложения">
-        <button
+        {!app.training.finished && activeIndex === 0 ? <TrainingBanner onStart={() => app.enterTraining()} onLater={() => setIndex(1)} /> : <button
           className="reference-banner"
           style={{ backgroundImage: `url(${referenceImage(image)})` }}
           onClick={() => open({ title, body: <p>{subtitle || title}</p> })}
         >
           <strong>{title}</strong>
           <span>{subtitle}</span>
-        </button>
+        </button>}
         <div className="reference-dots">
-          {banners.map(([name], i) => (
+          {visibleBanners.map(([name], i) => (
             <button
               key={name}
               aria-label={`Баннер ${i + 1}: ${name}`}
-              aria-pressed={i === index}
+              aria-pressed={i === activeIndex}
               onClick={() => setIndex(i)}
             />
           ))}
