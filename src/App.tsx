@@ -1,8 +1,9 @@
-import { useEffect, useState } from "react";
+﻿import { useEffect, useState } from "react";
 import { AppProvider, useApp } from "./state/AppState";
 import { TourProvider } from "./tour/Tour";
 import { AchievementModal, ActionsSheet, BottomNav, HelpSheet, MarketOfferSheet, QuestPanel, StageModalView, StatusBar, TaskPanel, Toasts, TrainingBanner, WelcomeSheet } from "./ui/chrome";
 import Home from "./screens/Home";
+import SourceHome from "./screens/SourceHome";
 import { History, Instrument, Market, Portfolio, Trade } from "./screens/Invest";
 import { DocOrder, DocReady, Documents, MoveMoney } from "./screens/Service";
 import { Achievements, DemoButtons, Hub, More, TrainingFinish, TrainingIntro } from "./screens/Learning";
@@ -30,7 +31,7 @@ function CurrentScreen() {
   const p = current.params ?? {};
   switch (current.name) {
     case "home":
-      return <Home />;
+      return mode === "real" ? <SourceHome /> : <Home />;
     case "portfolio":
       return <Portfolio />;
     case "market":
@@ -76,7 +77,7 @@ function Phone({ framed }: { framed: boolean }) {
   const fullScreen = app.current.name === "training-intro" || app.current.name === "training-finish" || (!training && ["topup", "transfer", "withdraw"].includes(app.current.name));
   const profileScreen = !training && ["profile", "profile-learning"].includes(app.current.name);
   const panelHidden = fullScreen || profileScreen || app.current.name === "hub" || app.current.name === "achievements";
-  // Квест «Первая покупка» важнее текущего задания программы: сначала он
+  // РљРІРµСЃС‚ В«РџРµСЂРІР°СЏ РїРѕРєСѓРїРєР°В» РІР°Р¶РЅРµРµ С‚РµРєСѓС‰РµРіРѕ Р·Р°РґР°РЅРёСЏ РїСЂРѕРіСЂР°РјРјС‹: СЃРЅР°С‡Р°Р»Р° РѕРЅ
   const showQuest = !panelHidden && app.buyQuest.active === app.mode;
   const showTaskPanel = !panelHidden && !showQuest && training && app.training.started && !app.training.finished;
 
@@ -121,43 +122,43 @@ function Shell() {
     <div className="flex min-h-full items-center justify-center gap-10 p-8">
       <Phone framed />
       <aside className="w-[300px] shrink-0 text-[14px] leading-5 text-ink-2">
-        <div className="text-[12px] font-semibold uppercase tracking-wide text-ink-3">Концепт · прототип</div>
-        <h1 className="mt-1 text-[24px] font-bold leading-8 text-ink">ВТБ Мои Инвестиции: онбординг и обучение</h1>
+        <div className="text-[12px] font-semibold uppercase tracking-wide text-ink-3">РљРѕРЅС†РµРїС‚ В· РїСЂРѕС‚РѕС‚РёРї</div>
+        <h1 className="mt-1 text-[24px] font-bold leading-8 text-ink">Р’РўР‘ РњРѕРё РРЅРІРµСЃС‚РёС†РёРё: РѕРЅР±РѕСЂРґРёРЅРі Рё РѕР±СѓС‡РµРЅРёРµ</h1>
         <div className="mt-4 flex gap-2 whitespace-nowrap text-[12px] font-semibold">
           <span className={cx("flex items-center gap-1.5 rounded-m px-2.5 py-1.5", !training ? "bg-brand text-white" : "bg-white text-ink-2")}>
             <span className="h-2 w-2 rounded-full bg-current" />
-            Реальное приложение
+            Р РµР°Р»СЊРЅРѕРµ РїСЂРёР»РѕР¶РµРЅРёРµ
           </span>
           <span className={cx("flex items-center gap-1.5 rounded-m px-2.5 py-1.5", training ? "training-stripe text-white" : "bg-white text-ink-2")}>
             <span className="h-2 w-2 rounded-full bg-current" />
-            Фейковые торги
+            Р¤РµР№РєРѕРІС‹Рµ С‚РѕСЂРіРё
           </span>
         </div>
         <ol className="mt-5 space-y-2">
           <li>
-            <b className="text-ink">1. Онбординг.</b> Короткие подсказки: «Действия» → Пополнить, Вывести, Отчёты и справки → Документы.
+            <b className="text-ink">1. РћРЅР±РѕСЂРґРёРЅРі.</b> РљРѕСЂРѕС‚РєРёРµ РїРѕРґСЃРєР°Р·РєРё: В«Р”РµР№СЃС‚РІРёСЏВ» в†’ РџРѕРїРѕР»РЅРёС‚СЊ, Р’С‹РІРµСЃС‚Рё, РћС‚С‡С‘С‚С‹ Рё СЃРїСЂР°РІРєРё в†’ Р”РѕРєСѓРјРµРЅС‚С‹.
           </li>
           <li>
-            <b className="text-ink">2. «Помощь»</b> вверху любого экрана: подсказки к экрану, переключение на фейковые торги и обратно, достижения.
+            <b className="text-ink">2. В«РџРѕРјРѕС‰СЊВ»</b> РІРІРµСЂС…Сѓ Р»СЋР±РѕРіРѕ СЌРєСЂР°РЅР°: РїРѕРґСЃРєР°Р·РєРё Рє СЌРєСЂР°РЅСѓ, РїРµСЂРµРєР»СЋС‡РµРЅРёРµ РЅР° С„РµР№РєРѕРІС‹Рµ С‚РѕСЂРіРё Рё РѕР±СЂР°С‚РЅРѕ, РґРѕСЃС‚РёР¶РµРЅРёСЏ.
           </li>
           <li>
-            <b className="text-ink">3. «Пройти обучение»</b> на главной открывает тренировку: 7 этапов, 11 заданий. Действия, сделанные заранее, засчитываются, когда программа до них дойдёт.
+            <b className="text-ink">3. В«РџСЂРѕР№С‚Рё РѕР±СѓС‡РµРЅРёРµВ»</b> РЅР° РіР»Р°РІРЅРѕР№ РѕС‚РєСЂС‹РІР°РµС‚ С‚СЂРµРЅРёСЂРѕРІРєСѓ: 7 СЌС‚Р°РїРѕРІ, 11 Р·Р°РґР°РЅРёР№. Р”РµР№СЃС‚РІРёСЏ, СЃРґРµР»Р°РЅРЅС‹Рµ Р·Р°СЂР°РЅРµРµ, Р·Р°СЃС‡РёС‚С‹РІР°СЋС‚СЃСЏ, РєРѕРіРґР° РїСЂРѕРіСЂР°РјРјР° РґРѕ РЅРёС… РґРѕР№РґС‘С‚.
           </li>
           <li>
-            <b className="text-ink">4. Возврат.</b> Выйдите из тренировки — на главной появится прогресс и «Продолжить обучение».
+            <b className="text-ink">4. Р’РѕР·РІСЂР°С‚.</b> Р’С‹Р№РґРёС‚Рµ РёР· С‚СЂРµРЅРёСЂРѕРІРєРё вЂ” РЅР° РіР»Р°РІРЅРѕР№ РїРѕСЏРІРёС‚СЃСЏ РїСЂРѕРіСЂРµСЃСЃ Рё В«РџСЂРѕРґРѕР»Р¶РёС‚СЊ РѕР±СѓС‡РµРЅРёРµВ».
           </li>
           <li>
-            <b className="text-ink">5. Первая покупка.</b> После пополнения — на биржу: баннер предлагает фейковые торги или обучение в приложении. Старт с фонда ликвидности, но выбор за клиентом.
+            <b className="text-ink">5. РџРµСЂРІР°СЏ РїРѕРєСѓРїРєР°.</b> РџРѕСЃР»Рµ РїРѕРїРѕР»РЅРµРЅРёСЏ вЂ” РЅР° Р±РёСЂР¶Сѓ: Р±Р°РЅРЅРµСЂ РїСЂРµРґР»Р°РіР°РµС‚ С„РµР№РєРѕРІС‹Рµ С‚РѕСЂРіРё РёР»Рё РѕР±СѓС‡РµРЅРёРµ РІ РїСЂРёР»РѕР¶РµРЅРёРё. РЎС‚Р°СЂС‚ СЃ С„РѕРЅРґР° Р»РёРєРІРёРґРЅРѕСЃС‚Рё, РЅРѕ РІС‹Р±РѕСЂ Р·Р° РєР»РёРµРЅС‚РѕРј.
           </li>
           <li>
-            <b className="text-ink">6. Достижения</b> — {ACHIEVEMENTS.length} наград почти за каждое первое действие. Фьючерсы без теста можно попробовать на фейковых торгах.
+            <b className="text-ink">6. Р”РѕСЃС‚РёР¶РµРЅРёСЏ</b> вЂ” {ACHIEVEMENTS.length} РЅР°РіСЂР°Рґ РїРѕС‡С‚Рё Р·Р° РєР°Р¶РґРѕРµ РїРµСЂРІРѕРµ РґРµР№СЃС‚РІРёРµ. Р¤СЊСЋС‡РµСЂСЃС‹ Р±РµР· С‚РµСЃС‚Р° РјРѕР¶РЅРѕ РїРѕРїСЂРѕР±РѕРІР°С‚СЊ РЅР° С„РµР№РєРѕРІС‹С… С‚РѕСЂРіР°С….
           </li>
         </ol>
         <div className="mt-6 rounded-l border border-line bg-white p-4">
-          <div className="text-[13px] font-semibold text-ink">Быстрые состояния</div>
+          <div className="text-[13px] font-semibold text-ink">Р‘С‹СЃС‚СЂС‹Рµ СЃРѕСЃС‚РѕСЏРЅРёСЏ</div>
           <DemoButtons compact />
         </div>
-        <p className="mt-4 text-[12px] text-ink-3">Все данные тестовые. Реальных платежей, сделок и банковских API нет.</p>
+        <p className="mt-4 text-[12px] text-ink-3">Р’СЃРµ РґР°РЅРЅС‹Рµ С‚РµСЃС‚РѕРІС‹Рµ. Р РµР°Р»СЊРЅС‹С… РїР»Р°С‚РµР¶РµР№, СЃРґРµР»РѕРє Рё Р±Р°РЅРєРѕРІСЃРєРёС… API РЅРµС‚.</p>
       </aside>
     </div>
   );
@@ -174,3 +175,4 @@ export default function App() {
     </AppProvider>
   );
 }
+
