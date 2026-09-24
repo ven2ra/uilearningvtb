@@ -62,13 +62,13 @@ export default function Promotions({
 }) {
   const [index, setIndex] = useState(0);
   const app = useApp();
-  const visibleBanners = app.training.finished ? banners.slice(1) : banners;
+  const visibleBanners = (app.onboarding === "done") ? banners.slice(1) : banners;
   const activeIndex = Math.min(index, visibleBanners.length - 1);
   const [title, subtitle, image] = visibleBanners[activeIndex];
   return (
     <>
       <section className="reference-banners" aria-label="Предложения">
-        {!app.training.finished && activeIndex === 0 ? <TrainingBanner onStart={() => app.enterTraining()} onLater={() => setIndex(1)} /> : <button
+        {!(app.onboarding === "done") && activeIndex === 0 ? <TrainingBanner onStart={() => app.setOnboarding("running")} onLater={() => setIndex(1)} /> : <button
           className="reference-banner"
           style={{ backgroundImage: `url(${referenceImage(image)})` }}
           onClick={() => open({ title, body: <p>{subtitle || title}</p> })}
@@ -97,7 +97,7 @@ export default function Promotions({
             }}
             onClick={() =>
               i === 5
-                ? app.enterTraining()
+                ? app.go("learning-path")
                 : open({
                     title: name,
                     body: (

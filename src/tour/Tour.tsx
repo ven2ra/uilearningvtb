@@ -52,97 +52,17 @@ export const useTour = () => useContext(TourCtx)!;
 
 // ---------- Сценарии ----------
 
-function onboardingTours(app: AppApi, start: (id: string) => void): Record<string, Tour> {
-  const backToActions = () => {
-    app.back();
-    app.openActions();
-  };
-  const skip = () => {
-    app.setOnboarding("skipped");
-    app.toast({ kind: "info", title: "Обучение закрыто", text: "Вернуться к подсказкам можно кнопкой «Помощь» вверху экрана" });
-    app.setHelpPulse(true);
-    window.setTimeout(() => app.setHelpPulse(false), 5000);
-  };
+function onboardingTours(app: AppApi): Record<string, Tour> {
   return {
     "onb-home": {
-      id: "onb-home",
-      kind: "onboarding",
-      onClose: skip,
-      onDone: () => start("onb-actions"),
+      id: "onb-home", kind: "onboarding",
+      onClose: () => app.setOnboarding("skipped"),
+      onDone: () => { app.setOnboarding("done"); app.emit("onb:done"); },
       steps: [
-        {
-          target: "actions",
-          title: "Действия",
-          text: "Все операции со счётом собраны здесь. Нажмите, чтобы открыть",
-          mode: "click",
-          advanceOn: "open:actions",
-        },
-      ],
-    },
-    // Принцип «нажми сам»: каждый раздел пользователь открывает сам, видит его и возвращается в меню
-    "onb-actions": {
-      id: "onb-actions",
-      kind: "onboarding",
-      onClose: skip,
-      onDone: () => start("onb-docs"),
-      steps: [
-        { target: "actions-sheet", title: "Меню действий", text: "Здесь находятся основные операции с вашим счётом" },
-        { target: "action-topup", title: "Пополнить", text: "Нажмите на «Пополнить», чтобы открыть", mode: "click", advanceOn: "open:topup" },
-        {
-          target: "topup-amount",
-          title: "Так пополняется счёт",
-          text: "Сумма, карта и кнопка — всё на одном экране",
-          button: "Назад к меню",
-          onNext: backToActions,
-        },
-        { target: "action-withdraw", title: "Вывести", text: "Теперь нажмите на «Вывести»", mode: "click", advanceOn: "open:withdraw" },
-        {
-          target: "withdraw-amount",
-          title: "Вывод на карту",
-          text: "Выводить можно только свободные деньги",
-          button: "Назад к меню",
-          onNext: backToActions,
-        },
-        { target: "action-docs", title: "Отчёты и справки", text: "И последнее — нажмите на «Отчёты и справки»", mode: "click", advanceOn: "open:documents" },
-      ],
-    },
-    "onb-docs": {
-      id: "onb-docs",
-      kind: "onboarding",
-      onClose: skip,
-      onDone: () => {
-        app.tab("home");
-        start("onb-final");
-      },
-      // Клиент заказывает настоящий документ, нажимая на его название, а не на общую плитку
-      steps: [
-        { target: "doc-quick-broker", title: "Заказать документ", text: "Например, «Брокерский отчёт» — нажмите на название", mode: "click", advanceOn: "open:doc-order" },
-        { target: "doc-type-pick", title: "Выберите тип", text: "Нажмите на нужный документ — например, справку о доходах", mode: "click", advanceOn: "select:doc-type", onNext: app.back },
-        { target: "docs-ready", title: "Скачать готовые", text: "А здесь документы, которые уже готовы. Нажмите", mode: "click", advanceOn: "open:doc-ready" },
-        { target: "docs-list", title: "Готовые документы", text: "Нажмите на документ, чтобы скачать", button: "Понятно" },
-      ],
-    },
-    "onb-final": {
-      id: "onb-final",
-      kind: "onboarding",
-      onClose: skip,
-      onDone: () => {
-        app.setOnboarding("done");
-        app.emit("onb:done");
-      },
-      steps: [
-        { target: "first-steps", title: "Первые шаги", text: "Пополните счёт и совершите первую покупку — подскажем на каждом шаге" },
-        { target: "training-card", title: "Попробуйте без риска", text: "Фейковые торги: тот же интерфейс, виртуальные деньги" },
-        { target: "ach-chip", title: "Достижения", text: "Почти за каждое действие — достижение. Нажмите, чтобы посмотреть", mode: "click", advanceOn: "open:achievements" },
-        { target: "ach-summary", title: "Ваша коллекция", text: "У закрытых достижений написано, как их получить", button: "Назад", onNext: app.back },
-        { target: "help-btn", title: "Помощь", text: "Подсказки, фейковые торги и обучение — здесь. Нажмите", mode: "click", advanceOn: "help:open" },
-        {
-          target: "help-screen",
-          title: "Вернуться можно всегда",
-          text: "Закройте обучение в любой момент — и продолжите отсюда",
-          button: "Завершить",
-          onNext: () => app.setHelpOpen(false),
-        },
+        { target: "balance", title: "Ваш портфель", text: "Здесь собраны стоимость активов и свободные деньги на ваших счетах. Ниже показано, как изменился результат инвестиций." },
+        { target: "actions", title: "Операции со счётом", text: "В меню «Действия» можно пополнить счёт, перевести или вывести деньги, а также найти отчёты и справки." },
+        { target: "bottom-nav", title: "Главные разделы", text: "Используйте нижнее меню, чтобы переходить между разделами приложения и находить инвестиционные инструменты." },
+        { target: "help-btn", title: "Помощь всегда рядом", text: "Здесь можно повторить подсказки по текущей странице или открыть обучение инвестициям — семь уроков с заданиями и сохранением прогресса.", button: "Завершить" },
       ],
     },
   };
@@ -152,7 +72,7 @@ const HELP: Partial<Record<ScreenName | "actions", TourStep[]>> = {
   home: [
     { target: "balance", title: "Стоимость портфеля", text: "Сколько сейчас стоят все активы и свободные деньги" },
     { target: "actions", title: "Действия", text: "Пополнение, вывод, отчёты и справки" },
-    { target: "training-card", title: "Обучение", text: "Тренировка на виртуальных деньгах" },
+    { target: "help-btn", title: "Обучение", text: "Откройте «Помощь», чтобы перейти к урокам об инвестициях" },
     { target: "bottom-nav", title: "Разделы", text: "Портфель, рынок и история — внизу экрана" },
   ],
   actions: [
@@ -235,7 +155,7 @@ export function TourProvider({ children }: { children: ReactNode }) {
   const endTour = useCallback(() => setTour(null), []);
 
   const start = useCallback((t: Tour | string) => {
-    const resolved = typeof t === "string" ? onboardingTours(appRef.current, (id) => start(id))[t] : t;
+    const resolved = typeof t === "string" ? onboardingTours(appRef.current)[t] : t;
     if (!resolved) return;
     setIdx(0);
     setTour(resolved);

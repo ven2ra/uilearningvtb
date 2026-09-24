@@ -3,11 +3,6 @@ import { useApp } from "../state/AppState";
 import { INSTRUMENT_BY_ID } from "../lib/data";
 import { fmtMoney } from "../lib/format";
 import Icon from "../ui/Icons";
-import {
-  AchChip,
-  FirstSteps,
-  LearningCard,
-} from "../components/learning/HomeLearning";
 import ReferenceIcon, {
   referenceImage,
 } from "../components/home/ReferenceIcon";
@@ -320,13 +315,7 @@ export default function SourceHome() {
         <InvestmentIdeas open={setDetail} />
         <EditorialSections open={setDetail} />
         <CollectionsAndFunds open={setDetail} />
-        <section className="reference-learning">
-          <div className="reference-learning-tools">
-            <AchChip />
-          </div>
-          <FirstSteps />
-          <LearningCard />
-        </section>
+
       </div>
       <DetailSheet detail={detail} onClose={() => setDetail(null)} />
     </div>

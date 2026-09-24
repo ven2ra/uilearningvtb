@@ -273,15 +273,15 @@ export function Instrument({ id }: { id: string }) {
               <Icon name="lock" size={18} className="text-[#B45309]" />
               Нужно тестирование
             </div>
-            <p className="mt-1 text-[13px] leading-5 text-ink-2">Фьючерсы доступны после теста для неквалифицированных инвесторов. Хотите попробовать уже сейчас — на фейковых торгах, без риска.</p>
+            <p className="mt-1 text-[13px] leading-5 text-ink-2">Фьючерсы доступны после теста для неквалифицированных инвесторов. Изучите основы инвестирования в разделе обучения.</p>
             <div className="mt-3 flex flex-col gap-2">
               <button
                 type="button"
                 data-tour="try-training"
-                onClick={() => app.switchMode("training")}
+                onClick={() => app.go("learning-path")}
                 className="training-stripe flex h-11 items-center justify-center gap-2 rounded-m text-[14px] font-semibold text-white cursor-pointer"
               >
-                <Icon name="cap" size={18} /> Попробовать на фейковых торгах
+                <Icon name="cap" size={18} /> Перейти к обучению
               </button>
               <Button size="m" variant="ghost" onClick={() => app.toast({ kind: "info", title: "Тестирование", text: "Прохождение теста не входит в сценарий прототипа" })}>
                 Пройти тест
