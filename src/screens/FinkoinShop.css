@@ -1,0 +1,99 @@
+.finkoin-shop{min-height:100%;padding:26px clamp(14px,5vw,48px) 40px;background:radial-gradient(ellipse at 88% 9%,#bcd6ff 0,transparent 34%),linear-gradient(130deg,#edf5ff,#e8f2fd 65%,#eef6ff);color:#090e25;max-width:1100px;margin:auto;font-family:Inter,system-ui,sans-serif}
+.finkoin-shop button{cursor:pointer;font:inherit}.finkoin-shop button:focus-visible{outline:3px solid #006aff;outline-offset:4px}.finkoin-shop h1,.finkoin-shop h2,.finkoin-shop h3,.finkoin-shop p{margin:0}.shop-back{width:48px;height:48px;background:#ffffffdf;border:1px solid #fff;border-radius:18px;box-shadow:0 3px 9px #486fa321;display:grid;place-items:center}.shop-hero{display:grid;grid-template-columns:1fr 1fr;align-items:center;position:relative;min-height:350px;margin:22px 0 28px}.shop-hero-copy{position:relative;z-index:2}.shop-eyebrow{color:#7987a7;font-size:13px;font-weight:700;letter-spacing:2px}.shop-hero h1{font-size:34px;letter-spacing:-1px;margin-top:14px;font-weight:750}.shop-balance{display:flex;align-items:center;gap:14px;margin:6px 0 14px}.shop-balance strong{font-size:64px;line-height:1.2;letter-spacing:-2px}.shop-coin-icon{width:28px;height:28px;flex-shrink:0;filter:drop-shadow(0 3px 3px #1675ff30)}.shop-balance .shop-coin-icon{width:64px;height:64px}.shop-hero p,.shop-banner p{color:#7d8aa7;font-size:16px;line-height:1.55}.shop-soft-button,.shop-primary-button{display:inline-flex;align-items:center;justify-content:center;gap:18px;border:0;border-radius:26px;padding:12px 18px;margin-top:20px;background:#d5e6ff;color:#0064e8;font-size:14px!important}.shop-primary-button{background:#0068ff;color:white;padding:14px 22px}.shop-artwork{position:relative;height:340px;min-width:0}.shop-mascot{position:absolute;width:82%;left:-3%;top:12%;z-index:2;filter:drop-shadow(0 16px 14px #327af72a);animation:shop-float 7s ease-in-out infinite}.shop-mascot svg{width:100%;height:auto}.shop-gift{filter:drop-shadow(0 10px 10px #3174d52f);width:100%;height:100%}.shop-artwork>.shop-gift{position:absolute;width:53%;height:65%;right:-5%;top:17%;transform:rotate(8deg)}.shop-floating-crystal{position:absolute;filter:drop-shadow(0 4px 6px #247aff33);width:18%;height:auto}.shop-crystal-one{right:16%;top:0;transform:rotate(15deg)}.shop-crystal-two{left:0;top:8%;width:10%}.shop-crystal-three{right:2%;bottom:2%;width:12%}.shop-streak{display:flex;gap:24px;align-items:center;padding:20px;border-radius:24px;background:#ffffffbf;margin-bottom:42px}.shop-streak-copy{flex:1}.shop-streak-copy>div{display:flex;gap:9px;align-items:baseline}.shop-streak-copy svg{width:42px;height:42px;align-self:center}.shop-streak-copy strong{font-size:44px;line-height:1}.shop-streak-copy span{font-size:12px;color:#7d8aa7}.shop-streak-copy p{font-size:14px;line-height:1.5;color:#7d8aa7;margin-top:12px}.shop-days{display:grid;grid-template-columns:repeat(5,1fr);gap:9px;flex:1.5}.shop-day{border-radius:17px;background:#eaf1fb;display:flex;align-items:center;flex-direction:column;gap:12px;padding:15px 6px;color:#7d8aa7;font-size:12px}.shop-day strong{display:flex;align-items:center;color:#090e25;font-size:15px;gap:2px}.shop-day .shop-coin-icon{width:17px;height:20px}.shop-day-status{height:30px;display:grid;place-items:center}.shop-day-status>svg{background:#368cff;color:white;border-radius:50%;padding:3px;width:24px;height:24px}.shop-day-current{background:white;box-shadow:0 0 0 1px #75acff,0 2px 12px #3988ff60;color:#006aff}.shop-day-current .shop-day-status>svg{background:transparent;width:32px;height:32px;padding:0}.shop-day-future .shop-day-status{opacity:.3}.shop-catalog-header{display:flex;justify-content:space-between;gap:18px;align-items:center;margin-bottom:22px}.finkoin-shop h2{font-weight:750;font-size:26px;letter-spacing:-.8px;line-height:1.2}.shop-tabs{display:flex;gap:5px}.shop-tabs button{border:0;border-radius:24px;background:#e0eafa;color:#7a87a5;padding:10px 14px;font-size:13px}.shop-tabs button[aria-pressed=true]{background:#0066ff;color:white}.shop-grid{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:18px}.shop-reward{display:flex;flex-direction:column;position:relative;text-align:left;border:1px solid #ffffffb0;background:#ffffffbf;border-radius:24px;padding:16px;box-shadow:0 4px 16px #7d9fc50a;min-width:0;color:inherit;transition:box-shadow .2s}.shop-reward:hover:not(:disabled){box-shadow:0 6px 20px #6595d52a}.shop-reward:disabled{cursor:default}.shop-reward-art{width:100%;height:145px;display:grid;place-items:center;filter:drop-shadow(0 8px 10px #3e83fc3a);margin-bottom:12px;color:#1581ff}.shop-reward-art>svg{width:100%;height:100%}.shop-art-course>svg{width:120px}.shop-percent{font-size:130px;font-weight:800;line-height:1;color:#4b95ff;text-shadow:2px 2px #9dccff,5px 7px #1769d0;transform:rotate(-12deg)}.shop-book{display:grid;place-items:center;background:linear-gradient(130deg,#a0d3ff,#0875ef 65%,#0345cc);color:#fff;box-shadow:5px 7px #b6d8ff,9px 12px #4188dc;border-radius:12px;width:105px;height:120px;transform:rotate(18deg)}.shop-reward h3{font-size:18px;line-height:1.2;font-weight:700;letter-spacing:-.5px}.shop-reward p{font-size:14px;line-height:1.4;color:#7d8aa7;margin:8px 0 12px;flex:1}.shop-reward-price{display:flex;gap:8px;align-items:center;width:100%}.shop-reward-price>span{margin-left:auto;background:#e8eff8;border-radius:50%;height:36px;width:36px;display:grid;place-items:center}.shop-reward-dark{background:linear-gradient(140deg,#19273c,#25354f 65%,#415989);color:white;box-shadow:inset 0 1px 5px #a8d5ff}.shop-reward-dark p{color:#acbbd4}.shop-reward-dark .shop-reward-price>span{background:#ffffff1c}.shop-reward-lock{position:absolute;right:18px;top:18px}.shop-banner{display:grid;grid-template-columns:1fr 1fr;align-items:center;background:linear-gradient(120deg,#ffffffa0,#cfe3ff80);border:2px solid white;border-radius:24px;padding:26px;margin-top:24px;box-shadow:0 4px 12px #799bd520}.shop-banner p{margin-top:14px;font-size:15px}.shop-banner .shop-artwork{height:230px}.shop-banner .shop-mascot{top:0}.shop-banner .shop-artwork>.shop-gift{top:30%;z-index:3}.shop-banner .shop-crystal-one{right:5%}@keyframes shop-float{50%{transform:translateY(-8px) rotate(2deg)}}@media(prefers-reduced-motion:reduce){.shop-mascot{animation:none}}@media(max-width:700px){.shop-catalog-header{align-items:flex-start;flex-direction:column}.shop-streak{flex-direction:column;align-items:stretch}.shop-days{gap:7px}.shop-streak-copy p{display:none}.shop-hero{min-height:280px}.shop-hero h1{font-size:27px}.shop-balance strong{font-size:50px}.shop-balance .shop-coin-icon{width:42px;height:42px}.shop-artwork{height:245px}.shop-hero p{font-size:13px}.shop-soft-button{font-size:12px!important;gap:6px;padding:11px}.shop-grid{gap:10px}.shop-reward{padding:12px;border-radius:20px}.shop-reward-art{height:115px}.shop-reward h3{font-size:16px}.shop-banner{padding:20px}.finkoin-shop h2{font-size:24px}}@media(max-width:480px){.shop-hero{grid-template-columns:1.25fr 1fr;margin-top:28px}.shop-hero-copy{margin-right:-35px}.shop-artwork{height:230px;align-self:start;margin-top:8px;opacity:.95}.shop-hero .shop-mascot{width:110%;left:-5%;top:25%}.shop-hero p{max-width:210px}.shop-hero p br{display:none}.shop-eyebrow{font-size:10px}.shop-hero h1{font-size:25px}.shop-balance strong{font-size:46px}.shop-grid{grid-template-columns:repeat(2,minmax(0,1fr))}.shop-reward-art{height:125px}.shop-banner{grid-template-columns:1fr;overflow:hidden}.shop-banner .shop-artwork{height:200px;width:230px;justify-self:center}.shop-tabs{width:100%}.shop-tabs button{flex:1;padding:10px;font-size:12px}.shop-streak{padding:14px;margin-bottom:30px}.shop-streak-copy strong{font-size:36px}.shop-day{gap:8px;padding:12px 3px}.shop-day strong{font-size:14px}}
+/* Shop illustrations share a fixed canvas so artwork never shifts during motion. */
+.shop-coin-icon{object-fit:contain;transform:scale(1.15)}
+.shop-mascot{object-fit:contain;width:86%;height:100%;left:-8%;top:0;animation:shop-happy 7s ease-in-out infinite;transform-origin:50% 65%}
+.shop-gift>svg{width:100%;height:100%;overflow:hidden}
+.shop-artwork>.shop-gift{width:57%;height:74%;right:-7%;top:12%;transform:rotate(6deg)}
+.shop-crystal-one{right:17%;top:-7%;width:22%}
+.shop-crystal-two{left:-3%;top:7%;width:12%}
+.shop-crystal-three{right:0;bottom:4%;width:14%}
+.shop-reward{overflow:hidden}
+.shop-reward-art{height:auto;aspect-ratio:1.35;margin-bottom:12px;filter:none;border-radius:16px;overflow:hidden;background:radial-gradient(ellipse at center,#d7e8ff80,transparent 72%)}
+.shop-reward-art>svg,.shop-art-course>svg{width:100%;height:100%;overflow:hidden}
+.shop-art-theme{background:linear-gradient(135deg,#172035,#3b4864)}
+.shop-reward-lock{z-index:2}
+.shop-banner{position:relative;grid-template-columns:1.05fr 1fr;padding:28px 30px;min-height:250px;overflow:hidden;background:radial-gradient(ellipse at 75% 80%,#b4d1ff80,transparent 70%),linear-gradient(125deg,#f8fcff,#deecff)}
+.shop-banner>div{z-index:1;position:relative}
+.shop-banner-illustration{position:absolute;right:-1%;bottom:-5%;width:54%;height:110%;object-fit:contain;animation:none;pointer-events:none}
+.shop-banner h2{font-size:clamp(15px,2.7vw,28px)}
+.shop-banner p{font-size:clamp(10px,1.6vw,16px);line-height:1.4}
+@keyframes shop-happy{0%,100%{transform:translateY(0) rotate(-2deg)}50%{transform:translateY(-7px) rotate(2deg)}}
+@media(max-width:700px){
+ .shop-banner{padding:20px;min-height:210px}
+ .shop-banner .shop-primary-button{font-size:12px!important;padding:10px 14px;gap:8px}
+ .shop-reward-art{height:auto}
+ .shop-reward h3{font-size:14px}
+ .shop-reward p{font-size:12px}
+}
+@media(max-width:480px){
+ .shop-hero{grid-template-columns:1.1fr 1fr;min-height:240px;margin:22px 0}
+ .shop-hero-copy{margin-right:0}
+ .shop-hero .shop-mascot{width:112%;height:100%;left:-17%;top:0}
+ .shop-artwork{height:200px;margin-top:0;align-self:center}
+ .shop-hero h1{font-size:24px}
+ .shop-hero p{font-size:11px;line-height:1.5}
+ .shop-soft-button{font-size:10px!important;padding:9px;gap:3px;margin-top:12px;white-space:nowrap}
+ .shop-grid{grid-template-columns:repeat(3,minmax(0,1fr));gap:8px}
+ .shop-reward{padding:8px;border-radius:16px}
+ .shop-reward-art{height:auto;aspect-ratio:1.1;border-radius:10px;margin-bottom:8px}
+ .shop-reward h3{font-size:11px;letter-spacing:-.3px;line-height:1.25}
+ .shop-reward p{font-size:10px;line-height:1.35;margin:5px 0 8px}
+ .shop-reward-price{gap:3px;font-size:12px}
+ .shop-reward-price .shop-coin-icon{width:19px;height:23px}
+ .shop-reward-price>span{width:23px;height:23px}
+ .shop-reward-price>span svg{width:15px;height:15px}
+ .shop-reward-lock{right:8px;top:9px}
+ .shop-reward-lock svg{width:13px;height:13px}
+ .shop-catalog-header{gap:12px;margin-bottom:14px}
+ .shop-catalog-header h2{font-size:22px}
+ .shop-tabs button{font-size:11px;padding:8px}
+ .shop-banner{grid-template-columns:1.05fr 1fr;min-height:155px;padding:14px;margin-top:18px;border-radius:17px}
+ .shop-banner h2{font-size:14px;letter-spacing:-.4px}
+ .shop-banner p{font-size:9px;margin-top:8px}
+ .shop-banner .shop-primary-button{font-size:9px!important;padding:8px 10px;margin-top:10px;gap:4px}
+ .shop-banner .shop-primary-button svg{width:14px;height:14px}
+ .shop-banner-illustration{width:54%;height:108%;right:-2%;bottom:-4%}
+}
+@media(prefers-reduced-motion:reduce){.shop-mascot{animation:none}}
+/* Earning hint, streak and banner typography. */
+.shop-earning{max-width:320px;margin-top:20px}
+.shop-earning .shop-soft-button{width:100%;margin:0;justify-content:space-between;text-align:left;white-space:normal;border:1px solid #ffffffb0;background:linear-gradient(120deg,#dfedff,#cbdfff);box-shadow:0 4px 12px #3679d510;line-height:1.35;transition:background .2s,box-shadow .2s}
+.shop-earning .shop-soft-button:hover{background:#c9dfff;box-shadow:0 4px 14px #3679d522}
+.shop-earning .shop-soft-button svg{flex-shrink:0;transition:transform .2s}
+.shop-earning .shop-soft-button[aria-expanded=true] svg{transform:rotate(90deg)}
+.shop-earning #shop-earning-info{margin:10px 0 0;padding:13px;border-radius:16px;background:#ffffffc9;color:#647491;font-size:13px;line-height:1.55;box-shadow:0 4px 16px #3679d510}
+.shop-streak{background:linear-gradient(120deg,#fff,#f5f9ff);border:1px solid #fff;box-shadow:0 8px 26px #426fba0c;gap:20px}
+.shop-streak-copy>div{align-items:center}
+.shop-streak-copy svg{width:48px;height:48px;flex-shrink:0;filter:drop-shadow(0 3px 5px #ffae2420)}
+.shop-streak-copy strong{font-variant-numeric:tabular-nums;letter-spacing:-1.5px}
+.shop-streak-copy span{color:#6f7e99}
+.shop-days{align-items:stretch}
+.shop-day{border:1px solid #e4ecf8;background:linear-gradient(160deg,#f1f6ff,#e8f0fc);gap:10px;box-shadow:inset 0 1px 0 #fff;padding:14px 6px}
+.shop-day-status{width:34px;height:34px}
+.shop-day-done .shop-day-status>svg{background:linear-gradient(145deg,#51aaff,#0670fa);box-shadow:0 3px 7px #1679ff26}
+.shop-day-pending{width:21px;height:21px;border:2px solid #c6d6eb;border-radius:50%;background:#ffffff80;box-shadow:inset 0 1px 3px #8fa6c418}
+.shop-day-future .shop-day-status{opacity:1}
+.shop-day-current{border-color:#79b2ff;background:linear-gradient(150deg,#fff,#f5faff);box-shadow:0 0 0 2px #e2eeff,0 4px 14px #2b7ff52b}
+.shop-day-current .shop-day-status>svg{width:36px;height:36px;filter:drop-shadow(0 2px 3px #ffb32828)}
+.shop-day strong{font-variant-numeric:tabular-nums}
+.shop-banner>div{padding-right:10px}
+.shop-banner h2{text-wrap:balance;line-height:1.2;letter-spacing:-.6px}
+.shop-banner p{color:#647491;line-height:1.5;text-wrap:pretty}
+@media(max-width:700px){.shop-streak-copy p{display:block;margin-top:8px;font-size:12px}.shop-streak-copy p br{display:none}}
+@media(max-width:480px){
+ .shop-earning{margin-top:14px}
+ .shop-earning .shop-soft-button{font-size:11px!important;padding:11px 12px;border-radius:17px;gap:6px}
+ .shop-earning #shop-earning-info{font-size:11px;padding:11px;max-width:none}
+ .shop-streak{gap:16px;padding:16px}
+ .shop-days{gap:6px}
+ .shop-day{padding:11px 3px;gap:8px;border-radius:14px;font-size:11px}
+ .shop-day strong{font-size:13px}
+ .shop-streak-copy strong{font-size:36px}
+ .shop-streak-copy svg{width:42px;height:42px}
+ .shop-banner{grid-template-columns:1.2fr 1fr;min-height:185px;padding:16px}
+ .shop-banner h2{font-size:17px;letter-spacing:-.5px}
+ .shop-banner p{font-size:11px;margin-top:9px}
+ .shop-banner .shop-primary-button{font-size:11px!important;padding:10px 12px;margin-top:12px}
+ .shop-banner-illustration{width:49%;right:-3%;height:100%;bottom:-4%}
+}

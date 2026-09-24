@@ -47,3 +47,33 @@ export const ACHIEVEMENTS: AchievementDef[] = [
 
 export const ACH_BY_ID: Record<string, AchievementDef> = Object.fromEntries(ACHIEVEMENTS.map((a) => [a.id, a]));
 export const ACH_GROUPS: AchievementGroup[] = ["Первые шаги", "Биржа", "Фейковые торги"];
+
+export type LearningAchievementCondition =
+  | { type: "lesson_completed" | "study_streak" | "topics_completed" | "perfect_lessons" | "portfolio_lessons" | "coins" | "tasks_completed"; minimum: number }
+  | { type: "topic_completed"; topic: string }
+  | { type: "quiz_score"; minimum: number }
+  | { type: "all_lessons" };
+
+export interface LearningAchievement {
+  id: string;
+  title: string;
+  description: string;
+  icon: "book" | "calendar" | "graduation" | "pie" | "target" | "chart" | "shield" | "star" | "bulb" | "coins" | "arrow" | "diamond";
+  reward: number;
+  condition: LearningAchievementCondition;
+}
+
+export const LEARNING_ACHIEVEMENTS: LearningAchievement[] = [
+  { id: "first_step", title: "Первый шаг", description: "Пройдите первый урок обучения", icon: "book", reward: 10, condition: { type: "lesson_completed", minimum: 1 } },
+  { id: "streak_3", title: "Серия 3 дня", description: "Заходите в обучение 3 дня подряд", icon: "calendar", reward: 15, condition: { type: "study_streak", minimum: 3 } },
+  { id: "curious_learner", title: "Любознательный", description: "Пройдите 3 урока", icon: "graduation", reward: 20, condition: { type: "lesson_completed", minimum: 3 } },
+  { id: "first_knowledge", title: "Первые знания", description: "Пройдите тему «Основные инструменты»", icon: "pie", reward: 20, condition: { type: "topic_completed", topic: "instruments" } },
+  { id: "accuracy", title: "Точность", description: "Пройдите все тесты на 80% и выше", icon: "target", reward: 25, condition: { type: "quiz_score", minimum: 80 } },
+  { id: "active_learner", title: "Активный ученик", description: "Пройдите 10 уроков", icon: "chart", reward: 30, condition: { type: "lesson_completed", minimum: 10 } },
+  { id: "flawless", title: "Без ошибок", description: "Пройдите 5 уроков подряд без ошибок", icon: "shield", reward: 30, condition: { type: "perfect_lessons", minimum: 5 } },
+  { id: "streak_7", title: "Постоянство", description: "Заходите в обучение 7 дней подряд", icon: "star", reward: 40, condition: { type: "study_streak", minimum: 7 } },
+  { id: "deep_knowledge", title: "Глубокие знания", description: "Пройдите 3 темы полностью", icon: "bulb", reward: 40, condition: { type: "topics_completed", minimum: 3 } },
+  { id: "investor_start", title: "Инвестор (начало)", description: "Пройдите 5 уроков о портфеле", icon: "coins", reward: 50, condition: { type: "portfolio_lessons", minimum: 5 } },
+  { id: "strategist", title: "Стратег", description: "Пройдите тему «Стратегии инвестирования»", icon: "arrow", reward: 50, condition: { type: "topic_completed", topic: "strategies" } },
+  { id: "expert", title: "Эксперт", description: "Пройдите все уроки обучения", icon: "diamond", reward: 100, condition: { type: "all_lessons" } },
+];

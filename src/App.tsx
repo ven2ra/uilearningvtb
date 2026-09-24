@@ -6,9 +6,12 @@ import Home from "./screens/Home";
 import SourceHome from "./screens/SourceHome";
 import { History, Instrument, Market, Portfolio, Trade } from "./screens/Invest";
 import { DocOrder, DocReady, Documents, MoveMoney } from "./screens/Service";
-import { Achievements, More } from "./screens/Learning";
+import { More } from "./screens/Learning";
+import Achievements from "./screens/Achievements";
 import Profile from "./screens/Profile";
 import LearningPath from "./screens/LearningPath";
+import LessonFlow from "./screens/LessonFlow";
+import FinkoinShop from "./screens/FinkoinShop";
 import { SourceProfile, ProfileLearning } from "./screens/SourceProfile";
 import MoneyOperations from "./screens/MoneyOperations";
 
@@ -33,8 +36,12 @@ function CurrentScreen() {
       return mode === "real" ? <SourceProfile /> : <Profile />;
     case "profile-learning":
       return <ProfileLearning />;
-    case "learning-path":
-      return <LearningPath />;
+    case "finkoin-shop":
+      return <FinkoinShop />;
+      case "learning-path":
+        return <LearningPath />;
+      case "lesson-flow":
+        return <LessonFlow />;
     case "hub":
       return <LearningPath />;
     case "achievements":
@@ -64,7 +71,7 @@ function CurrentScreen() {
 
 function Shell() {
   const app = useApp();
-  const fullScreen = ["topup", "transfer", "withdraw", "profile", "profile-learning", "learning-path"].includes(app.current.name);
+  const fullScreen = ["topup", "transfer", "withdraw", "profile", "profile-learning", "learning-path", "lesson-flow", "finkoin-shop", "achievements"].includes(app.current.name);
   return <div className="source-desktop-host">
     <div ref={app.frameRef} className="source-design mode-real relative flex h-dvh w-full flex-col overflow-hidden bg-page">
       <main key={app.current.name} className="no-scrollbar relative flex-1 overflow-y-auto anim-fade"><CurrentScreen /></main>

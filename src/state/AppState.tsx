@@ -3,9 +3,13 @@ import { INITIAL_PRICES, INSTRUMENT_BY_ID, REAL_ACCOUNT, VIRTUAL_START_CASH, typ
 import { STAGES, TASKS } from "../lib/training";
 import { ACHIEVEMENTS, ACH_BY_ID } from "../lib/achievements";
 import { fmtMoney, fmtQty } from "../lib/format";
+import { finkoinRewards } from "../lib/finkoinRewards";
+import { settleAchievements, type LearningRewardProgress } from "../lib/AchievementService";
+import { LEARNING_ACHIEVEMENTS } from "../lib/achievements";
 
 export type Mode = "real" | "training";
 export type ScreenName =
+  | "lesson-flow"
   | "home"
   | "portfolio"
   | "market"
@@ -14,6 +18,7 @@ export type ScreenName =
   | "profile"
   | "profile-learning"
   | "learning-path"
+  | "finkoin-shop"
   | "hub"
   | "achievements"
   | "instrument"
@@ -95,7 +100,9 @@ const INITIAL_MONEY_BALANCES = { master: 500000, main: 0, otc: 0 };
 const freshReal = (): Account => ({ balanceRevision: 1, moneyBalances: { ...INITIAL_MONEY_BALANCES }, cash: REAL_ACCOUNT.cash, positions: REAL_ACCOUNT.positions, history: REAL_ACCOUNT.history, docs: REAL_ACCOUNT.docs });
 const freshQuest = (): BuyQuest => ({ offer: "new", active: null, done: false });
 
-export interface CourseProgress {
+export interface CourseProgress extends LearningRewardProgress {
+  lessonScreenSteps?: Record<number, number>;
+  ownedThemes?: string[];
   completed: number;
   steps: Record<number, number>;
   answers: Record<number, number>;
@@ -104,6 +111,7 @@ export interface CourseProgress {
 }
 
 interface Persisted {
+  activeTheme?: "crystal" | null;
   course?: CourseProgress;
   favorites?: string[];
   onboarding: OnboardingStatus;
@@ -143,11 +151,34 @@ function useAppStateValue() {
   const persisted = useMemo(loadPersisted, []);
   const frameRef = useRef<HTMLDivElement | null>(null);
 
-  const [course, setCourse] = useState<CourseProgress>(persisted?.course ?? { completed: 0, steps: {}, answers: {}, coins: 0, days: [] });
+  const [course, updateCourse] = useState<CourseProgress>(() => settleAchievements(persisted?.course ?? { completed: 0, steps: {}, answers: {}, coins: 0, days: [] }));
+  const setCourse = useCallback((update: CourseProgress | ((previous: CourseProgress) => CourseProgress)) => {
+    const now = Date.now();
+    updateCourse(previous => settleAchievements(typeof update === "function" ? update(previous) : update, now));
+  }, []);
+  const [achievementCelebration, setAchievementCelebration] = useState<{ ids: string[]; timestamp: number } | null>(null);
+  const courseRef = useRef(course);
+  courseRef.current = course;
+  const [activeTheme, setActiveTheme] = useState<"crystal" | null>(() => {
+    try { return persisted?.activeTheme ?? (localStorage.getItem("activeTheme") === "crystal" ? "crystal" : null); }
+    catch { return persisted?.activeTheme ?? null; }
+  });
+  const exchangeCrystal = (): string | null => {
+    const progress = courseRef.current;
+    const reward = finkoinRewards.find(item => item.icon === "theme")!;
+    if (!progress.ownedThemes?.includes("crystal") && activeTheme !== "crystal") {
+      if (progress.coins < reward.cost) return `Не хватает ${reward.cost - progress.coins} финкоинов`;
+      const next = { ...progress, coins: progress.coins - reward.cost, ownedThemes: [...(progress.ownedThemes ?? []), "crystal"] };
+      courseRef.current = next;
+      setCourse(next);
+    }
+    setActiveTheme("crystal");
+    return null;
+  };
   const [mode, setMode] = useState<Mode>("real");
   const [favorites, setFavorites] = useState<string[]>(persisted?.favorites ?? []);
   const toggleFavorite = (id: string) => setFavorites(items => items.includes(id) ? items.filter(item => item !== id) : [...items, id]);
-  const [stack, setStack] = useState<Screen[]>([{ name: "home" }]);
+  const [stack, setStack] = useState<Screen[]>(() => /^\/learning\/1\/?$/.test(location.pathname) ? [{ name: "learning-path" }, { name: "lesson-flow", params: { id: "1" } }] : [{ name: "home" }]);
   const [actionsOpen, setActionsOpen] = useState(false);
   const [helpOpen, setHelpOpen] = useState(false);
   const [offerOpen, setOfferOpen] = useState(false);
@@ -169,8 +200,12 @@ function useAppStateValue() {
   const [moves, setMoves] = useState<Record<string, "up" | "down">>({});
 
   useEffect(
-    () => savePersisted({ onboarding, training, real, achievements, buyQuest, favorites, course }),
-    [onboarding, training, real, achievements, buyQuest, favorites, course],
+    () => {
+      savePersisted({ onboarding, training, real, achievements, buyQuest, favorites, course, activeTheme });
+      try { if (activeTheme) localStorage.setItem("activeTheme", activeTheme); }
+      catch { /* Тема работает в текущей сессии, если хранилище недоступно. */ }
+    },
+    [onboarding, training, real, achievements, buyQuest, favorites, course, activeTheme],
   );
 
   // Имитация движения котировок (тестовые данные)
@@ -201,6 +236,17 @@ function useAppStateValue() {
     window.setTimeout(() => setToasts((prev) => prev.filter((x) => x.id !== id)), t.kind === "error" ? 4500 : 3200);
   }, []);
   const dismissToast = useCallback((id: number) => setToasts((prev) => prev.filter((x) => x.id !== id)), []);
+  const announcedLearningAchievements = useRef(new Set(Object.keys(persisted?.course?.achievementProgress ?? {})));
+  useEffect(() => {
+    const fresh = LEARNING_ACHIEVEMENTS.filter(item => course.achievementProgress?.[item.id] && !announcedLearningAchievements.current.has(item.id));
+    if (!fresh.length) return;
+    fresh.forEach(item => announcedLearningAchievements.current.add(item.id));
+    setAchievementCelebration({ ids: fresh.map(item => item.id), timestamp: Date.now() });
+    toast({ kind: "achievement", title: fresh.map(item => item.title).join(" · "), text: `+${fresh.reduce((sum, item) => sum + item.reward, 0)} финкоинов за достижения`, action: { label: "Смотреть", fn: () => goRef.current("achievements") } });
+  }, [course.achievementProgress, toast]);
+  useEffect(() => {
+    setCourse(previous => previous.completedTasks === training.done ? previous : { ...previous, completedTasks: training.done });
+  }, [training.done, setCourse]);
 
   // ---------- Рефы для синхронной логики событий ----------
   const listeners = useRef(new Set<Listener>());
@@ -706,6 +752,9 @@ function useAppStateValue() {
     trade,
     moveMoney,
     course,
+    achievementCelebration,
+    activeTheme,
+    exchangeCrystal,
     setCourse,
     moneyBalances,
     simulateMoney,

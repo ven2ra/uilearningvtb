@@ -1,5 +1,7 @@
 ﻿import { useState } from "react";
 import { useApp } from "../state/AppState";
+import CrystalTheme from "../components/themes/crystal/CrystalTheme";
+import CrystalMascot from "../components/themes/crystal/CrystalMascot";
 import { INSTRUMENT_BY_ID } from "../lib/data";
 import { fmtMoney } from "../lib/format";
 import Icon from "../ui/Icons";
@@ -49,7 +51,8 @@ export default function SourceHome() {
   if (app.moneyBalances.otc > 0) shownAccounts.splice(1, 0, { value: app.moneyBalances.otc, title: "Брокерский счет • 11MD3A • Внебиржевой", change: "0 ₽ • 0%" });
 
   return (
-    <div className="reference-home">
+    <div className={`reference-home${app.activeTheme === "crystal" ? " crystal-home" : ""}`}>
+      {app.activeTheme === "crystal" && <CrystalTheme/>}
       <header className="reference-header">
         <button
           className="reference-stories"
@@ -124,6 +127,7 @@ export default function SourceHome() {
           </div>
         )}
         <section className="reference-balance" data-tour="balance">
+          {app.activeTheme === "crystal" && <aside className="crystal-balance-art" aria-hidden="true"><CrystalMascot state="happy"/></aside>}
           <div>
             <span>
               {hidden
