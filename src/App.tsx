@@ -7,6 +7,7 @@ import { History, Instrument, Market, Portfolio, Trade } from "./screens/Invest"
 import { DocOrder, DocReady, Documents, MoveMoney } from "./screens/Service";
 import { Achievements, DemoButtons, Hub, More, TrainingFinish, TrainingIntro } from "./screens/Learning";
 import Profile from "./screens/Profile";
+import { SourceProfile, ProfileLearning } from "./screens/SourceProfile";
 import MoneyOperations from "./screens/MoneyOperations";
 import { cx } from "./ui/kit";
 import { ACHIEVEMENTS } from "./lib/achievements";
@@ -39,7 +40,9 @@ function CurrentScreen() {
     case "more":
       return <More />;
     case "profile":
-      return <Profile />;
+      return mode === "real" ? <SourceProfile /> : <Profile />;
+    case "profile-learning":
+      return <ProfileLearning />;
     case "hub":
       return <Hub />;
     case "achievements":
@@ -71,7 +74,8 @@ function Phone({ framed }: { framed: boolean }) {
   const app = useApp();
   const training = app.mode === "training";
   const fullScreen = app.current.name === "training-intro" || app.current.name === "training-finish" || (!training && ["topup", "transfer", "withdraw"].includes(app.current.name));
-  const panelHidden = fullScreen || app.current.name === "hub" || app.current.name === "achievements";
+  const profileScreen = !training && ["profile", "profile-learning"].includes(app.current.name);
+  const panelHidden = fullScreen || profileScreen || app.current.name === "hub" || app.current.name === "achievements";
   // Квест «Первая покупка» важнее текущего задания программы: сначала он
   const showQuest = !panelHidden && app.buyQuest.active === app.mode;
   const showTaskPanel = !panelHidden && !showQuest && training && app.training.started && !app.training.finished;
@@ -93,7 +97,7 @@ function Phone({ framed }: { framed: boolean }) {
       </main>
       {showTaskPanel && <TaskPanel />}
       {showQuest && <QuestPanel />}
-      {!fullScreen && <BottomNav />}
+      {!fullScreen && !profileScreen && <BottomNav />}
       <ActionsSheet />
       <WelcomeSheet />
       <MarketOfferSheet />

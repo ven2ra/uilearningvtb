@@ -12,6 +12,7 @@ export type ScreenName =
   | "history"
   | "more"
   | "profile"
+  | "profile-learning"
   | "hub"
   | "achievements"
   | "instrument"
