@@ -16,7 +16,7 @@ function Agreement({ iis = false }: { iis?: boolean }) {
 export function SourceProfile() {
   const app = useApp();
   const [tab, setTab] = useState("Профиль");
-  return <div className="snapshot-profile"><Header title="Профиль" /><div className="snapshot-profile-body">
+  return <div data-tour="profile-tour" className="snapshot-profile"><Header title="Профиль" /><div className="snapshot-profile-body">
     <section className="snapshot-identity"><img src={asset("image-0-0.png")} width={56} height={56} alt="" /><h2>Долгасова А.Г</h2><div><span><Glyph id={1} size={14} />Квал.инвестор</span><span><Glyph id={2} size={14} />Привилегия</span></div></section>
     <div className="snapshot-ruby" style={{ backgroundImage: `url(${asset("image-0-1.png")})` }}><span className="snapshot-ruby-icon"><img src={asset("image-0-2.png")} width={32} height={32} alt="" /></span><div><span>Расти с ВТБ</span><strong>Ваш уровень: Рубин</strong></div><Glyph id={3} /></div>
     <div className="snapshot-profile-shortcuts">{["Конкурсы и акции", "Обучение", "Промокоды", "Мероприятия"].map((title, i) => <button key={title} onClick={title === "Обучение" ? () => app.go("profile-learning") : undefined}><Glyph id={i + 4} /><span>{title}</span></button>)}</div>

@@ -56,20 +56,23 @@ function onboardingTours(app: AppApi): Record<string, Tour> {
   return {
     "onb-home": {
       id: "onb-home", kind: "onboarding",
-      onClose: () => { app.setOnboarding("skipped"); app.setActionsOpen(false); },
-      onDone: () => { app.setOnboarding("done"); app.emit("onb:done"); },
+      onDone: () => { app.setOnboarding("done"); app.setActionsOpen(false); app.tab("home"); app.emit("onb:done"); },
       steps: [
-        { target: "balance", title: "Ваш портфель", text: "Здесь собраны стоимость активов и свободные деньги на ваших счетах. Ниже показано, как изменился результат инвестиций." },
-        { target: "actions", title: "Попробуйте сами", text: "Нажмите «Действия». Здесь собраны пополнение, переводы, вывод денег и документы.", mode: "click", advanceOn: "open:actions" },
-        { target: "action-docs", title: "Отчеты и справки", text: "Нажмите на этот пункт, чтобы посмотреть, где заказывать документы.", mode: "click", advanceOn: "open:documents" },
-        { target: "reports-tabs", title: "Все документы под рукой", text: "Во вкладке «Заказать» выберите отчет, счет и период. Во вкладке «Скачать готовые» появятся подготовленные документы.", onNext: () => app.tab("home") },
-        { target: "nav-portfolio", title: "Перейдём на Биржу", text: "Нажмите на пульс: здесь находятся избранные бумаги, размещения и акции.", mode: "click", advanceOn: "open:portfolio" },
-        { target: "exchange-categories", title: "Выбирайте инструменты", text: "Переключайте вкладки и открывайте бумаги. В карточке есть график, статистика и кнопки покупки и продажи. Котировки в прототипе демонстрационные." },
-        { target: "nav-intelligence", title: "Знакомьтесь: Интеллект", text: "Нажмите на кристалл, чтобы узнать о сервисе подбора инвестиционной стратегии.", mode: "click", advanceOn: "open:intelligence" },
-        { target: "intelligence-heading", title: "Стратегия и возможности", text: "Здесь описаны возможности сервиса, условия старта и этапы подключения." },
-        { target: "nav-support-chat", title: "Поддержка рядом", text: "Нажмите на значок чата. Можно выбрать тему или написать свой вопрос.", mode: "click", advanceOn: "open:support-chat" },
-        { target: "support-compose", title: "Ваш вопрос", text: "Введите сообщение и отправьте его стрелкой. Сейчас это демо-чат без подключения оператора.", onNext: () => app.tab("home") },
-        { target: "home-tour-start", title: "Вы освоились!", text: "Теперь можно исследовать приложение самостоятельно. Этот обзор доступен повторно с главной страницы.", button: "Начать пользоваться" },
+        { target: "balance", title: "Знакомство с приложением", text: "Пройдём основные разделы. Это обзор: деньги и настройки не изменятся. Начатый обзор нужно пройти до конца.", onNext: () => app.openActions() },
+        { target: "action-topup", title: "Пополнить", text: "Перевод денег на инвестиционный счёт. Посмотрим, где находится форма пополнения.", onNext: () => app.openFromActions("topup") },
+        { target: "money-tour", title: "Пополнение счёта", text: "Выберите источник, брокерский счёт и сумму. Перед подтверждением проверьте реквизиты. В обзоре мы только знакомимся с экраном.", onNext: () => { app.tab("home"); app.openActions(); } },
+        { target: "action-transfer", title: "Между счетами", text: "Перевод свободных денег между своими брокерскими счетами.", onNext: () => app.openFromActions("transfer") },
+        { target: "money-tour", title: "Перевод между счетами", text: "Выберите счёт списания, счёт зачисления и сумму. Сейчас мы только смотрим форму — перевода не будет.", onNext: () => { app.tab("home"); app.openActions(); } },
+        { target: "action-withdraw", title: "Вывести", text: "Вывод доступных денег с брокерского счёта на банковский.", onNext: () => app.openFromActions("withdraw") },
+        { target: "money-tour", title: "Вывод денег", text: "Укажите счёт получения и сумму в пределах доступного остатка. В обзоре вывод не выполняется.", onNext: () => { app.tab("home"); app.openActions(); } },
+        { target: "action-docs", title: "Отчеты и справки", text: "Заказывайте документы и скачивайте готовые отчёты.", onNext: () => app.openFromActions("documents") },
+        { target: "reports-tabs", title: "Заказать или скачать", text: "В «Заказать» выберите документ, счёт и период. Подготовленные документы находятся в «Скачать готовые».", onNext: () => app.tab("portfolio") },
+        { target: "exchange-categories", title: "Биржа и инструменты", text: "Избранные бумаги, размещения и акции. В карточках — цена, график, покупка и продажа. Котировки в демо имитируются.", onNext: () => app.go("instrument", { id: "GAZP", source: "exchange" }) },
+        { target: "instrument-tour", title: "Карточка инструмента", text: "На примере Газпрома: цена, график и показатели бумаги. Кнопки покупки и продажи открывают заявку. В обзоре сделки не совершаются.", onNext: () => app.tab("intelligence") },
+        { target: "intelligence-heading", title: "Интеллект", text: "Подбор инвестиционной стратегии. Здесь описаны возможности сервиса и условия подключения.", onNext: () => app.tab("support-chat") },
+        { target: "support-compose", title: "Чат", text: "Выберите тему или напишите вопрос поддержке. Здесь работает демо-чат без оператора.", onNext: () => { app.tab("home"); app.go("profile"); } },
+        { target: "profile-tour", title: "Профиль", text: "Ваши данные, настройки, услуги и документы. После обзора сможете настроить приложение под себя.", onNext: () => app.tab("home") },
+        { target: "balance", title: "Обзор завершён", text: "Теперь разделы доступны для самостоятельного использования. Во время обзора операции не выполнялись. В этом прототипе банковские операции остаются имитацией." },
       ],
     },
   };
@@ -164,6 +167,8 @@ export function TourProvider({ children }: { children: ReactNode }) {
   const start = useCallback((t: Tour | string) => {
     const resolved = typeof t === "string" ? onboardingTours(appRef.current)[t] : t;
     if (!resolved) return;
+    if (appRef.current.onboarding === "running" && resolved.kind !== "onboarding") return;
+    if (resolved.kind === "onboarding") appRef.current.setOnboarding("running");
     setIdx(0);
     setTour(resolved);
   }, []);
@@ -252,7 +257,7 @@ export function TourProvider({ children }: { children: ReactNode }) {
 
   // Смена режима прерывает тур — кроме квеста, который как раз и переключает режим
   useEffect(() => {
-    setTour((t) => (t?.kind === "quest" ? t : null));
+    setTour((t) => (t?.kind === "quest" || t?.kind === "onboarding" ? t : null));
   }, [app.mode]);
 
   return (
@@ -270,11 +275,31 @@ function TourLayer({ tour, idx, setIdx, end }: { tour: Tour; idx: number; setIdx
   const [rect, setRect] = useState<Rect | null>(null);
   const [frameSize, setFrameSize] = useState({ w: 390, h: 800 });
   const [shake, setShake] = useState(0);
+  const mandatory = tour.kind === "onboarding";
+  const dialogRef = useRef<HTMLDivElement>(null);
   const step = tour.steps[idx];
   const mode = step?.mode ?? "next";
   const elRef = useRef<HTMLElement | null>(null);
   const idxRef = useRef(idx);
   idxRef.current = idx;
+  useEffect(() => {
+    if (!mandatory) return;
+    const focus = () => dialogRef.current?.querySelector<HTMLElement>("input,button:not(:disabled)")?.focus();
+    focus();
+    const key = (event: KeyboardEvent) => {
+      if (event.key === "Escape") { event.preventDefault(); event.stopImmediatePropagation(); }
+      if (event.key === "Tab") {
+        const nodes = [...(dialogRef.current?.querySelectorAll<HTMLElement>("input,button:not(:disabled)") ?? [])];
+        const index = nodes.indexOf(document.activeElement as HTMLElement);
+        event.preventDefault(); event.stopImmediatePropagation();
+        nodes[(index + (event.shiftKey ? -1 : 1) + nodes.length) % nodes.length]?.focus();
+      }
+    };
+    const contain = (event: FocusEvent) => { if (!dialogRef.current?.contains(event.target as Node)) focus(); };
+    document.addEventListener("keydown", key, true);
+    document.addEventListener("focusin", contain);
+    return () => { document.removeEventListener("keydown", key, true); document.removeEventListener("focusin", contain); };
+  }, [mandatory, idx]);
 
   const finish = useCallback(() => {
     end();
@@ -289,6 +314,7 @@ function TourLayer({ tour, idx, setIdx, end }: { tour: Tour; idx: number; setIdx
   }, [finish, setIdx, tour.steps]);
 
   const close = () => {
+    if (mandatory) return;
     end();
     tour.onClose?.();
   };
@@ -347,7 +373,7 @@ function TourLayer({ tour, idx, setIdx, end }: { tour: Tour; idx: number; setIdx
       } else {
         elRef.current = null;
         setRect(null);
-        if (performance.now() - missingSince > 1600) {
+        if (!mandatory && performance.now() - missingSince > 1600) {
           // Цель так и не появилась — пропускаем шаг (или завершаем подсказку)
           if (tour.kind === "hint" || tour.kind === "quest" || idxRef.current + 1 >= tour.steps.length) {
             end();
@@ -361,7 +387,7 @@ function TourLayer({ tour, idx, setIdx, end }: { tour: Tour; idx: number; setIdx
     };
     raf = requestAnimationFrame(loop);
     return () => cancelAnimationFrame(raf);
-  }, [app.frameRef, step, tour, setIdx, end]);
+  }, [app.frameRef, step, tour, setIdx, end, mandatory]);
 
   if (!step) return null;
 
@@ -382,20 +408,21 @@ function TourLayer({ tour, idx, setIdx, end }: { tour: Tour; idx: number; setIdx
     arrow = { left: Math.max(18, Math.min(tipW - 18, cx0 - left)), side: placeBelow ? "top" : "bottom" };
   }
 
+  if (mandatory && (step.target === "money-tour" || step.target === "profile-tour" || step.target === "instrument-tour")) { tipStyle = { left: Math.max(12,(frameSize.w-tipW)/2), top: "50%", transform: "translateY(-50%)", width: tipW, maxHeight: "calc(100% - 32px)", overflowY: "auto" }; arrow = null; }
   const onBlockerClick = (e: ReactMouseEvent) => {
     if (!cut) return;
     const fr = app.frameRef.current!.getBoundingClientRect();
     const px = e.clientX - fr.left;
     const py = e.clientY - fr.top;
     const inside = px >= cut.x && px <= cut.x + cut.w && py >= cut.y && py <= cut.y + cut.h;
-    if (inside && mode === "next") next();
+    if (inside && mode === "next" && !mandatory) next();
     else if (tour.kind === "hint" || tour.kind === "quest") end();
     else setShake((s) => s + 1);
   };
 
   const total = tour.steps.length;
   const isLast = idx + 1 >= total;
-  const primaryLabel = step.button ?? (mode === "click" ? "Показать" : isLast ? "Готово" : "Далее");
+  const primaryLabel = mandatory ? "Далее" : step.button ?? (mode === "click" ? "Показать" : isLast ? "Готово" : "Далее");
   const onPrimary = () => {
     if (mode === "click") elRef.current?.click();
     else next();
@@ -449,6 +476,7 @@ function TourLayer({ tour, idx, setIdx, end }: { tour: Tour; idx: number; setIdx
 
       {/* Тултип */}
       <div
+        ref={dialogRef}
         key={`${idx}-${shake}`}
         role="dialog"
         aria-label={step.title}
@@ -471,14 +499,15 @@ function TourLayer({ tour, idx, setIdx, end }: { tour: Tour; idx: number; setIdx
             </div>
             <div className="text-[18px] font-semibold leading-6">{step.title}</div>
             <p className="mt-1 text-[14px] leading-5 text-ink-2">{step.text}</p>
+            {mandatory && <p className="mt-2 text-[11px] font-semibold text-accent-text">ДЕМО · без реальных операций</p>}
           </div>
-          <button type="button" onClick={close} className="-mr-2 -mt-2 flex h-9 w-9 shrink-0 items-center justify-center rounded-m text-ink-3 cursor-pointer" aria-label={tour.kind === "onboarding" ? "Закрыть обучение" : "Закрыть подсказку"}>
+          {!mandatory && <button type="button" onClick={close} className="-mr-2 -mt-2 flex h-9 w-9 shrink-0 items-center justify-center rounded-m text-ink-3 cursor-pointer" aria-label={tour.kind === "onboarding" ? "Закрыть обучение" : "Закрыть подсказку"}>
             <Icon name="x" size={20} />
-          </button>
+          </button>}
         </div>
         <div className="mt-3 flex items-center justify-between gap-2">
           {total > 1 ? (
-            <div className="flex gap-1.5" aria-hidden="true">
+            <div className="flex flex-wrap gap-1 max-w-[130px]" aria-hidden="true">
               {tour.steps.map((_, i) => (
                 <span key={i} className={cx("h-1.5 rounded-full transition-all", i === idx ? "w-4 bg-accent" : i < idx ? "w-1.5 bg-accent" : "w-1.5 bg-line-strong")} />
               ))}
@@ -487,7 +516,7 @@ function TourLayer({ tour, idx, setIdx, end }: { tour: Tour; idx: number; setIdx
             <span />
           )}
           <div className="flex items-center gap-1">
-            {step.secondary && (
+            {step.secondary && !mandatory && (
               <button
                 type="button"
                 onClick={() => {
@@ -500,7 +529,7 @@ function TourLayer({ tour, idx, setIdx, end }: { tour: Tour; idx: number; setIdx
               </button>
             )}
             {/* Шаги click требуют реального тапа по разделу — кнопки-обманки нет, только выход */}
-            {mode === "click" ? (
+            {mode === "click" && !mandatory ? (
               <button type="button" onClick={close} className="h-9 px-2 text-[13px] font-semibold text-ink-2 cursor-pointer">
                 Закрыть
               </button>

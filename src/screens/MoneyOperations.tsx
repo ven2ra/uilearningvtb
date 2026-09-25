@@ -52,7 +52,7 @@ export function MoneyActionsSheet() {
     </> : <div data-tour="actions-sheet" className="money-actions">
       <h2>Пополнения и выводы</h2>
       {row("plus", "Пополнить", () => setMethods(true), "action-topup")}
-      {row("transfer", "Между счетами", () => app.openFromActions("transfer"))}
+      {row("transfer", "Между счетами", () => app.openFromActions("transfer"), "action-transfer")}
       {row("withdraw", "Вывести", () => app.openFromActions("withdraw"), "action-withdraw")}
       <h2>Услуги и действия со счетом</h2>
       {row("margin", "Маржинальная торговля")}
@@ -109,7 +109,7 @@ export default function MoneyOperations({ kind }: { kind: Kind }) {
   }, [stage]);
   const selectSource = (v: string) => { setSource(v); if (v === destination) setDestination(source); };
   const selectDestination = (v: string) => { setDestination(v); if (v === source) setSource(destination); };
-  return <section className={`money-flow money-${kind} ${stage === "success" ? "money-success" : ""}`}>
+  return <section data-tour="money-tour" className={`money-flow money-${kind} ${stage === "success" ? "money-success" : ""}`}>
     {stage === "success" ? <>
       <div className="money-success-content"><img src={asset("success.png")} alt="" />
         {topup ? <><h2>Пополнение счета</h2><div className="money-success-amount">+{formatted}</div><p>деньги зачислены на Брокерский счет 11MD3A • Основной</p><span className="money-processing"><Glyph name="clock" size={16} />Выполнено</span></> : <h2>Деньги переведены</h2>}

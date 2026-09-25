@@ -20,7 +20,7 @@ export default function ExchangeInstrument({ id }: { id: string }) {
   const line = values.map((value, index) => `${index / 95 * 550},${y(value)}`).join(" ");
   const stats = [["Цена открытия", money(item.open, item.decimals)], ["Минимальная цена", money(Math.min(...quote.points), item.decimals)], ["Максимальная цена", money(Math.max(...quote.points), item.decimals)], ["Тип инструмента", item.currency ? "Валюта" : "Акции"], ["Тикер", item.id]];
   const openOrder = (side: "buy" | "sell") => app.go("trade", { id, side, source: "exchange" });
-  return <section className="exchange-instrument">
+  return <section data-tour="instrument-tour" className="exchange-instrument">
     <header className="ei-header"><button type="button" aria-label="Назад в Биржу" onClick={app.back}>←</button><div><h1>{item.title}</h1><span>{item.id}</span></div><span className="ei-star" aria-label={reference.favorites.some(favorite => favorite.subtitle === id) ? "В избранном" : "Не в избранном"}>{reference.favorites.some(favorite => favorite.subtitle === id) ? "★" : "☆"}</span></header>
     <nav className="ei-tabs" aria-label="Информация об инструменте">{["Торги", "Показатели", "Обзор"].map(label => <button key={label} aria-pressed={tab === label} onClick={() => setTab(label)}>{label}</button>)}</nav>
     <div className="ei-market"><span>Мосбиржа · Демо-котировки</span><time>{new Date(quote.updated).toLocaleTimeString("ru-RU")}</time></div>
