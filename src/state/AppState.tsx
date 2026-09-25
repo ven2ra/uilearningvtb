@@ -6,6 +6,7 @@ import { fmtMoney, fmtQty } from "../lib/format";
 import { finkoinRewards } from "../lib/finkoinRewards";
 import { settleAchievements, type LearningRewardProgress } from "../lib/AchievementService";
 import { LEARNING_ACHIEVEMENTS } from "../lib/achievements";
+import type { QuizProgress } from "../lib/quiz1";
 
 export type Mode = "real" | "training";
 export type ScreenName =
@@ -104,6 +105,7 @@ const freshReal = (): Account => ({ balanceRevision: 1, moneyBalances: { ...INIT
 const freshQuest = (): BuyQuest => ({ offer: "new", active: null, done: false });
 
 export interface CourseProgress extends LearningRewardProgress {
+  quiz1?: QuizProgress;
   lessonScreenSteps?: Record<number, number>;
   ownedThemes?: string[];
   completed: number;
@@ -114,6 +116,7 @@ export interface CourseProgress extends LearningRewardProgress {
 }
 
 interface Persisted {
+  learningResetRevision?: number;
   activeTheme?: "crystal" | null;
   course?: CourseProgress;
   favorites?: string[];
@@ -125,11 +128,20 @@ interface Persisted {
 }
 
 const STORAGE_KEY = "vtb-learning-proto-v2";
+const LEARNING_RESET_REVISION = 1;
+const freshCourse = (): CourseProgress => ({ completed: 0, steps: {}, answers: {}, coins: 100, days: [] });
 
 function loadPersisted(): Persisted | null {
   try {
     const raw = localStorage.getItem(STORAGE_KEY);
-    return raw ? (JSON.parse(raw) as Persisted) : null;
+    if (!raw) return null;
+    const saved = JSON.parse(raw) as Persisted;
+    if (saved.learningResetRevision !== LEARNING_RESET_REVISION) {
+      saved.course = { ...freshCourse(), ownedThemes: saved.course?.ownedThemes };
+      saved.achievements = [];
+      saved.learningResetRevision = LEARNING_RESET_REVISION;
+    }
+    return saved;
   } catch {
     return null;
   }
@@ -137,7 +149,7 @@ function loadPersisted(): Persisted | null {
 
 function savePersisted(p: Persisted) {
   try {
-    localStorage.setItem(STORAGE_KEY, JSON.stringify(p));
+    localStorage.setItem(STORAGE_KEY, JSON.stringify({ ...p, learningResetRevision: LEARNING_RESET_REVISION }));
   } catch {
     /* хранилище недоступно — прототип работает без него */
   }
@@ -154,7 +166,7 @@ function useAppStateValue() {
   const persisted = useMemo(loadPersisted, []);
   const frameRef = useRef<HTMLDivElement | null>(null);
 
-  const [course, updateCourse] = useState<CourseProgress>(() => settleAchievements(persisted?.course ?? { completed: 0, steps: {}, answers: {}, coins: 0, days: [] }));
+  const [course, updateCourse] = useState<CourseProgress>(() => settleAchievements(persisted?.course ?? freshCourse()));
   const setCourse = useCallback((update: CourseProgress | ((previous: CourseProgress) => CourseProgress)) => {
     const now = Date.now();
     updateCourse(previous => settleAchievements(typeof update === "function" ? update(previous) : update, now));

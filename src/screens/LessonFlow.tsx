@@ -5,6 +5,8 @@ import { Checklist, IntroCard, LessonHeader, LessonIllustration, LessonInfoCard,
 import './LessonFlow.css';
 import { lessonAssets, preloadLessonStep } from '../lib/lessonAssets';
 import { GrowthComparison, LessonSummary, QuizInfoCards } from '../components/lesson/LessonContinuation';
+import QuizFlow from './QuizFlow';
+import { freshQuiz } from '../lib/quiz1';
 
 export default function LessonFlow() {
   const app = useApp();
@@ -29,6 +31,7 @@ export default function LessonFlow() {
     return () => { active = false; };
   }, [step]);
   const screen = lesson1.screens[step];
+  if (app.course.quiz1?.active) return <QuizFlow/>;
   return <div className={`lesson-flow lf-step-${step}`}>
     <LessonHeader back={() => step ? setStep(step - 1) : app.back()} progress={step / (lesson1.screens.length - 1)} balance={app.course.coins}/>
     <div className="lf-content" ref={content}>
@@ -46,6 +49,6 @@ export default function LessonFlow() {
         {'items' in screen && <><h2 className="lf-list-title">Инвестиции могут помочь вам:</h2><Checklist items={screen.items}/></>}
       </div>
     </div>
-    <footer className="lf-footer"><PrimaryButton onClick={() => setStep(step + 1)} disabled={step === lesson1.screens.length - 1}>{step === 0 ? 'Начать урок' : step === 9 ? 'Начать тест' : 'Далее'}</PrimaryButton></footer>
+    <footer className="lf-footer"><PrimaryButton onClick={() => step === 9 ? app.setCourse(course => ({ ...course, quiz1: course.quiz1 ? { ...course.quiz1, active: true } : freshQuiz() })) : setStep(step + 1)}>{step === 0 ? 'Начать урок' : step === 9 ? 'Начать тест' : 'Далее'}</PrimaryButton></footer>
   </div>;
 }
