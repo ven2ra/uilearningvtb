@@ -117,6 +117,7 @@ export interface CourseProgress extends LearningRewardProgress {
 
 interface Persisted {
   learningResetRevision?: number;
+  startingBalanceRevision?: number;
   activeTheme?: "crystal" | null;
   course?: CourseProgress;
   favorites?: string[];
@@ -129,7 +130,8 @@ interface Persisted {
 
 const STORAGE_KEY = "vtb-learning-proto-v2";
 const LEARNING_RESET_REVISION = 1;
-const freshCourse = (): CourseProgress => ({ completed: 0, steps: {}, answers: {}, coins: 100, days: [] });
+const STARTING_BALANCE_REVISION = 1;
+const freshCourse = (): CourseProgress => ({ completed: 0, steps: {}, answers: {}, coins: 2000, days: [] });
 
 function loadPersisted(): Persisted | null {
   try {
@@ -141,6 +143,10 @@ function loadPersisted(): Persisted | null {
       saved.achievements = [];
       saved.learningResetRevision = LEARNING_RESET_REVISION;
     }
+    if (saved.startingBalanceRevision !== STARTING_BALANCE_REVISION) {
+      saved.course = { ...(saved.course ?? freshCourse()), coins: 2000 };
+      saved.startingBalanceRevision = STARTING_BALANCE_REVISION;
+    }
     return saved;
   } catch {
     return null;
@@ -149,7 +155,7 @@ function loadPersisted(): Persisted | null {
 
 function savePersisted(p: Persisted) {
   try {
-    localStorage.setItem(STORAGE_KEY, JSON.stringify({ ...p, learningResetRevision: LEARNING_RESET_REVISION }));
+    localStorage.setItem(STORAGE_KEY, JSON.stringify({ ...p, learningResetRevision: LEARNING_RESET_REVISION, startingBalanceRevision: STARTING_BALANCE_REVISION }));
   } catch {
     /* хранилище недоступно — прототип работает без него */
   }
