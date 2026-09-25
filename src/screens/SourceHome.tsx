@@ -1,5 +1,7 @@
 ﻿import { useState } from "react";
 import { useApp } from "../state/AppState";
+import { useTour } from "../tour/Tour";
+import InteractiveOverviewCard from "../components/home/InteractiveOverviewCard";
 import "../components/themes/crystal/CrystalTheme.css";
 import CrystalMascot from "../components/themes/crystal/CrystalMascot";
 import { INSTRUMENT_BY_ID } from "../lib/data";
@@ -35,6 +37,7 @@ const accounts = [
 
 export default function SourceHome() {
   const app = useApp();
+  const tour = useTour();
   const [tab, setTab] = useState("Счета");
   const [hidden, setHidden] = useState(false);
   const [detail, setDetail] = useState<Detail | null>(null);
@@ -52,6 +55,7 @@ export default function SourceHome() {
 
   return (
     <div className={`reference-home${app.activeTheme === "crystal" ? " crystal-home" : ""}`}>
+      <InteractiveOverviewCard currentStep={1} totalSteps={5} highlight={app.onboarding !== "done"} onClick={() => tour.start("onb-home")} />
       <header className="reference-header">
         <button
           className="reference-stories"

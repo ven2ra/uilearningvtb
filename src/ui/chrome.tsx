@@ -59,9 +59,9 @@ export function BottomNav() {
   if (!training) {
     const sourceItems: { name: ScreenName; label: string; icon: ReferenceIconName }[] = [
       { name: "home", label: "Главная", icon: "nav-home" },
-      { name: "portfolio", label: "Портфель", icon: "nav-portfolio" },
-      { name: "market", label: "Рынок", icon: "nav-market" },
-      { name: "more", label: "Ещё", icon: "nav-more" },
+      { name: "portfolio", label: "Биржа", icon: "nav-portfolio" },
+      { name: "intelligence", label: "Интеллект", icon: "nav-market" },
+      { name: "support-chat", label: "Чат", icon: "nav-more" },
     ];
     const root = app.stack[0].name;
     return (

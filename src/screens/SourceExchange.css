@@ -1,0 +1,58 @@
+.source-design.mode-real > main:has(> .exchange-screen) { padding-bottom: 0; overflow-y: hidden; }
+.exchange-screen { height: 100%; min-height: 0; display: flex; flex-direction: column; background: #fff; color: #18191c; font-family: ReferenceInter, Arial, sans-serif; }
+.exchange-header { position: relative; display: flex; align-items: center; justify-content: center; min-height: 64px; flex-shrink: 0; }
+.exchange-header h1 { margin: 0; font-size: 16px; font-weight: 500; line-height: 20px; }
+.exchange-settings { position: absolute; right: 12px; top: 10px; width: 44px; height: 44px; display: grid; place-items: center; border: 0; background: transparent; color: inherit; cursor: pointer; }
+.exchange-settings-menu { position: absolute; top: 54px; right: 16px; z-index: 5; padding: 6px; background: #fff; border-radius: 16px; box-shadow: 0 5px 24px #15213e25; }
+.exchange-settings-menu button { display: block; width: 100%; border: 0; border-radius: 10px; background: transparent; padding: 12px; text-align: left; font-size: 14px; cursor: pointer; }
+.exchange-settings-menu button:hover { background: #f0f0f8; }
+.exchange-categories { display: flex; align-items: center; gap: 20px; flex-shrink: 0; overflow-x: auto; scrollbar-width: none; padding: 0 18px; height: 42px; white-space: nowrap; }
+.exchange-categories::-webkit-scrollbar { display: none; }
+.exchange-tabs { display: flex; gap: 20px; }
+.exchange-tabs button, .exchange-category { border: 0; background: transparent; color: #b0b0b8; font-size: 16px; line-height: 22px; font-weight: 600; padding: 10px 0; }
+.exchange-tabs button { cursor: pointer; }
+.exchange-tabs button[aria-selected="true"] { color: #18191c; font-weight: 500; }
+.exchange-viewport { flex: 1; min-height: 0; overflow: hidden; }
+.exchange-track { display: flex; width: 300%; height: 100%; transition: transform .42s cubic-bezier(.22,.61,.36,1); }
+.exchange-panel { flex: 0 0 calc(100% / 3); width: calc(100% / 3); min-width: 0; height: 100%; overflow-y: auto; overscroll-behavior-y: contain; padding: 0 16px 152px; box-sizing: border-box; scrollbar-width: none; }
+.exchange-sort { min-height: 30px; padding: 0 0 8px; border: 0; background: transparent; color: #007aff; font-size: 14px; line-height: 18px; cursor: pointer; }
+.exchange-placements .exchange-sort { color: #a9a9b2; font-weight: 600; }
+.exchange-list { list-style: none; padding: 0; margin: 0; }
+.exchange-row { display: flex; gap: 12px; align-items: center; min-height: 66px; }
+.exchange-row-clickable { position: relative; }
+.exchange-instrument-link { position: absolute; inset: 0; z-index: 1; width: 100%; border: 0; border-radius: 10px; background: transparent; cursor: pointer; }
+.exchange-instrument-link:hover { background: #007aff06; }
+.exchange-logo { display: grid; place-items: center; width: 40px; height: 40px; flex: 0 0 40px; border-radius: 50%; }
+.exchange-logo img { width: 40px; height: 40px; object-fit: contain; border-radius: 50%; }
+.exchange-stocks .exchange-logo { position: relative; }
+.exchange-favorite-star { position: absolute; top: -4px; right: -2px; color: #ffbf29; background: #fff; border-radius: 50%; font-size: 14px; line-height: 16px; }
+.exchange-stock-highlights { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; margin: 4px 0 20px; }
+.exchange-stock-highlights > div { background: #f0f0f8; border-radius: 16px; padding: 16px; min-width: 0; }
+.exchange-stock-highlights strong { display: block; font-weight: 500; font-size: 16px; line-height: 20px; }
+.exchange-stock-highlights > div > span { color: #75767f; font-size: 14px; }
+.exchange-mini-logos { display: flex; align-items: center; margin-top: 10px; }
+.exchange-mini-logos img { width: 22px; height: 22px; border-radius: 50%; border: 1px solid #fff; margin-right: -8px; }
+.exchange-mini-logos span { background: white; border-radius: 12px; padding: 3px 5px; font-size: 11px; }
+.exchange-market-bar { display: flex; gap: 4px; height: 12px; margin-top: 8px; }
+.exchange-market-bar i { width: 33%; background: linear-gradient(10deg,#56bd70,#b8ddca); border-radius: 4px; }
+.exchange-market-bar i + i { width: 67%; background: linear-gradient(10deg,#ef434a,#e9b8bd); }
+.exchange-stocks .exchange-sort { color: #a9a9b2; font-weight: 600; }
+.exchange-name { flex: 1; min-width: 0; font-size: 16px; font-weight: 500; line-height: 20px; overflow-wrap: anywhere; }
+.exchange-name span, .exchange-quote span { display: block; margin-top: 4px; color: #75767f; font-size: 14px; line-height: 18px; font-weight: 400; }
+.exchange-quote { flex-shrink: 0; text-align: right; font-size: 16px; line-height: 20px; font-weight: 500; font-variant-numeric: tabular-nums; }
+.exchange-quote .exchange-up, .exchange-placements .exchange-quote > div { color: #009744; }
+.exchange-quote .exchange-down { color: #e4474b; }
+.exchange-quote .exchange-deadline { color: #007aff; }
+.exchange-placements .exchange-row { min-height: 80px; gap: 16px; }
+.exchange-placements .exchange-logo { width: 48px; height: 48px; flex-basis: 48px; }
+.exchange-logo-ring { border: 2px solid #79a9ff; box-shadow: inset 2px -1px 2px #bfadff; }
+.exchange-screen button:focus-visible { outline: 2px solid #007aff; outline-offset: 2px; }
+@media (max-width: 480px) {
+  .exchange-quote { max-width: 42%; font-size: 14px; }
+  .exchange-quote span { font-size: 12px; }
+  .exchange-name { font-size: 15px; }
+  .exchange-placements .exchange-row { gap: 10px; padding: 8px 0; }
+  .exchange-placements .exchange-logo { width: 42px; height: 42px; flex-basis: 42px; }
+  .exchange-placements .exchange-logo img { width: 34px; height: 34px; }
+}
+@media (prefers-reduced-motion: reduce) { .exchange-track { transition: none; } }

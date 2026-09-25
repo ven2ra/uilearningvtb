@@ -13,6 +13,9 @@ export type ScreenName =
   | "home"
   | "portfolio"
   | "market"
+  | "intelligence"
+  | "support-chat"
+  | "trade-confirmation"
   | "history"
   | "more"
   | "profile"
@@ -34,7 +37,7 @@ export type ScreenName =
 
 export interface Screen {
   name: ScreenName;
-  params?: { id?: string; side?: "buy" | "sell" };
+  params?: { id?: string; side?: "buy" | "sell"; source?: "exchange"; quantity?: number; orderPrice?: number; orderType?: "limit" | "market"; expires?: string };
 }
 
 export type OnboardingStatus = "new" | "running" | "done" | "skipped";

@@ -56,13 +56,20 @@ function onboardingTours(app: AppApi): Record<string, Tour> {
   return {
     "onb-home": {
       id: "onb-home", kind: "onboarding",
-      onClose: () => app.setOnboarding("skipped"),
+      onClose: () => { app.setOnboarding("skipped"); app.setActionsOpen(false); },
       onDone: () => { app.setOnboarding("done"); app.emit("onb:done"); },
       steps: [
         { target: "balance", title: "Ваш портфель", text: "Здесь собраны стоимость активов и свободные деньги на ваших счетах. Ниже показано, как изменился результат инвестиций." },
-        { target: "actions", title: "Операции со счётом", text: "В меню «Действия» можно пополнить счёт, перевести или вывести деньги, а также найти отчёты и справки." },
-        { target: "bottom-nav", title: "Главные разделы", text: "Используйте нижнее меню, чтобы переходить между разделами приложения и находить инвестиционные инструменты." },
-        { target: "help-btn", title: "Помощь всегда рядом", text: "Здесь можно повторить подсказки по текущей странице или открыть обучение инвестициям — семь уроков с заданиями и сохранением прогресса.", button: "Завершить" },
+        { target: "actions", title: "Попробуйте сами", text: "Нажмите «Действия». Здесь собраны пополнение, переводы, вывод денег и документы.", mode: "click", advanceOn: "open:actions" },
+        { target: "action-docs", title: "Отчеты и справки", text: "Нажмите на этот пункт, чтобы посмотреть, где заказывать документы.", mode: "click", advanceOn: "open:documents" },
+        { target: "reports-tabs", title: "Все документы под рукой", text: "Во вкладке «Заказать» выберите отчет, счет и период. Во вкладке «Скачать готовые» появятся подготовленные документы.", onNext: () => app.tab("home") },
+        { target: "nav-portfolio", title: "Перейдём на Биржу", text: "Нажмите на пульс: здесь находятся избранные бумаги, размещения и акции.", mode: "click", advanceOn: "open:portfolio" },
+        { target: "exchange-categories", title: "Выбирайте инструменты", text: "Переключайте вкладки и открывайте бумаги. В карточке есть график, статистика и кнопки покупки и продажи. Котировки в прототипе демонстрационные." },
+        { target: "nav-intelligence", title: "Знакомьтесь: Интеллект", text: "Нажмите на кристалл, чтобы узнать о сервисе подбора инвестиционной стратегии.", mode: "click", advanceOn: "open:intelligence" },
+        { target: "intelligence-heading", title: "Стратегия и возможности", text: "Здесь описаны возможности сервиса, условия старта и этапы подключения." },
+        { target: "nav-support-chat", title: "Поддержка рядом", text: "Нажмите на значок чата. Можно выбрать тему или написать свой вопрос.", mode: "click", advanceOn: "open:support-chat" },
+        { target: "support-compose", title: "Ваш вопрос", text: "Введите сообщение и отправьте его стрелкой. Сейчас это демо-чат без подключения оператора.", onNext: () => app.tab("home") },
+        { target: "home-tour-start", title: "Вы освоились!", text: "Теперь можно исследовать приложение самостоятельно. Этот обзор доступен повторно с главной страницы.", button: "Начать пользоваться" },
       ],
     },
   };

@@ -1,0 +1,454 @@
+{
+  "favorites": [
+    {
+      "title": "Газпром",
+      "subtitle": "GAZP",
+      "value": "100,06 ₽",
+      "change": "-1,10 ₽ • 1,09%",
+      "image": "/exchange/a-0.png"
+    },
+    {
+      "title": "ВТБ",
+      "subtitle": "VTBR",
+      "value": "51,210 ₽",
+      "change": "+0,005 ₽ • 0,01%",
+      "image": "/exchange/a-1.png"
+    },
+    {
+      "title": "Московская биржа",
+      "subtitle": "MOEX",
+      "value": "149,24 ₽",
+      "change": "-0,50 ₽ • 0,33%",
+      "image": "/exchange/a-2.png"
+    },
+    {
+      "title": "Доллар США",
+      "subtitle": "USD000UTSTOM",
+      "value": "84,9400 ₽",
+      "change": "-0,2400 ₽ • 0,28%",
+      "image": "/exchange/a-3.png"
+    },
+    {
+      "title": "Евро",
+      "subtitle": "EUR_RUB__TOM",
+      "value": "95,6200 ₽",
+      "change": "0 ₽ • 0%",
+      "image": "/exchange/a-4.png"
+    },
+    {
+      "title": "Сбербанк",
+      "subtitle": "SBER",
+      "value": "278,73 ₽",
+      "change": "-0,60 ₽ • 0,21%",
+      "image": "/exchange/a-5.png"
+    },
+    {
+      "title": "Лукойл",
+      "subtitle": "LKOH",
+      "value": "5 387,5 ₽",
+      "change": "-32,0 ₽ • 0,59%",
+      "image": "/exchange/a-6.png"
+    },
+    {
+      "title": "Роснефть",
+      "subtitle": "ROSN",
+      "value": "365,00 ₽",
+      "change": "-3,10 ₽ • 0,84%",
+      "image": "/exchange/a-7.png"
+    },
+    {
+      "title": "Магнит",
+      "subtitle": "MGNT",
+      "value": "1 622,0 ₽",
+      "change": "+7,5 ₽ • 0,46%",
+      "image": "/exchange/a-8.png"
+    }
+  ],
+  "placements": [
+    {
+      "title": "Атомэнпр18 (расч. в CNY)",
+      "subtitle": "На 1 год 6 мес.",
+      "value": "8.5-8.75% в ¥",
+      "change": "осталось 6 часов",
+      "image": "/exchange/b-0.png"
+    },
+    {
+      "title": "Атомэнпр18 (расч. в RUB)",
+      "subtitle": "На 1 год 6 мес.",
+      "value": "8.5-8.75% в ¥",
+      "change": "осталось 6 часов",
+      "image": "/exchange/b-1.png"
+    },
+    {
+      "title": "СО СФО ВТБ ИП «Время покупать»",
+      "subtitle": "1 год",
+      "value": "до 31% в ₽",
+      "change": "осталось 5 часов",
+      "image": "/exchange/b-2.png"
+    },
+    {
+      "title": "СО ВТБ С-1-1722 «Умножение капитала+»",
+      "subtitle": "На 5 лет",
+      "value": "16.76% в ₽*",
+      "change": "начнётся вскоре",
+      "image": "/exchange/b-3.png"
+    },
+    {
+      "title": "ЗПИФН ВИМ РД 3",
+      "subtitle": "SFO",
+      "value": "1 046,86 ₽",
+      "change": "осталось 36 дней",
+      "image": "/exchange/b-4.png"
+    },
+    {
+      "title": "ЗПИКФ ВИМ - Спектр",
+      "subtitle": "SFO",
+      "value": "106 852,99 ₽",
+      "change": "осталось 36 дней",
+      "image": "/exchange/b-5.png"
+    },
+    {
+      "title": "ЗПИФ «РД 2»",
+      "subtitle": "SFO",
+      "value": "134 152,81 ₽",
+      "change": "осталось 36 дней",
+      "image": "/exchange/b-6.png"
+    },
+    {
+      "title": "ВТБ Б-1-385 «Ключевая ставка»",
+      "subtitle": "На 2 года 2 мес.",
+      "value": "14% в ₽",
+      "change": "осталось 34 дня",
+      "image": "/exchange/b-7.png"
+    },
+    {
+      "title": "РКСОлмA902",
+      "subtitle": "На 6 лет 9 мес.",
+      "value": "до 15% в ₽",
+      "change": "начнётся вскоре",
+      "image": "/exchange/b-8.png"
+    },
+    {
+      "title": "ВТБ Б-1-420 «Сохранность»",
+      "subtitle": "На 1 год",
+      "value": "13.7% в ₽",
+      "change": "начнётся вскоре",
+      "image": "/exchange/b-9.png"
+    },
+    {
+      "title": "СО СФО ВТБ ИП «Сохранность: Ключевая ставка+»",
+      "subtitle": "9 мес.",
+      "value": "до 14.6% в ₽",
+      "change": "осталось 5 часов",
+      "image": "/exchange/b-10.png"
+    },
+    {
+      "title": "СО СФО ВТБ ИП «Короткое решение №2»",
+      "subtitle": "91 день",
+      "value": "до 33% в ₽",
+      "change": "осталось 8 дней",
+      "image": "/exchange/b-11.png"
+    },
+    {
+      "title": "ВТБ Б-1-419 \"Потенциал ОФЗ\"",
+      "subtitle": "На 1 год",
+      "value": "23% в ₽",
+      "change": "осталось 6 часов",
+      "image": "/exchange/b-12.png"
+    },
+    {
+      "title": "ВТБ Б-1-418 \"Сохранность: +50%\"",
+      "subtitle": "На 3 года 6 мес.",
+      "value": "14.29% в ₽*",
+      "change": "осталось 8 дней",
+      "image": "/exchange/b-13.png"
+    },
+    {
+      "title": "ВТБ Б1-400",
+      "subtitle": "На 90 дней",
+      "value": "13.5% в ₽",
+      "change": "осталось 34 дня",
+      "image": "/exchange/b-14.png"
+    },
+    {
+      "title": "СФО ТБ-11",
+      "subtitle": "1 год 11 мес.*",
+      "value": "16.5% в ₽",
+      "change": "осталось 5 часов",
+      "image": "/exchange/b-15.png"
+    },
+    {
+      "title": "АСВ 1Р06",
+      "subtitle": "На 3 года",
+      "value": "24% в ₽",
+      "change": "до начала 2 часа",
+      "image": "/exchange/b-16.png"
+    },
+    {
+      "title": "ДелПорт1P5 (Доп выпуск)",
+      "subtitle": "На 2 года 10 мес.",
+      "value": "17.05% в ₽",
+      "change": "до начала 2 часа",
+      "image": "/exchange/b-17.png"
+    },
+    {
+      "title": "НоваБев4Р1",
+      "subtitle": "На 3 года",
+      "value": "16.5% в ₽",
+      "change": "до начала 5 дней",
+      "image": "/exchange/b-18.png"
+    },
+    {
+      "title": "НоваБев4Р2",
+      "subtitle": "На 2 года",
+      "value": "Около 16,5%",
+      "change": "до начала 5 дней",
+      "image": "/exchange/b-19.png"
+    },
+    {
+      "title": "РУСАЛ 1Р17 (расч. в RUB)",
+      "subtitle": "На 2 года",
+      "value": "Ожидается",
+      "change": "до начала 5 дней",
+      "image": "/exchange/b-20.png"
+    },
+    {
+      "title": "РУСАЛ 1Р17 (расч. в CNY)",
+      "subtitle": "На 2 года",
+      "value": "Ожидается",
+      "change": "до начала 5 дней",
+      "image": "/exchange/b-21.png"
+    },
+    {
+      "title": "КарРус1P10",
+      "subtitle": "На 1 год 6 мес.",
+      "value": "23.5% в ₽",
+      "change": "до начала 6 дней",
+      "image": "/exchange/b-22.png"
+    },
+    {
+      "title": "ЯТЭК 1P-7",
+      "subtitle": "На 2 года 6 мес.",
+      "value": "Около 17,5%",
+      "change": "до начала 7 дней",
+      "image": "/exchange/b-23.png"
+    },
+    {
+      "title": "ОТЭКО 1Р1",
+      "subtitle": "На 2 года",
+      "value": "18.5% в ₽",
+      "change": "до начала 14 дней",
+      "image": "/exchange/b-24.png"
+    },
+    {
+      "title": "NSKATD1Р01",
+      "subtitle": "На 1 год 10 мес.",
+      "value": "до 21.5% в ₽",
+      "change": "начнётся вскоре",
+      "image": "/exchange/b-25.png"
+    },
+    {
+      "title": "iВУШ 1P8",
+      "subtitle": "На 3 года",
+      "value": "до 22% в ₽",
+      "change": "начнётся вскоре",
+      "image": "/exchange/b-26.png"
+    },
+    {
+      "title": "АЛЬЯНС 1P9",
+      "subtitle": "На 2 года 5 мес.",
+      "value": "до 23.51% в ₽",
+      "change": "начнётся вскоре",
+      "image": "/exchange/b-27.png"
+    },
+    {
+      "title": "БЭЛТИ БОП9",
+      "subtitle": "На 3 года 3 мес.",
+      "value": "до 19% в ₽",
+      "change": "начнётся вскоре",
+      "image": "/exchange/b-28.png"
+    },
+    {
+      "title": "Бустер Б04",
+      "subtitle": "На 2 года 11 мес.",
+      "value": "до 22.5% в ₽",
+      "change": "начнётся вскоре",
+      "image": "/exchange/b-29.png"
+    },
+    {
+      "title": "ВОСТКОЙЛ-2",
+      "subtitle": "На 4 года 5 мес.",
+      "value": "до 26% в ₽",
+      "change": "начнётся вскоре",
+      "image": "/exchange/b-30.png"
+    },
+    {
+      "title": "Вернём1Р4",
+      "subtitle": "На 2 года 11 мес.",
+      "value": "до 25.5% в ₽",
+      "change": "начнётся вскоре",
+      "image": "/exchange/b-31.png"
+    },
+    {
+      "title": "ГрупПроБ03",
+      "subtitle": "На 2 года 6 мес.",
+      "value": "до 23% в ₽",
+      "change": "начнётся вскоре",
+      "image": "/exchange/b-32.png"
+    },
+    {
+      "title": "ЗО-001P-01",
+      "subtitle": "На 2 года 11 мес.",
+      "value": "до 25.5% в ₽",
+      "change": "начнётся вскоре",
+      "image": "/exchange/b-33.png"
+    },
+    {
+      "title": "ИНТРФУД-02",
+      "subtitle": "На 2 года 11 мес.",
+      "value": "до 28% в ₽",
+      "change": "начнётся вскоре",
+      "image": "/exchange/b-34.png"
+    },
+    {
+      "title": "КДСНН01",
+      "subtitle": "На 3 года 11 мес.",
+      "value": "до 24% в ₽",
+      "change": "начнётся вскоре",
+      "image": "/exchange/b-35.png"
+    },
+    {
+      "title": "Кеарли 1Р2",
+      "subtitle": "На 2 года 7 мес.",
+      "value": "до 25% в ₽",
+      "change": "начнётся вскоре",
+      "image": "/exchange/b-36.png"
+    },
+    {
+      "title": "МеталТрБ01",
+      "subtitle": "На 3 года 9 мес.",
+      "value": "до 25.5% в ₽",
+      "change": "начнётся вскоре",
+      "image": "/exchange/b-37.png"
+    },
+    {
+      "title": "ПионЛизБО9",
+      "subtitle": "На 4 года 7 мес.",
+      "value": "до 26.5% в ₽",
+      "change": "начнётся вскоре",
+      "image": "/exchange/b-38.png"
+    },
+    {
+      "title": "РКС2Р9",
+      "subtitle": "На 2 года 11 мес.",
+      "value": "до 24% в ₽",
+      "change": "начнётся вскоре",
+      "image": "/exchange/b-39.png"
+    },
+    {
+      "title": "РУССОЙЛ-02",
+      "subtitle": "На 2 года 10 мес.",
+      "value": "до 22.25% в ₽",
+      "change": "начнётся вскоре",
+      "image": "/exchange/b-40.png"
+    },
+    {
+      "title": "СБСекр6АС",
+      "subtitle": "На 9 лет",
+      "value": "16%",
+      "change": "начнётся вскоре",
+      "image": "/exchange/b-41.png"
+    },
+    {
+      "title": "СЗА БО-08",
+      "subtitle": "На 2 года 11 мес.",
+      "value": "до 25% в ₽",
+      "change": "начнётся вскоре",
+      "image": "/exchange/b-42.png"
+    },
+    {
+      "title": "СКСЛомбБ03",
+      "subtitle": "На 2 года 8 мес.",
+      "value": "до 21.5% в ₽",
+      "change": "начнётся вскоре",
+      "image": "/exchange/b-43.png"
+    },
+    {
+      "title": "Сульфур1P2",
+      "subtitle": "На 3 года 1 мес.",
+      "value": "до 28% в ₽",
+      "change": "начнётся вскоре",
+      "image": "/exchange/b-44.png"
+    },
+    {
+      "title": "ТАЛК002P04",
+      "subtitle": "На 3 года 3 мес.",
+      "value": "до 24% в ₽",
+      "change": "начнётся вскоре",
+      "image": "/exchange/b-45.png"
+    },
+    {
+      "title": "ТАЛК003P01",
+      "subtitle": "На 3 года 9 мес.",
+      "value": "до 21.3% в ₽",
+      "change": "начнётся вскоре",
+      "image": "/exchange/b-46.png"
+    },
+    {
+      "title": "ЗПИКФ Место Встречи",
+      "subtitle": "DPO",
+      "value": "900 ₽",
+      "change": "осталось 10 часов",
+      "image": "/exchange/b-47.png"
+    },
+    {
+      "title": "ТЕХНЛГ 04",
+      "subtitle": "На 2 года 10 мес.",
+      "value": "до 22.75% в ₽",
+      "change": "начнётся вскоре",
+      "image": "/exchange/b-48.png"
+    },
+    {
+      "title": "Петрокартон",
+      "subtitle": "Pre-IPO",
+      "value": "7,55 ₽",
+      "change": "начнётся вскоре",
+      "image": "/exchange/b-49.png"
+    },
+    {
+      "title": "ТатнхимP03",
+      "subtitle": "На 4 года 10 мес.",
+      "value": "до 20.5% в ₽",
+      "change": "начнётся вскоре",
+      "image": "/exchange/b-50.png"
+    },
+    {
+      "title": "УПТК65 1P2",
+      "subtitle": "На 4 года 5 мес.",
+      "value": "до 22% в ₽",
+      "change": "начнётся вскоре",
+      "image": "/exchange/b-51.png"
+    },
+    {
+      "title": "ЭЛРЕШ 1Р4",
+      "subtitle": "На 1 год 10 мес.",
+      "value": "до 22% в ₽",
+      "change": "начнётся вскоре",
+      "image": "/exchange/b-52.png"
+    },
+    {
+      "title": "ЭлАп БО-04",
+      "subtitle": "На 4 года 8 мес.",
+      "value": "до 17.5% в ₽",
+      "change": "начнётся вскоре",
+      "image": "/exchange/b-53.png"
+    },
+    {
+      "title": "ЮУЛЦ 1Р3",
+      "subtitle": "На 2 года 10 мес.",
+      "value": "до 23.51% в ₽",
+      "change": "начнётся вскоре",
+      "image": "/exchange/b-54.png"
+    }
+  ]
+}
