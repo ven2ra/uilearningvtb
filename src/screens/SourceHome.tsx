@@ -1,6 +1,6 @@
 ﻿import { useState } from "react";
 import { useApp } from "../state/AppState";
-import CrystalTheme from "../components/themes/crystal/CrystalTheme";
+import "../components/themes/crystal/CrystalTheme.css";
 import CrystalMascot from "../components/themes/crystal/CrystalMascot";
 import { INSTRUMENT_BY_ID } from "../lib/data";
 import { fmtMoney } from "../lib/format";
@@ -52,7 +52,6 @@ export default function SourceHome() {
 
   return (
     <div className={`reference-home${app.activeTheme === "crystal" ? " crystal-home" : ""}`}>
-      {app.activeTheme === "crystal" && <CrystalTheme/>}
       <header className="reference-header">
         <button
           className="reference-stories"

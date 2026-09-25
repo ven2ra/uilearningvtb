@@ -35,6 +35,14 @@
 .snapshot-agreement dt { color: #75767f; font-size: 16px; line-height: 20px; }
 .snapshot-agreement dd { font-size: 18px; line-height: 22px; margin: 4px 0 0; }
 .snapshot-profile-list > div { padding: 16px 0; }
+.snapshot-theme-setting { display: flex; align-items: center; justify-content: space-between; gap: 16px; }
+.snapshot-theme-switch { position: relative; flex: 0 0 52px; width: 52px; height: 44px; border: 0; background: transparent; cursor: pointer; }
+.snapshot-theme-switch::before { content: ""; position: absolute; inset: 6px 0; border-radius: 20px; background: #d5d5dc; transition: background .18s; }
+.snapshot-theme-switch > span { position: absolute; top: 9px; left: 3px; width: 26px; height: 26px; border-radius: 50%; background: white; box-shadow: 0 1px 4px #0002; transition: transform .18s; }
+.snapshot-theme-switch[aria-checked="true"]::before { background: #007aff; }
+.snapshot-theme-switch[aria-checked="true"] > span { transform: translateX(20px); }
+.snapshot-theme-switch:focus-visible { outline: 2px solid #007aff; outline-offset: 3px; border-radius: 20px; }
+@media(prefers-reduced-motion:reduce) { .snapshot-theme-switch::before,.snapshot-theme-switch > span { transition: none; } }
 .snapshot-learning-body { padding: 14px 16px; }
 .snapshot-fincode { height: 176px; border-radius: 16px; background-size: cover; background-position: center; display: flex; align-items: center; padding: 16px; }
 .snapshot-fincode > div { width: 190px; max-width: 55%; }

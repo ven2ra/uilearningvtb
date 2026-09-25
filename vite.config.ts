@@ -5,7 +5,7 @@ import { passwordGate } from './password-gate';
 export default defineConfig(({ mode }) => {
   const env = loadEnv(mode, process.cwd(), 'PREVIEW_');
   return {
-    base: './',
+    base: '/',
     plugins: [passwordGate(process.env.PREVIEW_PASSWORD || env.PREVIEW_PASSWORD || ''), react(), tailwindcss()],
     server: { host: '0.0.0.0', port: parseInt(process.env.PORT || '5173') },
   };

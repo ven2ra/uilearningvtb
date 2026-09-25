@@ -1,14 +1,4 @@
-.reference-home.crystal-home{position:relative;isolation:isolate;background:radial-gradient(600px 480px at 100% 0,#a9d4ff80,transparent 75%),radial-gradient(500px 650px at 0 750px,#cee4ff80,transparent 80%),linear-gradient(160deg,#edf7ff,#e5effc 35%,#f5f9ff 80%);overflow:hidden}
-.crystal-home>.reference-header,.crystal-home>.reference-body{position:relative;z-index:1}
-.crystal-background{position:absolute;inset:0;overflow:hidden;pointer-events:none;z-index:0}
-.crystal-background>img{position:absolute;width:160px;opacity:.18;filter:blur(2px) drop-shadow(0 8px 24px #198aff24);object-fit:contain}
-.crystal-background>img:nth-child(1){top:70px;left:-85px;transform:rotate(-24deg);width:220px}
-.crystal-background>img:nth-child(2){top:62px;left:54%;width:36px;transform:rotate(18deg);opacity:.38;filter:drop-shadow(0 4px 10px #198aff24)}
-.crystal-background>img:nth-child(3){top:110px;right:-65px;transform:rotate(25deg);width:200px}
-.crystal-background>img:nth-child(4){top:720px;left:-70px;transform:rotate(-18deg)}
-.crystal-background>img:nth-child(5){top:950px;right:-60px;transform:rotate(30deg);width:220px}
-.crystal-background>img:nth-child(6){top:1500px;left:-45px;transform:rotate(-20deg)}
-.crystal-home .reference-balance{position:relative;min-height:168px;margin:12px 0 0;padding:32px 20px;text-align:left;border:1px solid #ffffffe6;border-radius:24px;background:radial-gradient(ellipse at 90% 85%,#88c9ff66,transparent 55%),linear-gradient(115deg,#fffffff5,#f5fbffdd 50%,#d9eeffb3);box-shadow:inset 0 2px 8px #fff,0 12px 32px -16px #4389cf66;overflow:hidden}
+.crystal-home .reference-balance{position:relative;min-height:168px;margin:12px 0 0;padding:32px 20px;text-align:left;border:1px solid #ffffffe6;border-radius:24px;background:linear-gradient(115deg,#fff,#f4f4f6);box-shadow:inset 0 2px 8px #fff,0 12px 32px -16px #20202a22;overflow:hidden}
 .crystal-home .reference-balance::after{content:"";position:absolute;inset:0;background:linear-gradient(120deg,transparent 55%,#ffffff65 55.5%,transparent 57%,transparent 73%,#ffffff50 73.5%,transparent 75%);pointer-events:none}
 .crystal-home .reference-balance>div,.crystal-home .reference-balance>p{position:relative;justify-content:flex-start;z-index:1;width:70%}
 .crystal-home .reference-balance>div>span{font-size:clamp(28px,7vw,43.2px);line-height:1.5}
@@ -18,19 +8,6 @@
 .crystal-mascot-motion{display:block;width:100%;height:100%;transform-origin:55% 80%;animation:crystal-happy 5s ease-in-out infinite}
 .crystal-mascot-motion>svg{width:100%;height:100%;filter:drop-shadow(0 8px 12px #399fe933)}
 .crystal-mascot-hand{transform-origin:83px 64px;animation:crystal-wave 6s ease-in-out infinite}
-.crystal-home .reference-actions{margin-top:14px}
-.crystal-home .reference-actions>button,.crystal-home .reference-account{background:linear-gradient(120deg,#fffffff0,#f6fbffd9);border:1px solid #ffffffdd;box-shadow:inset 0 1px 5px #fff,0 6px 18px -12px #548ec966;backdrop-filter:blur(12px);transition:box-shadow .2s,border-color .2s,background-color .2s}
-.crystal-home .reference-account-label{color:#6a7e9b}
-.crystal-home .reference-account-tabs button[aria-selected="true"]{color:#12366b}
-.crystal-home .reference-account-tabs button{color:#8b9eb8}
-.crystal-home .reference-change.neutral{background:#e5eef9;color:#6c82a3}
-.crystal-home .reference-change:not(.neutral){background:#c8f0e2;color:#087f62}
-.crystal-home .reference-header-help{background:#ffffffc9;border-color:#ffffff;box-shadow:0 3px 14px #77a7d51a}
-.crystal-home .reference-customize button{background:#ffffffa6;color:#647d9d;box-shadow:inset 0 0 0 1px #ffffffb3}
-.crystal-home button:focus-visible{outline:2px solid #3889f5;outline-offset:3px}
-@media(hover:hover){.crystal-home .reference-actions>button:hover,.crystal-home .reference-account:hover{border-color:#aed6ff;box-shadow:inset 0 1px 5px #fff,0 7px 20px -10px #4488ce66}}
-.crystal-home .reference-actions>button{color:#001678}
-.crystal-home .reference-promos>button,.crystal-home .reference-banners{box-shadow:0 4px 20px #7ebeff33;outline:1px solid #ffffff9c}
 .crystal-particles{position:absolute;inset:0;pointer-events:none;overflow:visible}
 .crystal-particles>img{position:absolute;top:50%;left:50%;width:var(--size);height:var(--size);object-fit:contain;opacity:0;animation:crystal-sparkle 5s var(--delay) ease-in-out infinite}
 .crystal-particles.is-burst>img{animation:crystal-burst 2.7s var(--delay) cubic-bezier(.15,.65,.3,1) both}

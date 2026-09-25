@@ -160,7 +160,7 @@ function useAppStateValue() {
   const courseRef = useRef(course);
   courseRef.current = course;
   const [activeTheme, setActiveTheme] = useState<"crystal" | null>(() => {
-    try { return persisted?.activeTheme ?? (localStorage.getItem("activeTheme") === "crystal" ? "crystal" : null); }
+    try { return persisted?.activeTheme !== undefined ? persisted.activeTheme : (localStorage.getItem("activeTheme") === "crystal" ? "crystal" : null); }
     catch { return persisted?.activeTheme ?? null; }
   });
   const exchangeCrystal = (): string | null => {
@@ -202,7 +202,7 @@ function useAppStateValue() {
   useEffect(
     () => {
       savePersisted({ onboarding, training, real, achievements, buyQuest, favorites, course, activeTheme });
-      try { if (activeTheme) localStorage.setItem("activeTheme", activeTheme); }
+      try { if (activeTheme) localStorage.setItem("activeTheme", activeTheme); else localStorage.removeItem("activeTheme"); }
       catch { /* Тема работает в текущей сессии, если хранилище недоступно. */ }
     },
     [onboarding, training, real, achievements, buyQuest, favorites, course, activeTheme],
@@ -754,6 +754,7 @@ function useAppStateValue() {
     course,
     achievementCelebration,
     activeTheme,
+    setActiveTheme,
     exchangeCrystal,
     setCourse,
     moneyBalances,
